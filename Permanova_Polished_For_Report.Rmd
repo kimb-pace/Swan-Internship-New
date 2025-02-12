@@ -1,0 +1,3783 @@
+---
+title: "Permanova Cleaned and Organized"
+output: html_document
+date: "2025-02-04"
+---
+
+
+Load Necessary Data
+```{r}
+library(vegan)
+library(permute)
+library(lattice)
+library(dplyr)
+library(readxl)
+library(writexl)
+
+summary_table_vasc <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/summary_table_vasc.xlsx")
+summary_table_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/summary_table_nonvasc.xlsx")
+summary_table_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/summary_table_lichens.xlsx")
+
+vasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/vasc_df_balanced.xlsx")
+nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/nonvasc_df_balanced.xlsx")
+lichens_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/lichens_df_balanced.xlsx")
+
+lichen_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/Lichen_Species_Richness.xlsx")
+nonvasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/Nonvascular_Species_Richness.xlsx")
+vasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/Vascular_Species_Richness.xlsx")
+
+lichens_env <- lichenspresence_absence_df[,c(1:12)]
+nonvasc_env <- nonvascpresence_absence_df[,c(1:12)]
+vasc_env <- vascpresence_absence_df[,c(1:10)]
+
+
+vascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/presence_absence_df_full.xlsx")
+lichenspresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/lichenspresence_absence_df_full.xlsx")
+nonvascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/nonvascpresence_absence_df_full.xlsx")
+
+lichens_env <- lichens_df[,c(1:12)]
+nonvasc_env <- nonvasc_df[,c(1:12)]
+vasc_env <- vasc_df[,c(1:10)]
+
+viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship/Viereck_env.xlsx")
+
+
+
+dwarfscrub_env <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_env.xlsx")
+dwarfscrub_env_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_env_lichens.xlsx")
+dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_env_nonvasc.xlsx")
+
+dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_df.xlsx")
+dwarfscrub_df_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_df_lichens.xlsx")
+dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_df_nonvasc.xlsx")
+
+
+```
+
+
+
+# Alpine Communities 
+
+## NMDS
+```{r}
+#alpine community analysis 
+
+alpine_composition <- alpine_df[,c(7:280)]
+alpine_composition <- as.matrix(alpine_composition) 
+alpine_env
+
+alpine_df <- read_xlsx("C:/Users/kmpace/Desktop/alpine_df.xlsx")
+
+
+alpine_lichen_composition <- alpine_lichen_df[,c(13:179)]
+alpine_lichen_composition <- as.matrix(alpine_lichen_composition) 
+lichens_env_alpine
+
+
+alpine_nonvasc_composition <- alpine_nonvasc_df[,c(13:219)]
+alpine_nonvasc_composition <- as.matrix(alpine_nonvasc_composition) 
+nonvasc_env_alpine
+
+
+#vascular, but colored by viereck 3
+mds_alpine <- metaMDS(alpine_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(alpine_df[["Plot"]]))
+mds_alpine$stress
+mds_alpine$iters
+veg_colors <- c("skyblue2", "darkorange", "blue4", "seagreen3")
+names(veg_colors) <- unique(alpine_df$Viereck.3)
+dev.off()
+ordiplot(mds_alpine, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.13",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_alpine, display = "sites"),
+       col = veg_colors[alpine_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_alpine, groups = alpine_df$Park, draw ="polygon", label = TRUE)
+title("Vascular Species")
+alpinevasc_plot_viereck <- recordPlot()
+alpinevasc_plot_viereck
+
+#lichen, but colored by viereck 3
+mds_alpine_lichen <- metaMDS(alpine_lichen_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(alpine_lichen_df[["Plot"]]))
+mds_alpine_lichen$stress
+mds_alpine_lichen$iters
+veg_colors <- c("darkorange", "blue4", "seagreen3", "firebrick3", "skyblue2")
+names(veg_colors) <- unique(alpine_lichen_df$Viereck.3)
+dev.off()
+ordiplot(mds_alpine_lichen, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.09",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_alpine_lichen, display = "sites"),
+       col = veg_colors[alpine_lichen_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_alpine_lichen, groups = alpine_lichen_df$Park, draw ="polygon", label = TRUE)
+title("Lichen Species")
+alpinelichen_plot_viereck <- recordPlot()
+
+
+
+#nonvascular, but colored by viereck 3
+mds_alpine_nonvasc <- metaMDS(alpine_nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(alpine_nonvasc_df[["Plot"]]))
+mds_alpine_nonvasc$stress
+mds_alpine_nonvasc$iters
+veg_colors <- c("darkorange", "blue4", "seagreen3", "firebrick3", "skyblue2")
+names(veg_colors) <- unique(alpine_nonvasc_df$Viereck.3)
+dev.off()
+ordiplot(mds_alpine_nonvasc, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.12",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "3",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_alpine_nonvasc, display = "sites"),
+       col = veg_colors[alpine_nonvasc_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_alpine_nonvasc, groups = alpine_nonvasc_df$Park, draw ="polygon", label = TRUE)
+title("Nonvascular Species")
+alpinenonvasc_plot_viereck <- recordPlot()
+```
+
+
+
+## Vascular 
+```{r}
+filter_criteria_alpine <- list(
+  KATM_2009_02_048 = c(2011, 2016, 2023),
+  KATM_2010_03_049 = c(2011, 2016, 2023),
+  LACL_2010_03_001 = c(2011, 2016, 2023))
+
+#identify alpine plots with three plot visits 
+alpine_plots <- summary_table_vasc %>%
+  filter(Vegetation_Class == "Alpine", Number_Visits == 3) %>%
+  pull(Plot)
+
+#combine alpine plots with hand selected plots from filter criteria 
+selected_plots <- union(alpine_plots, names(filter_criteria_alpine))
+
+#subset main presence absence dataframe based on both conditions 
+
+#but first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- vascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_alpine) & 
+      Sample_Year %in% unlist(filter_criteria_alpine[Plot]))
+
+alpine_df <- vascpresence_absence_df %>%
+  filter(
+    (Plot %in% alpine_plots) | 
+      (Plot %in% names(filter_criteria_alpine) &
+         Sample_Year %in% unlist(filter_criteria_alpine[Plot])))
+
+#convert dataframe to a matrix so you can run permanova successfully 
+alpine_df
+alpine_df <- alpine_df %>%
+  left_join(viereck %>% select(Plot_Year, Viereck.3), by = c("Plot_Year"))
+
+
+alpine_composition <- alpine_df[,c(7:280)]
+alpine_composition <- as.matrix(alpine_composition) 
+
+#create env_file including viereck classes 
+alpine_env <- alpine_df[,c(1:6, 281:283)]
+alpine_env <- alpine_env %>%
+  left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+alpine_env <- alpine_env %>%
+  left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/alpine_df.xlsx")
+write_xlsx(alpine_env, "T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/alpine_env.xlsx")
+
+#create visit column 
+alpine_env <- alpine_env %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+#design permutation structure 
+perm_design_alpine = how(
+  plots = Plots(strata = alpine_env$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+perm_design_alpine_time = how(
+  plots = Plots(strata = alpine_env$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+
+
+#univariate analysis for species richness 
+alpine_univariate <- adonis2(alpine_env$Species_Richness ~ Park + Plot,
+                           data = alpine_env, 
+                           method = "euclidian",
+                           permutations = perm_design_alpine,
+                           by = "terms")
+#create permutation object 
+perms3 <- rbind(1:nrow(alpine_env),
+               shuffleSet(n = nrow(alpine_env), control = perm_design_alpine, nset = 999))
+
+#create object for Ss to be stored 
+results3 <- matrix(nrow = nrow(perms3), ncol = 4)
+colnames(results3) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms3)) {
+  temp.data <- alpine_env[perms3[i, ], ]
+  temp <- adonis2(alpine_env$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results3[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results3 <- results3 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/20))
+head(results3)
+
+#calculate P value 
+with(results3, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+#interaction of park and time for rest of table 
+alpine_vascular_univariate_timecross3 <- adonis2(alpine_env$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                      data = alpine_env, 
+                                      method = "euclidian",
+                                      permutations = perm_design_alpine_time,
+                                      by = "terms")
+alpine_vascular_univariate_timecross3
+
+
+
+#multivariate for species composition - presence/absence
+alpine_result <- adonis2(alpine_composition ~ Park + Plot, 
+                       data = alpine_env, method = "bray", 
+                       permutations = perm_design_alpine, 
+                       by = "terms")
+
+#create permutation framework + results object 
+perms4 <- rbind(1:nrow(alpine_composition),
+                shuffleSet(n = nrow(alpine_composition), control = perm_design_alpine, nset = 999))
+#head(perms4)
+results4 <- matrix(nrow = nrow(perms4), ncol = 4)
+colnames(results4) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms4)) {
+  temp.data <- alpine_env[perms4[i, ], ]
+  temp <- adonis2(alpine_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results4[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F values for permutations 
+results4 <- results4 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/20))
+head(results4)
+
+#calculate P value 
+with(results4, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+alpine_vascular_multivariate_timecross3 <- adonis2(alpine_composition ~ Park + Plot + Visit + Park*Visit,
+                                      data = alpine_env, 
+                                      method = "euclidian",
+                                      permutations = perm_design_alpine_time,
+                                      by = "terms")
+alpine_vascular_multivariate_timecross3
+
+
+#looking at viereck classes within alpine community 
+perm_design_alpine_time = how(
+  plots = Plots(strata = alpine_env$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+alpine_vascular_perm <- adonis2(alpine_composition ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                    data = alpine_env, method = "bray", 
+                                    permutations = perm_design_alpine_time, 
+                                    by = "terms")
+print(alpine_vascular_perm)
+
+
+
+#beta diversity 
+
+#based on park 
+alpine_dispersion_result <- betadisper(vegdist(alpine_composition, 
+                                  method = "bray"), alpine_env$Park)
+alpine_dispersion_result 
+permutest(alpine_dispersion_result, permutations = 999)
+
+#based on visit 
+alpine_dispersion_result2 <- betadisper(vegdist(alpine_composition, 
+                                  method = "bray"), alpine_env$Visit)
+alpine_dispersion_result2 
+permutest(alpine_dispersion_result2, permutations = 999)
+
+#based on viereck 
+alpine_dispersion_result3 <- betadisper(vegdist(alpine_composition, 
+                                  method = "bray"), alpine_env$Viereck.3)
+alpine_dispersion_result3 
+permutest(alpine_dispersion_result3, permutations = 999)
+```
+
+
+## Lichen 
+```{r}
+#hand select plots with high number of visits 
+filter_criteria_alpine_lichen <- list(
+  LACL_2010_03_998 = c(2011, 2016))
+
+#next identify plots with two plot visits 
+alpine_lichen_plots <- summary_table_lichens %>%
+  filter(Vegetation_Class == "Alpine", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(alpine_lichen_plots, names(filter_criteria_alpine_lichen))
+selected_plots
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- lichenspresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_alpine_lichen) & 
+      Sample_Year %in% unlist(filter_criteria_alpine_lichen[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+alpine_lichen_df <- lichenspresence_absence_df %>%
+  filter(
+    (Plot %in% alpine_lichen_plots) | 
+      (Plot %in% names(filter_criteria_alpine_lichen) &
+         Sample_Year %in% unlist(filter_criteria_alpine_lichen[Plot])))
+
+#verify everything has two sample visits 
+table(alpine_lichen_df$Park, alpine_lichen_df$Plot)
+
+
+#convert dataframe to a matrix so you can run permanova successfully 
+alpine_lichen_composition <- alpine_lichen_df[,c(13:179)]
+alpine_lichen_composition <- as.matrix(alpine_lichen_composition) 
+
+#create env_file including viereck classes 
+lichens_env_alpine <- alpine_lichen_df[,c(1:12)]
+
+#create env_file 
+table(lichens_env_alpine$Park, lichens_env_alpine$Plot)
+
+#add species richness column 
+lichens_env_alpine <- lichens_env_alpine %>%
+  left_join(lichen_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+#recode time as visit 
+lichens_env_alpine <- lichens_env_alpine %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+#restrict permutations 
+perm_design_alpine_lichen = how(
+  plots = Plots(strata = lichens_env_alpine$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+perm_design_alpine_lichen_time = how(
+  plots = Plots(strata = lichens_env_alpine$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+
+### Univeriate park 
+alpine_lichen_univariate <- adonis2(lichens_env_alpine$Species_Richness ~ Park + Plot,
+                           data = lichens_env_alpine, 
+                           method = "euclidian",
+                           permutations = perm_design_alpine_lichen,
+                           by = "terms")
+
+#create permutation object 
+perms <- rbind(1:nrow(lichens_env_alpine),
+               shuffleSet(n = nrow(lichens_env_alpine), control = perm_design_alpine_lichen, nset = 999))
+
+#create object for Ss to be stored 
+results <- matrix(nrow = nrow(perms), ncol = 4)
+colnames(results) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms)) {
+  temp.data <- lichens_env_alpine[perms[i, ], ]
+  temp <- adonis2(lichens_env_alpine$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results <- results |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/14))
+head(results)
+#first row is observed/your data, rows 2-1000 are the permuted data 
+
+#calculate P value 
+with(results, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+#interaction - park and time for rest of table terms 
+alpine_lichen_univariate_timecross3 <- adonis2(lichens_env_alpine$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                      data = lichens_env_alpine, 
+                                      method = "euclidian",
+                                      permutations = perm_design_alpine_lichen_time,
+                                      by = "terms")
+alpine_lichen_univariate_timecross3
+
+
+
+
+
+### Multivariate - presence absence composition 
+alpine_lichen_result <- adonis2(alpine_lichen_composition ~ Park + Plot, 
+                       data = lichens_env_alpine, method = "bray", 
+                       permutations = perm_design_alpine_lichen, 
+                       by = "terms")
+
+#create permutation object 
+perms2 <- rbind(1:nrow(alpine_lichen_composition),
+                shuffleSet(n = nrow(alpine_lichen_composition), control = perm_design_alpine_lichen, nset = 999))
+
+results2 <- matrix(nrow = nrow(perms2), ncol = 4)
+colnames(results2) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms2)) {
+  temp.data <- lichens_env_alpine[perms2[i, ], ]
+  temp <- adonis2(alpine_lichen_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results2[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F values for permutations 
+results2 <- results2 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/14))
+head(results2)
+
+#calculate P value 
+with(results2, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+#interaction model for rest of term values 
+alpine_lichen_result_timecross3 <- adonis2(alpine_lichen_composition ~ Park + Plot + Visit + Park*Visit, 
+                                  data = lichens_env_alpine, method = "bray", 
+                                  permutations = perm_design_alpine_lichen_time, 
+                                  by = "terms")
+alpine_lichen_result_timecross3
+
+
+#to look for changes amongst viereck classes in alpine 
+alpine_lichen_perm <- adonis2(alpine_lichen_composition ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                    data = lichens_env_alpine, method = "bray", 
+                                    permutations = perm_design_alpine_lichen_time, 
+                                    by = "terms")
+print(alpine_lichen_perm)
+
+
+
+
+#beta diversity 
+
+#based on park 
+alpine_lichen_dispersion_result <- betadisper(vegdist(alpine_lichen_composition, 
+                                             method = "bray"), lichens_env_alpine$Park)
+alpine_lichen_dispersion_result 
+permutest(alpine_lichen_dispersion_result, permutations = 999)
+
+#based on visit 
+alpine_lichen_dispersion_result2 <- betadisper(vegdist(alpine_lichen_composition, 
+                                             method = "bray"), lichens_env_alpine$Visit)
+alpine_lichen_dispersion_result2 
+permutest(alpine_lichen_dispersion_result2, permutations = 999)
+
+#based on viereck
+alpine_lichen_dispersion_result3 <- betadisper(vegdist(alpine_lichen_composition, 
+                                             method = "bray"), lichens_env_alpine$Viereck.3)
+alpine_lichen_dispersion_result3 
+permutest(alpine_lichen_dispersion_result3, permutations = 999)
+
+write_xlsx()
+
+write_xlsx(lichens_env_alpine, "T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/lichens_env_alpine.xlsx")
+write_xlsx(alpine_lichen_df, "T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/alpine_lichen_df.xlsx")
+
+```
+
+## Nonvascular
+```{r}
+#hand select plots with high number of visits 
+filter_criteria_alpine_nonvasc <- list(
+  LACL_2010_03_998 = c(2011, 2016))
+
+#next identify plots with two plot visits 
+alpine_nonvasc_plots <- summary_table_nonvasc %>%
+  filter(Vegetation_Class == "Alpine", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(alpine_nonvasc_plots, names(filter_criteria_alpine_nonvasc))
+selected_plots
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- nonvascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_alpine_nonvasc) & 
+      Sample_Year %in% unlist(filter_criteria_alpine_nonvasc[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+alpine_nonvasc_df <- nonvascpresence_absence_df %>%
+  filter(
+    (Plot %in% alpine_nonvasc_plots) | 
+      (Plot %in% names(filter_criteria_alpine_nonvasc) &
+         Sample_Year %in% unlist(filter_criteria_alpine_nonvasc[Plot])))
+
+#verify everything has two sample visits 
+table(alpine_nonvasc_df$Park, alpine_nonvasc_df$Plot)
+
+#convert dataframe to a matrix so you can run permanova successfully 
+alpine_nonvasc_composition <- alpine_nonvasc_df[,c(13:219)]
+alpine_nonvasc_composition <- as.matrix(alpine_nonvasc_composition) 
+
+
+#create env_file 
+nonvasc_env_alpine <- alpine_nonvasc_df[,c(1:13)]
+
+#recode time as visit 
+nonvasc_env_alpine <- nonvasc_env_alpine %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+#add species richness column 
+nonvasc_env_alpine <- nonvasc_env_alpine %>%
+  left_join(nonvasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+
+#design permutation structure 
+perm_design_alpine_nonvasc = how(
+  plots = Plots(strata = nonvasc_env_alpine$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+perm_design_alpine_nonvasc_time = how(
+  plots = Plots(strata = nonvasc_env_alpine$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+
+
+
+
+### Univeriate - species richness 
+alpine_nonvasc_univariate <- adonis2(nonvasc_env_alpine$Species_Richness ~ Park + Plot,
+                                    data = nonvasc_env_alpine, 
+                                    method = "euclidian",
+                                    permutations = perm_design_alpine_nonvasc,
+                                    by = "terms")
+
+#create permutation object 
+perms <- rbind(1:nrow(nonvasc_env_alpine),
+               shuffleSet(n = nrow(nonvasc_env_alpine), control = perm_design_alpine_nonvasc, nset = 999))
+
+#create object for Ss to be stored 
+results <- matrix(nrow = nrow(perms), ncol = 4)
+colnames(results) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms)) {
+  temp.data <- nonvasc_env_alpine[perms[i, ], ]
+  temp <- adonis2(nonvasc_env_alpine$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results <- results |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/14))
+head(results)
+#first row is observed/your data, rows 2-1000 are the permuted data 
+
+#calculate P value 
+with(results, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+#interaction - park and time for rest of table 
+alpine_nonvasc_univariate_timecross3 <- adonis2(nonvasc_env_alpine$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                               data = nonvasc_env_alpine, 
+                                               method = "euclidian",
+                                               permutations = perm_design_alpine_nonvasc_time,
+                                               by = "terms")
+alpine_nonvasc_univariate_timecross3
+
+
+
+
+
+
+
+### Multivariate - species composition 
+alpine_nonvasc_result <- adonis2(alpine_nonvasc_composition ~ Park + Plot, 
+                                data = nonvasc_env_alpine, method = "bray", 
+                                permutations = perm_design_alpine_nonvasc, 
+                                by = "terms")
+
+#create permutation object 
+perms2 <- rbind(1:nrow(alpine_nonvasc_composition),
+                shuffleSet(n = nrow(alpine_nonvasc_composition), control = perm_design_alpine_nonvasc, nset = 999))
+#create results object 
+results2 <- matrix(nrow = nrow(perms2), ncol = 4)
+colnames(results2) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms2)) {
+  temp.data <- nonvasc_env_alpine[perms2[i, ], ]
+  temp <- adonis2(alpine_nonvasc_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results2[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F values for permutations 
+results2 <- results2 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/14))
+head(results2)
+
+#calculate P value 
+with(results2, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+#interaction of park and time for rest of table term values 
+alpine_nonvasc_result_timecross3 <- adonis2(alpine_nonvasc_composition ~ Park + Plot + Visit + Park*Visit, 
+                                           data = nonvasc_env_alpine, method = "bray", 
+                                           permutations = perm_design_alpine_nonvasc_time, 
+                                           by = "terms")
+alpine_nonvasc_result_timecross3
+
+
+#looking at how viereck classes change within alpine communities 
+alpine_nonvasc_perm <- adonis2(alpine_nonvasc_composition ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                    data = nonvasc_env_alpine, method = "bray", 
+                                    permutations = perm_design_alpine_nonvasc_time, 
+                                    by = "terms")
+print(alpine_nonvasc_perm)
+
+nonvasc_env_alpine$Park <- factor(nonvasc_env_alpine$Park)
+str(nonvasc_env_alpine)
+
+
+alpine_nonvasc_perm_test <- adonis2(alpine_nonvasc_composition ~ Park + Plot + Visit, 
+                                    data = nonvasc_env_alpine, method = "bray", 
+                                    permutations = perm_design_alpine_nonvasc_time, 
+                                    by = "terms")
+print(alpine_nonvasc_perm_test)
+
+
+#distribution of plots 
+table(nonvasc_env_alpine$Park, nonvasc_env_alpine$Viereck.3)
+table(alpine_env$Park, alpine_env$Viereck.3)
+table(lichens_env_alpine$Park, lichens_env_alpine$Viereck.3)
+
+
+#beta diversity 
+
+#based on park 
+alpine_nonvasc_dispersion_result <- betadisper(vegdist(alpine_nonvasc_composition, 
+                                                      method = "bray"), nonvasc_env_alpine$Park)
+alpine_nonvasc_dispersion_result 
+permutest(alpine_nonvasc_dispersion_result, permutations = 999)
+
+#based on visit 
+alpine_nonvasc_dispersion_result2 <- betadisper(vegdist(alpine_nonvasc_composition, 
+                                                      method = "bray"), nonvasc_env_alpine$Visit)
+alpine_nonvasc_dispersion_result2 
+permutest(alpine_nonvasc_dispersion_result2, permutations = 999)
+
+#based on viereck.3
+alpine_nonvasc_dispersion_result3 <- betadisper(vegdist(alpine_nonvasc_composition, 
+                                                      method = "bray"), nonvasc_env_alpine$Viereck.3)
+alpine_nonvasc_dispersion_result3 
+permutest(alpine_nonvasc_dispersion_result3, permutations = 999)
+
+write_xlsx(nonvasc_env_alpine, "T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/nonvasc_env_alpine.xlsx")
+write_xlsx(alpine_nonvasc_df, "T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/alpine_nonvasc_df.xlsx")
+
+```
+
+
+# Beetle Kill Spruce 
+
+## Vascular 
+```{r}
+filter_criteria_beetle <- list(
+  KATM_2009_01_S996 = c(2012, 2014, 2019),
+  KATM_2009_01_S999 = c(2013, 2014, 2019),
+  KATM_2009_01_S995 = c(2012, 2014, 2019),
+  LACL_2010_01_S995	= c(2012, 2014, 2019))
+
+#next identify plots with three plot visits 
+beetle_plots <- summary_table %>%
+  filter(Vegetation_Class == "Beetle kill spruce", Number_Visits == 3) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(beetle_plots, names(filter_criteria_beetle))
+
+#subset main presence absence dataframe based on both conditions 
+#verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- presence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_beetle) & 
+      Sample_Year %in% unlist(filter_criteria_beetle[Plot]))
+
+beetle_df <- presence_absence_df %>%
+  filter(
+    (Plot %in% beetle_plots) | 
+      (Plot %in% names(filter_criteria_beetle) &
+         Sample_Year %in% unlist(filter_criteria_beetle[Plot])))
+
+#beetle_df <- beetle_df %>% filter(Park == "KATM")
+
+#check that its correct 
+table(beetle_df$Park, beetle_df$Plot) 
+
+#convert dataframe to a matrix so you can run permanova successfully 
+beetle_df <- beetle_df[order(beetle_df$Plot, beetle_df$Sample_Year), ]
+beetle_composition <- beetle_df[,c(7:280)]
+beetle_composition <- as.matrix(beetle_composition) 
+
+#create env_file with variable data 
+beetle_env <- vasc_env %>%
+  filter(
+    (Plot %in% beetle_plots) | 
+      (Plot %in% names(filter_criteria_beetle) &
+         Sample_Year %in% unlist(filter_criteria_beetle[Plot])))
+
+beetle_env <- beetle_env %>%
+  left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#beetle_env <- beetle_env %>% filter(Park == "KATM")
+
+#re-code sample_year as visits so that I can specify nesting structure and run beta diversity 
+beetle_env <- beetle_env %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+#head(beetle_env)
+
+#check that everything pulled correctly 
+table(beetle_env$Park, beetle_env$Plot) 
+
+#design permutation structure 
+perm_design_beetle_time = how(
+  plots = Plots(strata = beetle_env$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_beetle = how(
+   plots = Plots(strata = beetle_env$Plot, type = c("free")),
+   within = Within(type = "none"),
+   nperm = 999)
+
+beetle_env$Sample_Year <- as.factor(beetle_env$Sample_Year)
+
+#calculate park F and P values for table even though we aren't using them for the results interpretation due to low plot numbers 
+beetle_univariate <- adonis2(beetle_env$Species_Richness ~ Park + Plot,
+                             data = beetle_env, 
+                             method = "euclidian",
+                             permutations = perm_design_beetle,
+                             by = "terms")
+
+#create permutation object 
+perms7 <- rbind(1:nrow(beetle_env),
+                shuffleSet(n = nrow(beetle_env), control = perm_design_beetle, nset = 999))
+
+#create object for Ss to be stored 
+results7 <- matrix(nrow = nrow(perms7), ncol = 4)
+colnames(results7) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms7)) {
+  temp.data <- beetle_env[perms7[i, ], ]
+  temp <- adonis2(beetle_env$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results7[i, ] <- t(temp$SumOfSqs)
+}
+
+#results 
+#print(results7)
+
+#create F value column 
+results7 <- results7 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/13))
+head(results7)
+
+#calculate P value 
+with(results7, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+#multivariate 
+beetle_result <- adonis2(beetle_composition ~ Park + Plot, 
+                         data = beetle_env, method = "bray", 
+                         permutations = perm_design_beetle, 
+                         by = "terms")
+
+#create permutation structure and results object 
+perms8 <- rbind(1:nrow(beetle_composition),
+                shuffleSet(n = nrow(beetle_composition), control = perm_design_beetle, nset = 999))
+results8 <- matrix(nrow = nrow(perms8), ncol = 4)
+colnames(results8) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms8)) {
+  temp.data <- beetle_env[perms8[i, ], ]
+  temp <- adonis2(beetle_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results8[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results8 <- results8 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/13))
+head(results8)
+
+#calculate P value 
+with(results8, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit for rest of table 
+beetle_univariate_timecross2 <- adonis2(beetle_env$Species_Richness ~ Park + Plot + Visit,
+                                        data = beetle_env, 
+                                        method = "euclidian",
+                                        permutations = perm_design_beetle_time,
+                                        by = "terms")
+beetle_univariate_timecross2
+
+beetle_result_timecross2 <- adonis2(beetle_composition ~ Park + Plot + Visit, 
+                                    data = beetle_env, method = "bray", 
+                                    permutations = perm_design_beetle_time, 
+                                    by = "terms")
+beetle_result_timecross2
+
+
+### Beta Diversity 
+#based on sample year 
+beetle_dispersion_result <- betadisper(vegdist(beetle_composition, 
+                                               method = "bray"), beetle_env$Sample_Year)
+beetle_dispersion_result 
+permutest(beetle_dispersion_result, permutations = 999)
+
+#based on visit 
+beetle_dispersion_result2 <- betadisper(vegdist(beetle_composition, 
+                                                method = "bray"), beetle_env$Visit)
+beetle_dispersion_result2 
+permutest(beetle_dispersion_result2, permutations = 999)
+```
+
+## Lichens 
+```{r}
+filter_criteria_beetle_lichen <- list(
+  KATM_2009_01_S996 = c(2012, 2014, 2019),
+  KATM_2009_01_S999 = c(2013, 2014, 2019),
+  KATM_2009_01_S995 = c(2012, 2014, 2019),
+  LACL_2010_01_S995	= c(2012, 2014, 2019))
+
+#next identify plots with three plot visits 
+beetle_lichen_plots <- summary_table_lichens %>%
+  filter(Vegetation_Class == "Beetle kill spruce", Number_Visits == 3) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(beetle_lichen_plots, names(filter_criteria_beetle_lichen))
+selected_plots
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- lichenspresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_beetle_lichen) & 
+      Sample_Year %in% unlist(filter_criteria_beetle_lichen[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+beetle_lichen_df <- lichenspresence_absence_df %>%
+  filter(
+    (Plot %in% beetle_lichen_plots) | 
+      (Plot %in% names(filter_criteria_beetle_lichen) &
+         Sample_Year %in% unlist(filter_criteria_beetle_lichen[Plot])))
+#beetle_lichen_df <- beetle_lichen_df %>% filter(Park == "KATM")
+
+#verify everything has two sample visits 
+table(beetle_lichen_df$Park, beetle_lichen_df$Plot)
+
+#convert dataframe to a matrix so you can run permanova successfully 
+beetle_lichen_composition <- beetle_lichen_df[,c(13:179)]
+beetle_lichen_composition <- as.matrix(beetle_lichen_composition) 
+
+lichens_env_beetle <- beetle_lichen_df[,c(1:12)]
+table(lichens_env_beetle$Park, lichens_env_beetle$Plot)
+
+#add species richness column 
+lichens_env_beetle <- lichens_env_beetle %>%
+  left_join(lichen_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+lichens_env_beetle <- lichens_env_beetle %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+#restrict permutations 
+perm_design_beetle_lichen_time = how(
+  plots = Plots(strata = lichens_env_beetle$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_beetle_lichen = how(
+   plots = Plots(strata = lichens_env_beetle$Plot, type = c("free")),
+   within = Within(type = "none"),
+   nperm = 999)
+
+lichens_env_beetle$Sample_Year <- as.factor(lichens_env_beetle$Sample_Year)
+
+#calculate park F and P values for table even though we aren't using them for the results interpretation due to low plot numbers 
+beetle_univariate <- adonis2(lichens_env_beetle$Species_Richness ~ Park + Plot,
+                             data = lichens_env_beetle, 
+                             method = "euclidian",
+                             permutations = perm_design_beetle_lichen,
+                             by = "terms")
+
+#create permutation object 
+perms7 <- rbind(1:nrow(lichens_env_beetle),
+                shuffleSet(n = nrow(lichens_env_beetle), control = perm_design_beetle_lichen, nset = 999))
+
+#create object for Ss to be stored 
+results7 <- matrix(nrow = nrow(perms7), ncol = 4)
+colnames(results7) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms7)) {
+  temp.data <- lichens_env_beetle[perms7[i, ], ]
+  temp <- adonis2(lichens_env_beetle$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results7[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results7 <- results7 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/12))
+head(results7)
+
+#calculate P value 
+with(results7, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+#multivariate 
+beetle_result <- adonis2(beetle_lichen_composition ~ Park + Plot, 
+                         data = lichens_env_beetle, method = "bray", 
+                         permutations = perm_design_beetle_lichen, 
+                         by = "terms")
+
+#create permutation structure and results object 
+perms8 <- rbind(1:nrow(beetle_lichen_composition),
+                shuffleSet(n = nrow(beetle_lichen_composition), control = perm_design_beetle_lichen, nset = 999))
+results8 <- matrix(nrow = nrow(perms8), ncol = 4)
+colnames(results8) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms8)) {
+  temp.data <- lichens_env_beetle[perms8[i, ], ]
+  temp <- adonis2(beetle_lichen_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results8[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results8 <- results8 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/12))
+head(results8)
+
+#calculate P value 
+with(results8, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+#time for rest of table 
+beetle_lichen_univariate_timecross3 <- adonis2(lichens_env_beetle$Species_Richness ~ Park + Plot + Visit,
+                                               data = lichens_env_beetle, 
+                                               method = "euclidian",
+                                               permutations = perm_design_beetle_lichen_time,
+                                               by = "terms")
+beetle_lichen_univariate_timecross3
+
+beetle_lichen_result_timecross3 <- adonis2(beetle_lichen_composition ~ Park + Plot + Visit, 
+                                           data = lichens_env_beetle, method = "bray", 
+                                           permutations = perm_design_beetle_lichen_time, 
+                                           by = "terms")
+beetle_lichen_result_timecross3
+
+
+#based on visit 
+beetle_dispersion_result3 <- betadisper(vegdist(beetle_lichen_composition, 
+                                                method = "bray"), lichens_env_beetle$Visit)
+beetle_dispersion_result3
+permutest(beetle_dispersion_result3, permutations = 999)
+```
+
+
+## Nonvascular 
+```{r}
+filter_criteria_beetle_nonvasc <- list(
+  KATM_2009_01_S996 = c(2012, 2014, 2019),
+  KATM_2009_01_S999 = c(2013, 2014, 2019),
+  KATM_2009_01_S995 = c(2012, 2014, 2019),
+  LACL_2010_01_S995	= c(2012, 2014, 2019))
+
+#next identify plots with three plot visits 
+beetle_nonvasc_plots <- summary_table_nonvasc %>%
+  filter(Vegetation_Class == "Beetle kill spruce", Number_Visits == 3) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(beetle_nonvasc_plots, names(filter_criteria_beetle_nonvasc))
+selected_plots
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- nonvascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_beetle_nonvasc) & 
+      Sample_Year %in% unlist(filter_criteria_beetle_nonvasc[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+beetle_nonvasc_df <- nonvascpresence_absence_df %>%
+  filter(
+    (Plot %in% beetle_nonvasc_plots) | 
+      (Plot %in% names(filter_criteria_beetle_nonvasc) &
+         Sample_Year %in% unlist(filter_criteria_beetle_nonvasc[Plot])))
+#beetle_nonvasc_df <- beetle_nonvasc_df %>% filter(Park == "KATM")
+
+#verify everything has two sample visits 
+table(beetle_nonvasc_df$Park, beetle_nonvasc_df$Plot)
+
+#convert dataframe to a matrix so you can run permanova successfully 
+beetle_nonvasc_composition <- beetle_nonvasc_df[,c(13:219)]
+beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition) 
+
+nonvasc_env_beetle <- beetle_nonvasc_df[,c(1:12)]
+
+#add species richness column 
+nonvasc_env_beetle <- nonvasc_env_beetle %>%
+  left_join(nonvasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+#nonvasc_env_beetle <- nonvasc_env_beetle %>% filter(Park == "KATM")
+
+nonvasc_env_beetle <- nonvasc_env_beetle %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+#restrict permutations 
+perm_design_beetle_nonvasc_time = how(
+  plots = Plots(strata = nonvasc_env_beetle$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+perm_design_beetle_nonvasc = how(
+   plots = Plots(strata = nonvasc_env_beetle$Plot, type = c("free")),
+   within = Within(type = "none"),
+   nperm = 999)
+
+nonvasc_env_beetle$Sample_Year <- as.factor(nonvasc_env_beetle$Sample_Year)
+
+#calculate park F and P values for table even though we aren't using them for the results interpretation due to low plot numbers 
+beetle_univariate <- adonis2(nonvasc_env_beetle$Species_Richness ~ Park + Plot,
+                             data = nonvasc_env_beetle, 
+                             method = "euclidian",
+                             permutations = perm_design_beetle_nonvasc,
+                             by = "terms")
+
+#create permutation object 
+perms7 <- rbind(1:nrow(nonvasc_env_beetle),
+                shuffleSet(n = nrow(nonvasc_env_beetle), control = perm_design_beetle_nonvasc, nset = 999))
+
+#create object for Ss to be stored 
+results7 <- matrix(nrow = nrow(perms7), ncol = 4)
+colnames(results7) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms7)) {
+  temp.data <- nonvasc_env_beetle[perms7[i, ], ]
+  temp <- adonis2(nonvasc_env_beetle$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results7[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results7 <- results7 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/12))
+head(results7)
+
+#calculate P value 
+with(results7, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+#multivariate 
+beetle_result <- adonis2(beetle_nonvasc_composition ~ Park + Plot, 
+                         data = nonvasc_env_beetle, method = "bray", 
+                         permutations = perm_design_beetle_nonvasc, 
+                         by = "terms")
+
+#create permutation structure and results object 
+perms8 <- rbind(1:nrow(beetle_nonvasc_composition),
+                shuffleSet(n = nrow(beetle_nonvasc_composition), control = perm_design_beetle_nonvasc, nset = 999))
+results8 <- matrix(nrow = nrow(perms8), ncol = 4)
+colnames(results8) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms8)) {
+  temp.data <- nonvasc_env_beetle[perms8[i, ], ]
+  temp <- adonis2(beetle_nonvasc_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results8[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results8 <- results8 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/12))
+head(results8)
+
+#calculate P value 
+with(results8, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+
+beetle_nonvasc_univariate_timecross3 <- adonis2(nonvasc_env_beetle$Species_Richness ~ Park + Plot + Visit,
+                                               data = nonvasc_env_beetle, 
+                                               method = "euclidian",
+                                               permutations = perm_design_beetle_nonvasc_time,
+                                               by = "terms")
+beetle_nonvasc_univariate_timecross3
+
+beetle_nonvasc_result_timecross3 <- adonis2(beetle_nonvasc_composition ~ Park + Plot + Visit, 
+                                           data = nonvasc_env_beetle, method = "bray", 
+                                           permutations = perm_design_beetle_nonvasc_time, 
+                                           by = "terms")
+beetle_nonvasc_result_timecross3
+
+
+#based on visit 
+
+beetle_dispersion_result4 <- betadisper(vegdist(beetle_nonvasc_composition, 
+                                                method = "bray"), nonvasc_env_beetle$Visit)
+beetle_dispersion_result4
+permutest(beetle_dispersion_result4, permutations = 999)
+```
+
+
+
+
+
+
+
+# Spruce Woodland 
+
+## Vascular 
+
+```{r}
+## Woodland Needleleaf Forest 
+filter_criteria_needle <- list(
+  KATM_2009_01_S002 = c(2014, 2021),
+  KATM_2009_01_S012 = c(2015, 2021),
+  KATM_2009_01_S027 = c(2015, 2021),
+  KATM_2009_01_S035 = c(2015, 2019),
+  KATM_2009_01_S038 = c(2014, 2019),
+  KATM_2009_01_S050 = c(2017, 2021), 
+  KATM_2012_01_S041 = c(2014, 2019),
+  KATM_2012_01_S190 = c(2015, 2021),
+  LACL_2010_01_009 = c(2015, 2021),
+  LACL_2010_01_105 = c(2015, 2022),
+  LACL_2010_02_005 = c(2015, 2022),
+  LACL_2010_02_092 = c(2015, 2022),  
+  LACL_2010_02_S998 = c(2016, 2022),
+  LACL_2012_01_162 = c(2015, 2022),
+  LACL_2007_02_005 = c(2017, 2022),
+  LACL_2008_02_048 = c(2015, 2022),
+  LACL_2010_01_024 = c(2015, 2021),
+  LACL_2010_01_030 = c(2015, 2022),  
+  LACL_2010_01_S994 = c(2015, 2021),
+  LACL_2008_02_014 = c(2015, 2021)
+)
+
+#next identify plots with three plot visits 
+needle_plots <- summary_table_vasc %>%
+  filter(Viereck.3 == "Woodland Needleleaf Forest", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(needle_plots, names(filter_criteria_needle))
+
+vascpresence_absence_df <- vascpresence_absence_df %>%
+  left_join(viereck %>% select(Plot_Year, Viereck.3), by = c("Plot_Year"))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- vascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_needle) & 
+      Sample_Year %in% unlist(filter_criteria_needle[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+needle_df <- vascpresence_absence_df %>%
+  filter(
+    (Plot %in% needle_plots) | 
+      (Plot %in% names(filter_criteria_needle) &
+         Sample_Year %in% unlist(filter_criteria_needle[Plot])))
+
+#verify everything has two sample visits 
+table(needle_df$Park, needle_df$Plot)
+
+#convert dataframe to a matrix so you can run permanova successfully 
+needle_composition <- needle_df[,c(7:280)]
+needle_composition <- as.matrix(needle_composition) 
+
+#create env_file 
+needle_env <- needle_df[,c(1:6, 280:283)]
+
+needle_env <- needle_env %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+needle_env <- needle_env %>%
+  left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_needle = how(
+  plots = Plots(strata = needle_env$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+perm_design_needle_time = how(
+  plots = Plots(strata = needle_env$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+check(needle_env, control = perm_design_needle) #how many possible permutations 
+
+
+#species richness 
+needle_univariate <- adonis2(needle_env$Species_Richness ~ Park + Plot,
+                             data = needle_env, 
+                             method = "euclidian",
+                             permutations = perm_design_needle,
+                             by = "terms")
+needle_univariate
+
+#create permutation object 
+perms21 <- rbind(1:nrow(needle_env),
+                 shuffleSet(n = nrow(needle_env), control = perm_design_needle, nset = 999))
+
+#create object for Ss to be stored 
+results21 <- matrix(nrow = nrow(perms21), ncol = 4)
+colnames(results21) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms21)) {
+  temp.data <- needle_env[perms21[i, ], ]
+  temp <- adonis2(needle_env$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results21[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results21 <- results21 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/35))
+head(results21)
+
+#calculate P value 
+with(results21, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate - species composition 
+needle_result <- adonis2(needle_composition ~ Park + Plot, 
+                         data = needle_env, method = "bray", 
+                         permutations = perm_design_needle, 
+                         by = "terms")
+needle_result
+
+#create permutation structure and results object 
+perms22 <- rbind(1:nrow(needle_composition),
+                 shuffleSet(n = nrow(needle_composition), control = perm_design_needle, nset = 999))
+results22 <- matrix(nrow = nrow(perms22), ncol = 4)
+colnames(results22) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms22)) {
+  temp.data <- needle_env[perms22[i, ], ]
+  temp <- adonis2(needle_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results22[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results22 <- results22 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/35))
+head(results22)
+
+#calculate P value 
+with(results22, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit - time for rest of table 
+needle_univariate_timecross2 <- adonis2(needle_env$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                        data = needle_env, 
+                                        method = "euclidian",
+                                        permutations = perm_design_needle_time,
+                                        by = "terms")
+needle_univariate_timecross2
+
+needle_result_timecross2 <- adonis2(needle_composition ~ Park + Plot + Visit + Park*Visit, 
+                                    data = needle_env, method = "bray", 
+                                    permutations = perm_design_needle_time, 
+                                    by = "terms")
+needle_result_timecross2
+
+
+#beta diversity 
+
+#based on park 
+needle_dispersion_result <- betadisper(vegdist(needle_composition, 
+                                               method = "bray"), needle_env$Park)
+needle_dispersion_result 
+permutest(needle_dispersion_result, permutations = 999)
+
+#based on visit 
+needle_dispersion_result2 <- betadisper(vegdist(needle_composition, 
+                                                method = "bray"), needle_env$Visit)
+needle_dispersion_result2 
+permutest(needle_dispersion_result2, permutations = 999)
+```
+
+
+
+
+
+## Lichen 
+
+```{r}
+## Woodland Needleleaf Forest 
+filter_criteria_needle_lichen <- list(
+  KATM_2009_01_S002	= c(2014, 2021),
+  KATM_2009_01_S012	= c(2015, 2021),
+  KATM_2009_01_S027	= c(2015, 2021),
+  KATM_2009_01_S035	= c(2015, 2019),
+  KATM_2009_01_S038	= c(2014, 2019),
+  KATM_2009_01_S050	= c(2017, 2021),
+  KATM_2012_01_S041	= c(2014, 2019),
+  KATM_2012_01_S190	= c(2015, 2021),
+  LACL_2008_02_014	= c(2012, 2021),
+  LACL_2008_02_048	= c(2015, 2022),
+  LACL_2010_01_009	= c(2015, 2021),
+  LACL_2010_01_030	= c(2015, 2022),
+  LACL_2010_01_105	= c(2015, 2022),
+  LACL_2010_02_005	= c(2015, 2022),
+  LACL_2010_02_092	= c(2015, 2022),
+  LACL_2010_02_S998	= c(2016, 2022),
+  LACL_2010_01_024	= c(2015, 2021),
+  LACL_2010_01_S994	= c(2015, 2021))
+
+#next identify plots with three plot visits 
+needle_plots_lichen <- summary_table_lichens %>%
+  filter(Viereck.3 == "Woodland Needleleaf Forest", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(needle_plots_lichen, names(filter_criteria_needle_lichen))
+
+#lichenspresence_absence_df <- lichenspresence_absence_df %>%
+ # left_join(viereck %>% select(Plot_Year, Viereck.3), by = c("Plot_Year"))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- lichenspresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_needle_lichen) & 
+      Sample_Year %in% unlist(filter_criteria_needle_lichen[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+needle_df_lichen <- lichenspresence_absence_df %>%
+  filter(
+    (Plot %in% needle_plots_lichen) | 
+      (Plot %in% names(filter_criteria_needle_lichen) &
+         Sample_Year %in% unlist(filter_criteria_needle_lichen[Plot])))
+
+#verify everything has two sample visits 
+table(needle_df_lichen$Park, needle_df_lichen$Plot)
+
+needle_df_lichen <- needle_df_lichen[-15, ]
+needle_df_lichen <- needle_df_lichen[-18, ]
+needle_df_lichen <- needle_df_lichen[-39, ]
+
+
+#convert dataframe to a matrix so you can run permanova successfully 
+needle_composition_lichen <- needle_df_lichen[,c(13:179)]
+needle_composition_lichen <- as.matrix(needle_composition_lichen) 
+
+#create env_file 
+needle_env_lichen <- needle_df_lichen[,c(1:12)]
+
+needle_env_lichen <- needle_env_lichen %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+needle_env_lichen <- needle_env_lichen %>%
+  left_join(lichen_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_needle_lichen = how(
+  plots = Plots(strata = needle_env_lichen$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+perm_design_needle_time_lichen = how(
+  plots = Plots(strata = needle_env_lichen$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+check(needle_env_lichen, control = perm_design_needle_lichen) #how many possible permutations 
+
+
+#species richness 
+needle_univariate_lichen <- adonis2(needle_env_lichen$Species_Richness ~ Park + Plot,
+                             data = needle_env_lichen, 
+                             method = "euclidian",
+                             permutations = perm_design_needle_lichen,
+                             by = "terms")
+needle_univariate_lichen
+
+#create permutation object 
+perms21 <- rbind(1:nrow(needle_env_lichen),
+                 shuffleSet(n = nrow(needle_env_lichen), control = perm_design_needle_lichen, nset = 999))
+
+#create object for Ss to be stored 
+results21 <- matrix(nrow = nrow(perms21), ncol = 4)
+colnames(results21) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms21)) {
+  temp.data <- needle_env_lichen[perms21[i, ], ]
+  temp <- adonis2(needle_env_lichen$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results21[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results21 <- results21 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/30))
+head(results21)
+
+#calculate P value 
+with(results21, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate - species composition - use this to get correct DF for calculations 
+needle_result_lichen <- adonis2(needle_composition_lichen ~ Park + Plot, 
+                         data = needle_env_lichen, method = "bray", 
+                         permutations = perm_design_needle_lichen, 
+                         by = "terms")
+needle_result_lichen
+
+#create permutation structure and results object 
+perms22 <- rbind(1:nrow(needle_composition_lichen),
+                 shuffleSet(n = nrow(needle_composition_lichen), control = perm_design_needle_lichen, nset = 999))
+results22 <- matrix(nrow = nrow(perms22), ncol = 4)
+colnames(results22) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms22)) {
+  temp.data <- needle_env_lichen[perms22[i, ], ]
+  temp <- adonis2(needle_composition_lichen ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results22[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results22 <- results22 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/30))
+head(results22)
+
+#calculate P value 
+with(results22, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit - time for rest of table 
+needle_univariate_timecross2_lichen <- adonis2(needle_env_lichen$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                        data = needle_env_lichen, 
+                                        method = "euclidian",
+                                        permutations = perm_design_needle_time_lichen,
+                                        by = "terms")
+needle_univariate_timecross2_lichen
+
+needle_result_timecross2_lichen <- adonis2(needle_composition_lichen ~ Park + Plot + Visit + Park*Visit, 
+                                    data = needle_env_lichen, method = "bray", 
+                                    permutations = perm_design_needle_time_lichen, 
+                                    by = "terms")
+needle_result_timecross2_lichen
+
+
+#beta diversity 
+
+#based on park 
+needle_dispersion_result_lichen <- betadisper(vegdist(needle_composition_lichen, 
+                                               method = "bray"), needle_env_lichen$Park)
+needle_dispersion_result_lichen 
+permutest(needle_dispersion_result_lichen, permutations = 999)
+
+#based on visit 
+needle_dispersion_result2_lichen <- betadisper(vegdist(needle_composition_lichen, 
+                                                method = "bray"), needle_env_lichen$Visit)
+needle_dispersion_result2_lichen
+permutest(needle_dispersion_result2_lichen, permutations = 999)
+```
+
+
+
+
+
+## Nonvascular 
+
+```{r}
+filter_criteria_needle_nonvasc <- list(
+  KATM_2009_01_S002	= c(2014, 2021),
+  KATM_2009_01_S012	= c(2015, 2021),
+  KATM_2009_01_S027	= c(2015, 2021),
+  KATM_2009_01_S035	= c(2015, 2019),
+  KATM_2009_01_S038	= c(2014, 2019),
+  KATM_2009_01_S050	= c(2017, 2021),
+  KATM_2012_01_S041	= c(2014, 2019),
+  KATM_2012_01_S190	= c(2015, 2021),
+  LACL_2008_02_014	= c(2012, 2021),
+  LACL_2008_02_048	= c(2015, 2022),
+  LACL_2010_01_009	= c(2015, 2021),
+  LACL_2010_01_030	= c(2015, 2022),
+  LACL_2010_01_105	= c(2015, 2022),
+  LACL_2010_02_005	= c(2015, 2022),
+  LACL_2010_02_092	= c(2015, 2022),
+  LACL_2010_02_S998	= c(2016, 2022),
+  LACL_2010_01_024	= c(2015, 2021),
+  LACL_2010_01_S994	= c(2015, 2021))
+
+#next identify plots with three plot visits 
+needle_plots_nonvasc <- summary_table_nonvasc %>%
+  filter(Viereck.3 == "Woodland Needleleaf Forest", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(needle_plots_nonvasc, names(filter_criteria_needle_nonvasc))
+
+#lichenspresence_absence_df <- lichenspresence_absence_df %>%
+# left_join(viereck %>% select(Plot_Year, Viereck.3), by = c("Plot_Year"))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- nonvascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_needle_nonvasc) & 
+      Sample_Year %in% unlist(filter_criteria_needle_nonvasc[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+needle_df_nonvasc <- nonvascpresence_absence_df %>%
+  filter(
+    (Plot %in% needle_plots_nonvasc) | 
+      (Plot %in% names(filter_criteria_needle_nonvasc) &
+         Sample_Year %in% unlist(filter_criteria_needle_nonvasc[Plot])))
+
+#verify everything has two sample visits 
+table(needle_df_nonvasc$Park, needle_df_nonvasc$Plot)
+
+needle_df_nonvasc <- needle_df_nonvasc[-41, ]
+needle_df_nonvasc <- needle_df_nonvasc[-18, ]
+needle_df_nonvasc <- needle_df_nonvasc[-15, ]
+
+
+
+
+#convert dataframe to a matrix so you can run permanova successfully 
+needle_composition_nonvasc <- needle_df_nonvasc[,c(13:219)]
+needle_composition_nonvasc <- as.matrix(needle_composition_nonvasc) 
+
+#create env_file 
+needle_env_nonvasc <- needle_df_nonvasc[,c(1:12)]
+
+needle_env_nonvasc <- needle_env_nonvasc %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+needle_env_nonvasc <- needle_env_nonvasc %>%
+  left_join(nonvasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_needle_nonvasc = how(
+  plots = Plots(strata = needle_env_nonvasc$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+perm_design_needle_time_nonvasc = how(
+  plots = Plots(strata = needle_env_nonvasc$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+check(needle_env_nonvasc, control = perm_design_needle_nonvasc) #how many possible permutations 
+
+
+#species richness - run this to get the correct DF for equations 
+needle_univariate_nonvasc <- adonis2(needle_env_nonvasc$Species_Richness ~ Park + Plot,
+                                    data = needle_env_nonvasc, 
+                                    method = "euclidian",
+                                    permutations = perm_design_needle_nonvasc,
+                                    by = "terms")
+needle_univariate_nonvasc
+
+#create permutation object 
+perms21 <- rbind(1:nrow(needle_env_nonvasc),
+                 shuffleSet(n = nrow(needle_env_nonvasc), control = perm_design_needle_nonvasc, nset = 999))
+
+#create object for Ss to be stored 
+results21 <- matrix(nrow = nrow(perms21), ncol = 4)
+colnames(results21) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms21)) {
+  temp.data <- needle_env_nonvasc[perms21[i, ], ]
+  temp <- adonis2(needle_env_nonvasc$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results21[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results21 <- results21 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/30))
+head(results21)
+
+#calculate P value 
+with(results21, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate - species composition - use this to get correct DF for calculations 
+needle_result_nonvasc <- adonis2(needle_composition_nonvasc ~ Park + Plot, 
+                                data = needle_env_nonvasc, method = "bray", 
+                                permutations = perm_design_needle_nonvasc, 
+                                by = "terms")
+needle_result_nonvasc
+
+#create permutation structure and results object 
+perms22 <- rbind(1:nrow(needle_composition_nonvasc),
+                 shuffleSet(n = nrow(needle_composition_nonvasc), control = perm_design_needle_nonvasc, nset = 999))
+results22 <- matrix(nrow = nrow(perms22), ncol = 4)
+colnames(results22) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms22)) {
+  temp.data <- needle_env_nonvasc[perms22[i, ], ]
+  temp <- adonis2(needle_composition_nonvasc ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results22[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results22 <- results22 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/30))
+head(results22)
+
+#calculate P value 
+with(results22, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit - time for rest of table 
+needle_univariate_timecross2_nonvasc <- adonis2(needle_env_nonvasc$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                               data = needle_env_nonvasc, 
+                                               method = "euclidian",
+                                               permutations = perm_design_needle_time_nonvasc,
+                                               by = "terms")
+needle_univariate_timecross2_nonvasc
+
+needle_result_timecross2_nonvasc <- adonis2(needle_composition_nonvasc ~ Park + Plot + Visit + Park*Visit, 
+                                           data = needle_env_nonvasc, method = "bray", 
+                                           permutations = perm_design_needle_time_nonvasc, 
+                                           by = "terms")
+needle_result_timecross2_nonvasc
+
+
+#beta diversity 
+
+#based on park 
+needle_dispersion_result_nonvasc <- betadisper(vegdist(needle_composition_nonvasc, 
+                                                      method = "bray"), needle_env_nonvasc$Park)
+needle_dispersion_result_nonvasc 
+permutest(needle_dispersion_result_nonvasc, permutations = 999)
+
+#based on visit 
+needle_dispersion_result2_nonvasc <- betadisper(vegdist(needle_composition_nonvasc, 
+                                                       method = "bray"), needle_env_nonvasc$Visit)
+needle_dispersion_result2_nonvasc
+permutest(needle_dispersion_result2_nonvasc, permutations = 999)
+
+
+write_xlsx(needle_env, "C:/Users/kmpace/Desktop/needle_env.xlsx")
+write_xlsx(needle_env_lichen, "C:/Users/kmpace/Desktop/needle_env_lichen.xlsx")
+write_xlsx(needle_env_nonvasc, "C:/Users/kmpace/Desktop/needle_env_nonvasc.xlsx")
+```
+
+
+
+# Open Low Shrub
+
+## Vascular 
+
+```{r}
+filter_criteria_openlow <- list(
+  KATM_2009_01_078 = c(2015, 2021),
+  KATM_2009_01_S008 = c(2015, 2021),
+  KATM_2009_02_S004 = c(2016, 2023),
+  KATM_2009_02_S008 = c(2016, 2023),
+  LACL_2008_02_042 = c(2017, 2022),
+  LACL_2010_01_014 = c(2015, 2021), 
+  LACL_2010_01_026 = c(2015, 2021),
+  LACL_2010_01_027 = c(2015, 2021),
+  LACL_2010_01_051 = c(2015, 2022),
+  LACL_2010_01_105 = c(2015, 2022),
+  LACL_2010_02_016 = c(2016, 2022),
+  LACL_2010_02_042 = c(2017, 2022),  
+  LACL_2011_02_S997 = c(2016, 2022),
+  LACL_2011_02_S999 = c(2016, 2022),
+  LACL_2007_02_002 = c(2017, 2022),
+  LACL_2007_02_017 = c(2015, 2021),
+  LACL_2008_02_006 = c(2015, 2021),
+  LACL_2008_02_049 = c(2017, 2022),  
+  LACL_2010_02_999 = c(2016, 2022),
+  LACL_2011_01_033 = c(2015, 2021),
+  LACL_2007_02_006 = c(2015, 2022)
+)
+
+#next identify plots with three plot visits 
+openlow_plots <- summary_table_vasc %>%
+  filter(Viereck.3 == "Open Low Scrub", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(openlow_plots, names(filter_criteria_openlow))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- vascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_openlow) & 
+      Sample_Year %in% unlist(filter_criteria_openlow[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+openlow_df <- vascpresence_absence_df %>%
+  filter(
+    (Plot %in% openlow_plots) | 
+      (Plot %in% names(filter_criteria_openlow) &
+         Sample_Year %in% unlist(filter_criteria_openlow[Plot])))
+
+table(openlow_df$Park, openlow_df$Plot) 
+openlow_df <- openlow_df[-38, ]
+openlow_df <- openlow_df[-37, ]
+openlow_df <- openlow_df[-36, ]
+openlow_df <- openlow_df[-35, ]
+
+
+
+
+#verify everything has two sample visits 
+#table(openlow_df$Park, openlow_df$Plot)
+#table(openlow_env$Park, openlow_env$Plot)
+
+#convert dataframe to a matrix so you can run permanova successfully 
+openlow_composition <- openlow_df[,c(7:280)]
+openlow_composition <- as.matrix(openlow_composition) 
+
+#create env_file 
+
+openlow_env <- openlow_df[,c(1:6, 280:283)]
+
+openlow_env <- openlow_env %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+openlow_env <- openlow_env %>%
+  left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_openlow_time = how(
+  plots = Plots(strata = openlow_env$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_openlow = how(
+  plots = Plots(strata = openlow_env$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+
+### Univariate 
+check(openlow_env, control = perm_design_openlow) #how many possible permutations 
+
+openlow_univariate <- adonis2(openlow_env$Species_Richness ~ Park + Plot,
+                              data = openlow_env, 
+                              method = "euclidian",
+                              permutations = perm_design_openlow,
+                              by = "terms")
+openlow_univariate
+
+
+#create permutation object 
+perms19 <- rbind(1:nrow(openlow_env),
+                 shuffleSet(n = nrow(openlow_env), control = perm_design_openlow, nset = 999))
+
+#create object for Ss to be stored 
+results19 <- matrix(nrow = nrow(perms19), ncol = 4)
+colnames(results19) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms19)) {
+  temp.data <- openlow_env[perms19[i, ], ]
+  temp <- adonis2(openlow_env$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results19[i, ] <- t(temp$SumOfSqs)
+}
+
+#results 
+#print(results19)
+
+#create F value column 
+results19 <- results19 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/40))
+head(results19)
+
+#calculate P value 
+with(results19, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate 
+openlow_result <- adonis2(openlow_composition ~ Park + Plot, 
+                          data = openlow_env, method = "bray", 
+                          permutations = perm_design_openlow, 
+                          by = "terms")
+openlow_result
+
+#create permutation structure and results object 
+perms20 <- rbind(1:nrow(openlow_composition),
+                 shuffleSet(n = nrow(openlow_composition), control = perm_design_openlow, nset = 999))
+results20 <- matrix(nrow = nrow(perms20), ncol = 4)
+colnames(results20) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms20)) {
+  temp.data <- openlow_env[perms20[i, ], ]
+  temp <- adonis2(openlow_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results20[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results20 <- results20 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/40))
+head(results20)
+
+#calculate P value 
+with(results20, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit 
+openlow_univariate_timecross2 <- adonis2(openlow_env$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                         data = openlow_env, 
+                                         method = "euclidian",
+                                         permutations = perm_design_openlow_time,
+                                         by = "terms")
+openlow_univariate_timecross2
+
+openlow_result_timecross2 <- adonis2(openlow_composition ~ Park + Plot + Visit + Park*Visit, 
+                                     data = openlow_env, method = "bray", 
+                                     permutations = perm_design_openlow_time, 
+                                     by = "terms")
+openlow_result_timecross2
+
+
+#beta diversity 
+#based on park 
+openlow_dispersion_result <- betadisper(vegdist(openlow_composition, 
+                                                method = "bray"), openlow_env$Park)
+openlow_dispersion_result 
+permutest(openlow_dispersion_result, permutations = 999)
+
+#based on visit 
+openlow_dispersion_result2 <- betadisper(vegdist(openlow_composition, 
+                                                 method = "bray"), openlow_env$Visit)
+openlow_dispersion_result2 
+permutest(openlow_dispersion_result2, permutations = 999)
+```
+
+
+
+
+
+## Lichen 
+
+```{r}
+filter_criteria_openlow_lichen <- list(
+  KATM_2009_01_078	= c(2015, 2021),
+  KATM_2009_01_S008	= c(2015, 2021),
+  LACL_2010_01_014	= c(2015, 2021),
+  LACL_2010_01_026	= c(2015, 2021),
+  LACL_2010_01_027	= c(2015, 2021),
+  LACL_2010_01_051	= c(2015, 2022),
+  LACL_2011_02_S997	= c(2016, 2022),
+  LACL_2007_02_006	= c(2012, 2022),
+  LACL_2011_01_033	= c(2015, 2021))
+
+#next identify plots with three plot visits 
+openlow_plots_lichen <- summary_table_lichens %>%
+  filter(Viereck.3 == "Open Low Scrub", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(openlow_plots_lichen, names(filter_criteria_openlow_lichen))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- lichenspresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_openlow_lichen) & 
+      Sample_Year %in% unlist(filter_criteria_openlow_lichen[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+openlow_df_lichen <- lichenspresence_absence_df %>%
+  filter(
+    (Plot %in% openlow_plots_lichen) | 
+      (Plot %in% names(filter_criteria_openlow_lichen) &
+         Sample_Year %in% unlist(filter_criteria_openlow_lichen[Plot])))
+
+table(openlow_df_lichen$Park, openlow_df_lichen$Plot) 
+
+openlow_df_lichen <- openlow_df_lichen[-54, ]
+openlow_df_lichen <- openlow_df_lichen[-33, ]
+openlow_df_lichen <- openlow_df_lichen[-32, ]
+openlow_df_lichen <- openlow_df_lichen[-31, ]
+
+#convert dataframe to a matrix so you can run permanova successfully 
+openlow_composition_lichen <- openlow_df_lichen[,c(13:179)]
+openlow_composition_lichen <- as.matrix(openlow_composition_lichen) 
+
+#create env_file 
+
+openlow_env_lichen <- openlow_df_lichen[,c(1:12)]
+
+openlow_env_lichen <- openlow_env_lichen %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+openlow_env_lichen <- openlow_env_lichen %>%
+  left_join(lichen_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_openlow_time_lichen = how(
+  plots = Plots(strata = openlow_env_lichen$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_openlow_lichen = how(
+  plots = Plots(strata = openlow_env_lichen$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+
+### Univariate 
+check(openlow_env_lichen, control = perm_design_openlow_lichen) #how many possible permutations 
+
+openlow_univariate_lichen <- adonis2(openlow_env_lichen$Species_Richness ~ Park + Plot,
+                              data = openlow_env_lichen, 
+                              method = "euclidian",
+                              permutations = perm_design_openlow_lichen,
+                              by = "terms")
+openlow_univariate_lichen
+
+
+#create permutation object 
+perms19 <- rbind(1:nrow(openlow_env_lichen),
+                 shuffleSet(n = nrow(openlow_env_lichen), control = perm_design_openlow_lichen, nset = 999))
+
+#create object for Ss to be stored 
+results19 <- matrix(nrow = nrow(perms19), ncol = 4)
+colnames(results19) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms19)) {
+  temp.data <- openlow_env_lichen[perms19[i, ], ]
+  temp <- adonis2(openlow_env_lichen$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results19[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results19 <- results19 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/28))
+head(results19)
+
+#calculate P value 
+with(results19, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate 
+openlow_result_lichen <- adonis2(openlow_composition_lichen ~ Park + Plot, 
+                          data = openlow_env_lichen, method = "bray", 
+                          permutations = perm_design_openlow_lichen, 
+                          by = "terms")
+openlow_result_lichen
+
+#create permutation structure and results object 
+perms20 <- rbind(1:nrow(openlow_composition_lichen),
+                 shuffleSet(n = nrow(openlow_composition_lichen), control = perm_design_openlow_lichen, nset = 999))
+results20 <- matrix(nrow = nrow(perms20), ncol = 4)
+colnames(results20) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms20)) {
+  temp.data <- openlow_env_lichen[perms20[i, ], ]
+  temp <- adonis2(openlow_composition_lichen ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results20[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results20 <- results20 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/28))
+head(results20)
+
+#calculate P value 
+with(results20, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit 
+openlow_univariate_timecross2_lichen <- adonis2(openlow_env_lichen$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                         data = openlow_env_lichen, 
+                                         method = "euclidian",
+                                         permutations = perm_design_openlow_time_lichen,
+                                         by = "terms")
+openlow_univariate_timecross2_lichen
+
+openlow_result_timecross2_lichen <- adonis2(openlow_composition_lichen ~ Park + Plot + Visit + Park*Visit, 
+                                     data = openlow_env_lichen, method = "bray", 
+                                     permutations = perm_design_openlow_time_lichen, 
+                                     by = "terms")
+openlow_result_timecross2_lichen
+
+
+#beta diversity 
+#based on park 
+openlow_dispersion_result_lichen <- betadisper(vegdist(openlow_composition_lichen, 
+                                                method = "bray"), openlow_env_lichen$Park)
+openlow_dispersion_result_lichen 
+permutest(openlow_dispersion_result_lichen, permutations = 999)
+
+#based on visit 
+openlow_dispersion_result2_lichen <- betadisper(vegdist(openlow_composition_lichen, 
+                                                 method = "bray"), openlow_env_lichen$Visit)
+openlow_dispersion_result2_lichen 
+permutest(openlow_dispersion_result2_lichen, permutations = 999)
+```
+
+
+
+
+## Nonvascular
+
+```{r}
+filter_criteria_openlow_nonvasc <- list(
+  KATM_2009_01_078	= c(2015, 2021),
+  KATM_2009_01_S008	= c(2015, 2021),
+  LACL_2010_01_014	= c(2015, 2021),
+  LACL_2010_01_026	= c(2015, 2021),
+  LACL_2010_01_027	= c(2015, 2021),
+  LACL_2010_01_051	= c(2015, 2022),
+  LACL_2011_02_S997	= c(2016, 2022),
+  LACL_2007_02_006	= c(2012, 2022),
+  LACL_2011_01_033	= c(2015, 2021))
+
+#next identify plots with three plot visits 
+openlow_plots_nonvasc <- summary_table_nonvasc %>%
+  filter(Viereck.3 == "Open Low Scrub", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(openlow_plots_nonvasc, names(filter_criteria_openlow_nonvasc))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- nonvascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_openlow_nonvasc) & 
+      Sample_Year %in% unlist(filter_criteria_openlow_nonvasc[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+openlow_df_nonvasc <- nonvascpresence_absence_df %>%
+  filter(
+    (Plot %in% openlow_plots_nonvasc) | 
+      (Plot %in% names(filter_criteria_openlow_nonvasc) &
+         Sample_Year %in% unlist(filter_criteria_openlow_nonvasc[Plot])))
+
+table(openlow_df_nonvasc$Park, openlow_df_nonvasc$Plot) 
+
+openlow_df_nonvasc <- openlow_df_nonvasc[-54, ]
+openlow_df_nonvasc <- openlow_df_nonvasc[-33, ]
+openlow_df_nonvasc <- openlow_df_nonvasc[-32, ]
+openlow_df_nonvasc <- openlow_df_nonvasc[-31, ]
+
+#convert dataframe to a matrix so you can run permanova successfully 
+openlow_composition_nonvasc <- openlow_df_nonvasc[,c(13:219)]
+openlow_composition_nonvasc <- as.matrix(openlow_composition_nonvasc) 
+
+#create env_file 
+
+openlow_env_nonvasc <- openlow_df_nonvasc[,c(1:12)]
+
+openlow_env_nonvasc <- openlow_env_nonvasc %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+openlow_env_nonvasc <- openlow_env_nonvasc %>%
+  left_join(nonvasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_openlow_time_nonvasc = how(
+  plots = Plots(strata = openlow_env_nonvasc$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_openlow_nonvasc = how(
+  plots = Plots(strata = openlow_env_nonvasc$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+
+### Univariate 
+check(openlow_env_nonvasc, control = perm_design_openlow_nonvasc) #how many possible permutations 
+
+openlow_univariate_nonvasc <- adonis2(openlow_env_nonvasc$Species_Richness ~ Park + Plot,
+                                     data = openlow_env_nonvasc, 
+                                     method = "euclidian",
+                                     permutations = perm_design_openlow_nonvasc,
+                                     by = "terms")
+openlow_univariate_nonvasc
+
+
+#create permutation object 
+perms19 <- rbind(1:nrow(openlow_env_nonvasc),
+                 shuffleSet(n = nrow(openlow_env_nonvasc), control = perm_design_openlow_nonvasc, nset = 999))
+
+#create object for Ss to be stored 
+results19 <- matrix(nrow = nrow(perms19), ncol = 4)
+colnames(results19) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms19)) {
+  temp.data <- openlow_env_nonvasc[perms19[i, ], ]
+  temp <- adonis2(openlow_env_nonvasc$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results19[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results19 <- results19 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/28))
+head(results19)
+
+#calculate P value 
+with(results19, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate 
+openlow_result_nonvasc <- adonis2(openlow_composition_nonvasc ~ Park + Plot, 
+                                 data = openlow_env_nonvasc, method = "bray", 
+                                 permutations = perm_design_openlow_nonvasc, 
+                                 by = "terms")
+openlow_result_nonvasc
+
+#create permutation structure and results object 
+perms20 <- rbind(1:nrow(openlow_composition_nonvasc),
+                 shuffleSet(n = nrow(openlow_composition_nonvasc), control = perm_design_openlow_nonvasc, nset = 999))
+results20 <- matrix(nrow = nrow(perms20), ncol = 4)
+colnames(results20) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms20)) {
+  temp.data <- openlow_env_nonvasc[perms20[i, ], ]
+  temp <- adonis2(openlow_composition_nonvasc ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results20[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results20 <- results20 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/28))
+head(results20)
+
+#calculate P value 
+with(results20, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit 
+openlow_univariate_timecross2_nonvasc <- adonis2(openlow_env_nonvasc$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                                data = openlow_env_nonvasc, 
+                                                method = "euclidian",
+                                                permutations = perm_design_openlow_time_nonvasc,
+                                                by = "terms")
+openlow_univariate_timecross2_nonvasc
+
+openlow_result_timecross2_nonvasc <- adonis2(openlow_composition_nonvasc ~ Park + Plot + Visit + Park*Visit, 
+                                            data = openlow_env_nonvasc, method = "bray", 
+                                            permutations = perm_design_openlow_time_nonvasc, 
+                                            by = "terms")
+openlow_result_timecross2_nonvasc
+
+
+#beta diversity 
+#based on park 
+openlow_dispersion_result_nonvasc <- betadisper(vegdist(openlow_composition_nonvasc, 
+                                                       method = "bray"), openlow_env_nonvasc$Park)
+openlow_dispersion_result_nonvasc 
+permutest(openlow_dispersion_result_nonvasc, permutations = 999)
+
+#based on visit 
+openlow_dispersion_result2_nonvasc <- betadisper(vegdist(openlow_composition_nonvasc, 
+                                                        method = "bray"), openlow_env_nonvasc$Visit)
+openlow_dispersion_result2_nonvasc 
+permutest(openlow_dispersion_result2_nonvasc, permutations = 999)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+# Dwarf Scrub 
+
+## NMDS
+
+```{r}
+#Dwarf Scrub 
+#community analysis 
+
+
+dwarfscrub_composition <- dwarfscrub_df[,c(7:280)]
+dwarfscrub_composition <- as.matrix(dwarfscrub_composition) 
+dwarfscrub_env
+
+dwarfscrub_composition_lichens <- dwarfscrub_df_lichens[,c(13:179)]
+dwarfscrub_composition_lichens <- as.matrix(dwarfscrub_composition_lichens) 
+dwarfscrub_env_lichens
+
+dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(13:219)]
+dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc) 
+dwarfscrub_env_nonvasc
+
+
+#vascular, but colored by viereck 3
+mds_dwarfscrub <- metaMDS(dwarfscrub_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(dwarfscrub_df[["Plot"]]))
+mds_dwarfscrub$stress
+mds_dwarfscrub$iters #163
+veg_colors <- c("blue4", "seagreen3")
+names(veg_colors) <- unique(dwarfscrub_df$Viereck.3)
+dev.off()
+ordiplot(mds_dwarfscrub, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_dwarfscrub, display = "sites"),
+       col = veg_colors[dwarfscrub_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_dwarfscrub, groups = dwarfscrub_df$Park, draw ="polygon", label = TRUE)
+title("Vascular Species")
+dwarfscrubvasc_plot_viereck <- recordPlot()
+dwarfscrubvasc_plot_viereck
+
+#lichen, but colored by viereck 3
+mds_dwarfscrub_lichen <- metaMDS(dwarfscrub_composition_lichens, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(dwarfscrub_df_lichens[["Plot"]]))
+mds_dwarfscrub_lichen$stress
+mds_dwarfscrub_lichen$iters #129 
+veg_colors <- c("blue4", "seagreen3", "firebrick")
+names(veg_colors) <- unique(dwarfscrub_df_lichens$Viereck.3)
+dev.off()
+ordiplot(mds_dwarfscrub_lichen, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_dwarfscrub_lichen, display = "sites"),
+       col = veg_colors[dwarfscrub_df_lichens$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_dwarfscrub_lichen, groups = dwarfscrub_df_lichens$Park, draw ="polygon", label = TRUE)
+title("Lichen Species")
+dwarfscrublichen_plot_viereck <- recordPlot()
+
+
+
+#nonvascular, but colored by viereck 3
+mds_dwarfscrub_nonvasc <- metaMDS(dwarfscrub_composition_nonvasc, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(dwarfscrub_df_nonvasc[["Plot"]]))
+mds_dwarfscrub_nonvasc$stress
+mds_dwarfscrub_nonvasc$iters #72 
+veg_colors <- c("blue4", "seagreen3", "firebrick")
+names(veg_colors) <- unique(dwarfscrub_df_nonvasc$Viereck.3)
+dev.off()
+ordiplot(mds_dwarfscrub_nonvasc, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.13",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "3",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_dwarfscrub_nonvasc, display = "sites"),
+       col = veg_colors[dwarfscrub_df_nonvasc$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_dwarfscrub_nonvasc, groups = dwarfscrub_df_nonvasc$Park, draw ="polygon", label = TRUE)
+title("Nonvascular Species")
+dwarfscrubnonvasc_plot_viereck <- recordPlot()
+```
+
+
+
+## Vascular 
+```{r}
+# Dwarf Scrub 
+
+#vascular 
+#the most common sample visit number was 3 so that is what i used 
+filter_criteria_dwarfscrub <- list(
+  LACL_2010_03_001	= c(2011, 2016, 2023),
+  KATM_2009_02_048	= c(2011, 2016, 2023),
+  KATM_2010_03_049	= c(2011, 2016, 2023))
+  
+#next identify plots with three plot visits 
+dwarfscrub_plots <- summary_table_vasc %>%
+  filter(Viereck.2 == "Dwarf Scrub", Number_Visits == 3) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(dwarfscrub_plots, names(filter_criteria_dwarfscrub))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- vascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_dwarfscrub) & 
+      Sample_Year %in% unlist(filter_criteria_dwarfscrub[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+dwarfscrub_df <- vascpresence_absence_df %>%
+  filter(
+    (Plot %in% dwarfscrub_plots) | 
+      (Plot %in% names(filter_criteria_dwarfscrub) &
+         Sample_Year %in% unlist(filter_criteria_dwarfscrub[Plot])))
+
+#verify everything has two sample visits 
+table(dwarfscrub_df$Park, dwarfscrub_df$Plot)
+
+#convert dataframe to a matrix so you can run permanova successfully 
+dwarfscrub_composition <- dwarfscrub_df[,c(7:280)]
+dwarfscrub_composition <- as.matrix(dwarfscrub_composition) 
+
+dwarfscrub_env <- dwarfscrub_df[,c(1:6, 281:283)]
+
+dwarfscrub_env <- dwarfscrub_env %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+dwarfscrub_env <- dwarfscrub_env %>%
+  left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_dwarfscrub_time = how(
+  plots = Plots(strata = dwarfscrub_env$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_dwarfscrub = how(
+  plots = Plots(strata = dwarfscrub_env$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+
+### Univariate 
+check(dwarfscrub_env, control = perm_design_dwarfscrub) #how many possible permutations 
+
+dwarfscrub_univariate <- adonis2(dwarfscrub_env$Species_Richness ~ Park + Plot,
+                                 data = dwarfscrub_env, 
+                                 method = "euclidian",
+                                 permutations = perm_design_dwarfscrub,
+                                 by = "terms")
+dwarfscrub_univariate
+
+
+#create permutation object 
+perms17 <- rbind(1:nrow(dwarfscrub_env),
+                 shuffleSet(n = nrow(dwarfscrub_env), control = perm_design_dwarfscrub, nset = 999))
+
+#create object for Ss to be stored 
+results17 <- matrix(nrow = nrow(perms17), ncol = 4)
+colnames(results17) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms17)) {
+  temp.data <- dwarfscrub_env[perms17[i, ], ]
+  temp <- adonis2(dwarfscrub_env$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results17[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results17 <- results17 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/17))
+head(results17)
+
+#calculate P value 
+with(results17, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate 
+dwarfscrub_result <- adonis2(dwarfscrub_composition ~ Park + Plot, 
+                             data = dwarfscrub_env, method = "bray", 
+                             permutations = perm_design_dwarfscrub, 
+                             by = "terms")
+dwarfscrub_result
+
+#create permutation structure and results object 
+perms18 <- rbind(1:nrow(dwarfscrub_composition),
+                 shuffleSet(n = nrow(dwarfscrub_composition), control = perm_design_dwarfscrub, nset = 999))
+#head(perms18)
+results18 <- matrix(nrow = nrow(perms18), ncol = 4)
+colnames(results18) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms18)) {
+  temp.data <- dwarfscrub_env[perms18[i, ], ]
+  temp <- adonis2(dwarfscrub_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results18[i, ] <- t(temp$SumOfSqs)
+}
+
+
+#calculate F statistics for each permutation using correct equation 
+results18 <- results18 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/17))
+head(results18)
+#calculate P value 
+with(results18, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit 
+dwarfscrub_univariate_timecross2 <- adonis2(dwarfscrub_env$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                            data = dwarfscrub_env, 
+                                            method = "euclidian",
+                                            permutations = perm_design_dwarfscrub_time,
+                                            by = "terms")
+dwarfscrub_univariate_timecross2
+
+dwarfscrub_result_timecross2 <- adonis2(dwarfscrub_composition ~ Park + Plot + Visit + Park*Visit, 
+                                        data = dwarfscrub_env, method = "bray", 
+                                        permutations = perm_design_dwarfscrub_time, 
+                                        by = "terms")
+dwarfscrub_result_timecross2
+
+
+#viereck classes within 
+dwarfscrub_vascular_perm <- adonis2(dwarfscrub_composition ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                data = dwarfscrub_env, method = "bray", 
+                                permutations = perm_design_dwarfscrub_time, 
+                                by = "terms")
+print(dwarfscrub_vascular_perm)
+
+
+
+#beta diversity 
+#park 
+dwarfscrub_dispersion_result <- betadisper(vegdist(dwarfscrub_composition, 
+                                                   method = "bray"), dwarfscrub_env$Park)
+dwarfscrub_dispersion_result 
+permutest(dwarfscrub_dispersion_result, permutations = 999)
+
+#based on visit 
+dwarfscrub_dispersion_result2 <- betadisper(vegdist(dwarfscrub_composition, 
+                                                    method = "bray"), dwarfscrub_env$Visit)
+dwarfscrub_dispersion_result2 
+permutest(dwarfscrub_dispersion_result2, permutations = 999)
+
+#based on viereck
+dwarfscrub_dispersion_result3 <- betadisper(vegdist(dwarfscrub_composition, 
+                                                    method = "bray"), dwarfscrub_env$Viereck.3)
+dwarfscrub_dispersion_result3 
+permutest(dwarfscrub_dispersion_result3, permutations = 999)
+```
+
+
+
+
+## Lichens 
+
+```{r}
+#the most common sample visit number was 3 so that is what i used 
+filter_criteria_dwarfscrub_lichens <- list(
+  LACL_2010_03_998	= c(2011, 2016),
+  KATM_2009_02_048	= c(2011, 2016),
+  KATM_2010_03_049	= c(2011, 2016))
+  
+
+#next identify plots with three plot visits 
+dwarfscrub_plots_lichens <- summary_table_lichens %>%
+  filter(Viereck.2 == "Dwarf Scrub", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(dwarfscrub_plots_lichens, names(filter_criteria_dwarfscrub_lichens))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- lichenspresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_dwarfscrub_lichens) & 
+      Sample_Year %in% unlist(filter_criteria_dwarfscrub_lichens[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+dwarfscrub_df_lichens <- lichenspresence_absence_df %>%
+  filter(
+    (Plot %in% dwarfscrub_plots_lichens) | 
+      (Plot %in% names(filter_criteria_dwarfscrub_lichens) &
+         Sample_Year %in% unlist(filter_criteria_dwarfscrub_lichens[Plot])))
+
+#verify everything has two sample visits 
+table(dwarfscrub_df_lichens$Park, dwarfscrub_df_lichens$Plot)
+
+#convert dataframe to a matrix so you can run permanova successfully 
+dwarfscrub_composition_lichens <- dwarfscrub_df_lichens[,c(13:179)]
+dwarfscrub_composition_lichens <- as.matrix(dwarfscrub_composition_lichens) 
+
+dwarfscrub_env_lichens <- dwarfscrub_df_lichens[,c(1:12)]
+
+dwarfscrub_env_lichens <- dwarfscrub_env_lichens %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+dwarfscrub_env_lichens <- dwarfscrub_env_lichens %>%
+  left_join(lichen_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_dwarfscrub_time_lichens = how(
+  plots = Plots(strata = dwarfscrub_env_lichens$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_dwarfscrub_lichens = how(
+  plots = Plots(strata = dwarfscrub_env_lichens$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+
+### Univariate 
+check(dwarfscrub_env_lichens, control = perm_design_dwarfscrub_lichens) #how many possible permutations 
+
+dwarfscrub_univariate_lichens <- adonis2(dwarfscrub_env_lichens$Species_Richness ~ Park + Plot,
+                                 data = dwarfscrub_env_lichens, 
+                                 method = "euclidian",
+                                 permutations = perm_design_dwarfscrub_lichens,
+                                 by = "terms")
+dwarfscrub_univariate_lichens
+
+
+#create permutation object 
+perms17 <- rbind(1:nrow(dwarfscrub_env_lichens),
+                 shuffleSet(n = nrow(dwarfscrub_env_lichens), control = perm_design_dwarfscrub_lichens, nset = 999))
+
+#create object for Ss to be stored 
+results17 <- matrix(nrow = nrow(perms17), ncol = 4)
+colnames(results17) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms17)) {
+  temp.data <- dwarfscrub_env_lichens[perms17[i, ], ]
+  temp <- adonis2(dwarfscrub_env_lichens$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results17[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results17 <- results17 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/14))
+head(results17)
+
+#calculate P value 
+with(results17, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate 
+dwarfscrub_result_lichens <- adonis2(dwarfscrub_composition_lichens ~ Park + Plot, 
+                             data = dwarfscrub_env_lichens, method = "bray", 
+                             permutations = perm_design_dwarfscrub_lichens, 
+                             by = "terms")
+dwarfscrub_result_lichens
+
+#create permutation structure and results object 
+perms18 <- rbind(1:nrow(dwarfscrub_composition_lichens),
+                 shuffleSet(n = nrow(dwarfscrub_composition_lichens), control = perm_design_dwarfscrub_lichens, nset = 999))
+#head(perms18)
+results18 <- matrix(nrow = nrow(perms18), ncol = 4)
+colnames(results18) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms18)) {
+  temp.data <- dwarfscrub_env_lichens[perms18[i, ], ]
+  temp <- adonis2(dwarfscrub_composition_lichens ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results18[i, ] <- t(temp$SumOfSqs)
+}
+
+
+#calculate F statistics for each permutation using correct equation 
+results18 <- results18 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/14))
+head(results18)
+#calculate P value 
+with(results18, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit 
+dwarfscrub_univariate_timecross2_lichens <- adonis2(dwarfscrub_env_lichens$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                            data = dwarfscrub_env_lichens, 
+                                            method = "euclidian",
+                                            permutations = perm_design_dwarfscrub_time_lichens,
+                                            by = "terms")
+dwarfscrub_univariate_timecross2_lichens
+
+dwarfscrub_result_timecross2_lichens <- adonis2(dwarfscrub_composition_lichens ~ Park + Plot + Visit + Park*Visit, 
+                                        data = dwarfscrub_env_lichens, method = "bray", 
+                                        permutations = perm_design_dwarfscrub_time_lichens, 
+                                        by = "terms")
+dwarfscrub_result_timecross2_lichens
+
+
+#viereck classes within 
+dwarfscrub_vascular_perm_lichens <- adonis2(dwarfscrub_composition_lichens ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                    data = dwarfscrub_env_lichens, method = "bray", 
+                                    permutations = perm_design_dwarfscrub_time_lichens, 
+                                    by = "terms")
+print(dwarfscrub_vascular_perm_lichens)
+
+
+
+#beta diversity 
+#park 
+dwarfscrub_dispersion_result_lichens <- betadisper(vegdist(dwarfscrub_composition_lichens, 
+                                                   method = "bray"), dwarfscrub_env_lichens$Park)
+dwarfscrub_dispersion_result_lichens 
+permutest(dwarfscrub_dispersion_result_lichens, permutations = 999)
+
+#based on visit 
+dwarfscrub_dispersion_result2_lichens <- betadisper(vegdist(dwarfscrub_composition_lichens, 
+                                                    method = "bray"), dwarfscrub_env_lichens$Visit)
+dwarfscrub_dispersion_result2_lichens
+permutest(dwarfscrub_dispersion_result2_lichens, permutations = 999)
+
+#based on viereck 
+dwarfscrub_dispersion_result3_lichens <- betadisper(vegdist(dwarfscrub_composition_lichens, 
+                                                    method = "bray"), dwarfscrub_env_lichens$Viereck.3)
+dwarfscrub_dispersion_result3_lichens
+permutest(dwarfscrub_dispersion_result3_lichens, permutations = 999)
+```
+
+
+
+
+
+
+## Nonvascular 
+
+```{r}
+#the most common sample visit number was 3 so that is what i used 
+filter_criteria_dwarfscrub_nonvasc <- list(
+  LACL_2010_03_998	= c(2011, 2016),
+  KATM_2009_02_048	= c(2011, 2016),
+  KATM_2010_03_049	= c(2011, 2016))
+
+
+#next identify plots with three plot visits 
+dwarfscrub_plots_nonvasc <- summary_table_nonvasc %>%
+  filter(Viereck.2 == "Dwarf Scrub", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(dwarfscrub_plots_nonvasc, names(filter_criteria_dwarfscrub_nonvasc))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- nonvascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_dwarfscrub_nonvasc) & 
+      Sample_Year %in% unlist(filter_criteria_dwarfscrub_nonvasc[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+dwarfscrub_df_nonvasc <- nonvascpresence_absence_df %>%
+  filter(
+    (Plot %in% dwarfscrub_plots_nonvasc) | 
+      (Plot %in% names(filter_criteria_dwarfscrub_nonvasc) &
+         Sample_Year %in% unlist(filter_criteria_dwarfscrub_nonvasc[Plot])))
+
+#verify everything has two sample visits 
+table(dwarfscrub_df_nonvasc$Park, dwarfscrub_df_nonvasc$Plot)
+
+#convert dataframe to a matrix so you can run permanova successfully 
+dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(13:219)]
+dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc) 
+
+dwarfscrub_env_nonvasc <- dwarfscrub_df_nonvasc[,c(1:12)]
+
+dwarfscrub_env_nonvasc <- dwarfscrub_env_nonvasc %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+dwarfscrub_env_nonvasc <- dwarfscrub_env_nonvasc %>%
+  left_join(nonvasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_dwarfscrub_time_nonvasc = how(
+  plots = Plots(strata = dwarfscrub_env_nonvasc$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_dwarfscrub_nonvasc = how(
+  plots = Plots(strata = dwarfscrub_env_nonvasc$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+
+### Univariate 
+check(dwarfscrub_env_nonvasc, control = perm_design_dwarfscrub_nonvasc) #how many possible permutations 
+
+dwarfscrub_univariate_nonvasc <- adonis2(dwarfscrub_env_nonvasc$Species_Richness ~ Park + Plot,
+                                         data = dwarfscrub_env_nonvasc, 
+                                         method = "euclidian",
+                                         permutations = perm_design_dwarfscrub_nonvasc,
+                                         by = "terms")
+dwarfscrub_univariate_nonvasc
+
+
+#create permutation object 
+perms17 <- rbind(1:nrow(dwarfscrub_env_nonvasc),
+                 shuffleSet(n = nrow(dwarfscrub_env_nonvasc), control = perm_design_dwarfscrub_nonvasc, nset = 999))
+
+#create object for Ss to be stored 
+results17 <- matrix(nrow = nrow(perms17), ncol = 4)
+colnames(results17) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms17)) {
+  temp.data <- dwarfscrub_env_nonvasc[perms17[i, ], ]
+  temp <- adonis2(dwarfscrub_env_nonvasc$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results17[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results17 <- results17 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/14))
+head(results17)
+
+#calculate P value 
+with(results17, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate 
+dwarfscrub_result_nonvasc <- adonis2(dwarfscrub_composition_nonvasc ~ Park + Plot, 
+                                     data = dwarfscrub_env_nonvasc, method = "bray", 
+                                     permutations = perm_design_dwarfscrub_nonvasc, 
+                                     by = "terms")
+dwarfscrub_result_nonvasc
+
+#create permutation structure and results object 
+perms18 <- rbind(1:nrow(dwarfscrub_composition_nonvasc),
+                 shuffleSet(n = nrow(dwarfscrub_composition_nonvasc), control = perm_design_dwarfscrub_nonvasc, nset = 999))
+#head(perms18)
+results18 <- matrix(nrow = nrow(perms18), ncol = 4)
+colnames(results18) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms18)) {
+  temp.data <- dwarfscrub_env_nonvasc[perms18[i, ], ]
+  temp <- adonis2(dwarfscrub_composition_nonvasc ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results18[i, ] <- t(temp$SumOfSqs)
+}
+
+
+#calculate F statistics for each permutation using correct equation 
+results18 <- results18 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/14))
+head(results18)
+#calculate P value 
+with(results18, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+
+#based on visit 
+dwarfscrub_univariate_timecross2_nonvasc <- adonis2(dwarfscrub_env_nonvasc$Species_Richness ~ Park + Plot + Visit + Park*Visit,
+                                                    data = dwarfscrub_env_nonvasc, 
+                                                    method = "euclidian",
+                                                    permutations = perm_design_dwarfscrub_time_nonvasc,
+                                                    by = "terms")
+dwarfscrub_univariate_timecross2_nonvasc
+
+dwarfscrub_result_timecross2_nonvasc <- adonis2(dwarfscrub_composition_nonvasc ~ Park + Plot + Visit + Park*Visit, 
+                                                data = dwarfscrub_env_nonvasc, method = "bray", 
+                                                permutations = perm_design_dwarfscrub_time_nonvasc, 
+                                                by = "terms")
+dwarfscrub_result_timecross2_nonvasc
+
+
+#viereck classes within 
+dwarfscrub_vascular_perm_nonvasc <- adonis2(dwarfscrub_composition_nonvasc ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                            data = dwarfscrub_env_nonvasc, method = "bray", 
+                                            permutations = perm_design_dwarfscrub_time_nonvasc, 
+                                            by = "terms")
+print(dwarfscrub_vascular_perm_nonvasc)
+
+
+
+#beta diversity 
+#park 
+dwarfscrub_dispersion_result_nonvasc <- betadisper(vegdist(dwarfscrub_composition_nonvasc, 
+                                                           method = "bray"), dwarfscrub_env_nonvasc$Park)
+dwarfscrub_dispersion_result_nonvasc 
+permutest(dwarfscrub_dispersion_result_nonvasc, permutations = 999)
+
+#based on visit 
+dwarfscrub_dispersion_result2_nonvasc <- betadisper(vegdist(dwarfscrub_composition_nonvasc, 
+                                                            method = "bray"), dwarfscrub_env_nonvasc$Visit)
+dwarfscrub_dispersion_result2_nonvasc
+permutest(dwarfscrub_dispersion_result2_nonvasc, permutations = 999)
+
+#based on viereck
+dwarfscrub_dispersion_result3_nonvasc <- betadisper(vegdist(dwarfscrub_composition_nonvasc, 
+                                                    method = "bray"), dwarfscrub_env_nonvasc$Viereck.3)
+dwarfscrub_dispersion_result3_nonvasc
+permutest(dwarfscrub_dispersion_result3_nonvasc, permutations = 999)
+```
+
+
+
+# Spruce Forest 
+
+## NMDS 
+```{r}
+#vascular, but colored by viereck 3
+mds_forest <- metaMDS(forest_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(forest_df[["Plot"]])) #25 
+mds_forest$stress 
+mds_forest$iters #92
+veg_colors <- c("blue4", "seagreen3")
+names(veg_colors) <- unique(forest_df$Viereck.3)
+dev.off()
+ordiplot(mds_forest, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_forest, display = "sites"),
+       col = veg_colors[forest_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_forest, groups = forest_df$Park, draw ="polygon", label = TRUE)
+title("Vascular Species")
+forestvasc_plot_viereck <- recordPlot()
+forestvasc_plot_viereck
+
+#lichen, but colored by viereck 3
+mds_forest_lichen <- metaMDS(forest_composition_lichens, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(forest_df_lichens[["Plot"]]))
+mds_forest_lichen$stress
+mds_forest_lichen$iters #137
+veg_colors <- c("blue4", "seagreen3")
+names(veg_colors) <- unique(forest_df_lichens$Viereck.3)
+dev.off()
+ordiplot(mds_forest_lichen, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.13",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_forest_lichen, display = "sites"),
+       col = veg_colors[forest_df_lichens$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_forest_lichen, groups = forest_df_lichens$Park, draw ="polygon", label = TRUE)
+title("Lichen Species")
+forestlichen_plot_viereck <- recordPlot()
+
+
+
+#nonvascular, but colored by viereck 3
+mds_forest_nonvasc <- metaMDS(forest_composition_nonvasc, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(forest_df_nonvasc[["Plot"]]))
+mds_forest_nonvasc$stress
+mds_forest_nonvasc$iters #131
+veg_colors <- c("blue4", "seagreen3")
+names(veg_colors) <- unique(forest_df_nonvasc$Viereck.3)
+dev.off()
+ordiplot(mds_forest_nonvasc, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.14",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "3",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_forest_nonvasc, display = "sites"),
+       col = veg_colors[forest_df_nonvasc$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_forest_nonvasc, groups = forest_df_nonvasc$Park, draw ="polygon", label = TRUE)
+title("Nonvascular Species")
+forestnonvasc_plot_viereck <- recordPlot()
+```
+
+
+
+
+## Vascular 
+
+```{r}
+# Spruce forest - Open + Closed 
+
+#need to subset it to include "needleleaf forest" but remove beetle kill vegetation class, and woodland needleleaf forest viereck 3
+#vascular 
+
+filter_criteria_forest <- list(
+  LACL_2013_01_S988	= c(2014, 2019),
+  LACL_2013_01_S989	= c(2014, 2019),
+  LACL_2013_01_S991	= c(2014, 2019),
+  LACL_2010_01_S993	= c(2015, 2019),
+  LACL_2010_01_S996	= c(2014, 2019),
+  LACL_2010_01_S998	= c(2014, 2019),
+  LACL_2010_01_S999	= c(2014, 2019))
+
+#next identify plots with three plot visits 
+forest_plots <- summary_table_vasc %>%
+  filter(Viereck.2 == "Needleleaf Forest", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(forest_plots, names(filter_criteria_forest))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected <- vascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_forest) & 
+      Sample_Year %in% unlist(filter_criteria_forest[Plot]))
+table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+
+forest_df <- vascpresence_absence_df %>%
+  filter(
+    (Plot %in% forest_plots) | 
+      (Plot %in% names(filter_criteria_forest) &
+         Sample_Year %in% unlist(filter_criteria_forest[Plot])))
+
+forest_df <- forest_df %>%
+  left_join(viereck %>% select(Plot_Year, Viereck.3), by = c("Plot_Year"))
+
+forest_df <- forest_df %>%
+  filter(Vegetation_Class != "Beetle kill spruce",
+         Viereck.3 != "Woodland Needleleaf Forest")
+
+table(forest_df$Park, forest_df$Plot) 
+
+forest_df <- forest_df[-7, ]
+
+#convert dataframe to a matrix so you can run permanova successfully 
+forest_composition <- forest_df[,c(7:280)]
+forest_composition <- as.matrix(forest_composition) 
+
+#create env_file 
+
+forest_env <- forest_df[,c(1:6, 280:283)]
+
+forest_env <- forest_env %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+forest_env <- forest_env %>%
+  left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_forest_time = how(
+  plots = Plots(strata = forest_env$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_forest = how(
+  plots = Plots(strata = forest_env$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+
+#species richness 
+forest_univariate <- adonis2(forest_env$Species_Richness ~ Park + Plot,
+                             data = forest_env, 
+                             method = "euclidian",
+                             permutations = perm_design_forest,
+                             by = "terms")
+forest_univariate
+
+#create permutation object 
+perms21 <- rbind(1:nrow(forest_env),
+                 shuffleSet(n = nrow(forest_env), control = perm_design_forest, nset = 999))
+
+#create object for Ss to be stored 
+results21 <- matrix(nrow = nrow(perms21), ncol = 4)
+colnames(results21) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms21)) {
+  temp.data <- forest_env[perms21[i, ], ]
+  temp <- adonis2(forest_env$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results21[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results21 <- results21 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/23))
+head(results21)
+
+#calculate P value 
+with(results21, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate - species composition 
+forest_result <- adonis2(forest_composition ~ Park + Plot, 
+                         data = forest_env, method = "bray", 
+                         permutations = perm_design_forest, 
+                         by = "terms")
+forest_result
+
+#create permutation structure and results object 
+perms22 <- rbind(1:nrow(forest_composition),
+                 shuffleSet(n = nrow(forest_composition), control = perm_design_forest, nset = 999))
+results22 <- matrix(nrow = nrow(perms22), ncol = 4)
+colnames(results22) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms22)) {
+  temp.data <- forest_env[perms22[i, ], ]
+  temp <- adonis2(forest_composition ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results22[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results22 <- results22 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/23))
+head(results22)
+
+#calculate P value 
+with(results22, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+#based on visit - time for rest of table 
+forest_univariate_timecross2 <- adonis2(forest_env$Species_Richness ~ Park + Plot + Visit,
+                                        data = forest_env, 
+                                        method = "euclidian",
+                                        permutations = perm_design_forest_time,
+                                        by = "terms")
+forest_univariate_timecross2
+
+forest_result_timecross2 <- adonis2(forest_composition ~ Park + Plot + Visit, 
+                                    data = forest_env, method = "bray", 
+                                    permutations = perm_design_forest_time, 
+                                    by = "terms")
+forest_result_timecross2
+
+
+
+#viereck classes within - open and closed canopy 
+forest_vascular_perm <- adonis2(forest_composition ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                    data = forest_env, method = "bray", 
+                                    permutations = perm_design_forest_time, 
+                                    by = "terms")
+print(forest_vascular_perm)
+
+
+#beta diversity 
+
+#based on park 
+forest_dispersion_result <- betadisper(vegdist(forest_composition, 
+                                               method = "bray"), forest_env$Park)
+forest_dispersion_result 
+permutest(forest_dispersion_result, permutations = 999)
+
+#based on visit 
+forest_dispersion_result2 <- betadisper(vegdist(forest_composition, 
+                                                method = "bray"), forest_env$Visit)
+forest_dispersion_result2 
+permutest(forest_dispersion_result2, permutations = 999)
+
+#based on viereck
+forest_dispersion_result3 <- betadisper(vegdist(forest_composition, 
+                                                method = "bray"), forest_env$Viereck.3)
+forest_dispersion_result3 
+permutest(forest_dispersion_result3, permutations = 999)
+```
+
+
+
+
+
+## Lichens 
+
+```{r}
+filter_criteria_forest_lichens <- list(
+  LACL_2013_01_S988	= c(2014, 2019),
+  LACL_2013_01_S989	= c(2014, 2019),
+  LACL_2013_01_S991	= c(2014, 2019),
+  LACL_2010_01_S993	= c(2015, 2019),
+  LACL_2010_01_S996	= c(2014, 2019),
+  LACL_2010_01_S998	= c(2014, 2019),
+  LACL_2010_01_S999	= c(2014, 2019))
+
+#next identify plots with three plot visits 
+forest_plots_lichens <- summary_table_lichens %>%
+  filter(Viereck.2 == "Needleleaf Forest", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(forest_plots_lichens, names(filter_criteria_forest_lichens))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected_lichens <- lichenspresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_forest_lichens) & 
+      Sample_Year %in% unlist(filter_criteria_forest_lichens[Plot]))
+table(subset_hand_selected_lichens$Park, subset_hand_selected_lichens$Plot) 
+
+forest_df_lichens <- lichenspresence_absence_df %>%
+  filter(
+    (Plot %in% forest_plots_lichens) | 
+      (Plot %in% names(filter_criteria_forest_lichens) &
+         Sample_Year %in% unlist(filter_criteria_forest_lichens[Plot])))
+
+forest_df_lichens <- forest_df_lichens %>%
+  filter(Vegetation_Class != "Beetle kill spruce",
+         Viereck.3 != "Woodland Needleleaf Forest")
+
+table(forest_df_lichens$Park, forest_df_lichens$Plot) 
+
+forest_df_lichens <- forest_df_lichens[-7, ]
+
+#convert dataframe to a matrix so you can run permanova successfully 
+forest_composition_lichens <- forest_df_lichens[,c(13:179)]
+forest_composition_lichens <- as.matrix(forest_composition_lichens) 
+
+#create env_file 
+
+forest_env_lichens <- forest_df_lichens[,c(1:12)]
+
+forest_env_lichens <- forest_env_lichens %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+forest_env_lichens <- forest_env_lichens %>%
+  left_join(lichen_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_forest_time_lichens = how(
+  plots = Plots(strata = forest_env_lichens$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_forest_lichens = how(
+  plots = Plots(strata = forest_env_lichens$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+
+#species richness 
+forest_univariate_lichens <- adonis2(forest_env_lichens$Species_Richness ~ Park + Plot,
+                             data = forest_env_lichens, 
+                             method = "euclidian",
+                             permutations = perm_design_forest_lichens,
+                             by = "terms")
+forest_univariate_lichens
+
+#create permutation object 
+perms21 <- rbind(1:nrow(forest_env_lichens),
+                 shuffleSet(n = nrow(forest_env_lichens), control = perm_design_forest_lichens, nset = 999))
+
+#create object for Ss to be stored 
+results21 <- matrix(nrow = nrow(perms21), ncol = 4)
+colnames(results21) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms21)) {
+  temp.data <- forest_env_lichens[perms21[i, ], ]
+  temp <- adonis2(forest_env_lichens$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results21[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results21 <- results21 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/22))
+head(results21)
+
+#calculate P value 
+with(results21, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate - species composition 
+forest_result_lichens <- adonis2(forest_composition_lichens ~ Park + Plot, 
+                         data = forest_env_lichens, method = "bray", 
+                         permutations = perm_design_forest_lichens, 
+                         by = "terms")
+forest_result_lichens
+
+#create permutation structure and results object 
+perms22 <- rbind(1:nrow(forest_composition_lichens),
+                 shuffleSet(n = nrow(forest_composition_lichens), control = perm_design_forest_lichens, nset = 999))
+results22 <- matrix(nrow = nrow(perms22), ncol = 4)
+colnames(results22) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms22)) {
+  temp.data <- forest_env_lichens[perms22[i, ], ]
+  temp <- adonis2(forest_composition_lichens ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results22[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results22 <- results22 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/22))
+head(results22)
+
+#calculate P value 
+with(results22, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+#based on visit - time for rest of table 
+forest_univariate_timecross2_lichens <- adonis2(forest_env_lichens$Species_Richness ~ Park + Plot + Visit,
+                                        data = forest_env_lichens, 
+                                        method = "euclidian",
+                                        permutations = perm_design_forest_time_lichens,
+                                        by = "terms")
+forest_univariate_timecross2_lichens
+
+forest_result_timecross2_lichens <- adonis2(forest_composition_lichens ~ Park + Plot + Visit, 
+                                    data = forest_env_lichens, method = "bray", 
+                                    permutations = perm_design_forest_time_lichens, 
+                                    by = "terms")
+forest_result_timecross2_lichens
+
+
+
+#viereck classes within - open and closed canopy 
+forest_vascular_perm_lichens <- adonis2(forest_composition_lichens ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                data = forest_env_lichens, method = "bray", 
+                                permutations = perm_design_forest_time_lichens, 
+                                by = "terms")
+print(forest_vascular_perm_lichens)
+
+
+
+#beta diversity 
+
+#based on park 
+forest_dispersion_result_lichens <- betadisper(vegdist(forest_composition_lichens, 
+                                               method = "bray"), forest_env_lichens$Park)
+forest_dispersion_result_lichens 
+permutest(forest_dispersion_result_lichens, permutations = 999)
+
+#based on visit 
+forest_dispersion_result2_lichens <- betadisper(vegdist(forest_composition_lichens, 
+                                                method = "bray"), forest_env_lichens$Visit)
+forest_dispersion_result2_lichens 
+permutest(forest_dispersion_result2_lichens, permutations = 999)
+
+#viereck 
+forest_dispersion_result3_lichens <- betadisper(vegdist(forest_composition_lichens, 
+                                                       method = "bray"), forest_env_lichens$Viereck.3)
+forest_dispersion_result3_lichens 
+permutest(forest_dispersion_result3_lichens, permutations = 999)
+```
+
+
+
+## Nonvascular 
+
+```{r}
+filter_criteria_forest_nonvasc <- list(
+  LACL_2013_01_S988	= c(2014, 2019),
+  LACL_2013_01_S989	= c(2014, 2019),
+  LACL_2013_01_S991	= c(2014, 2019),
+  LACL_2010_01_S993	= c(2015, 2019),
+  LACL_2010_01_S996	= c(2014, 2019),
+  LACL_2010_01_S998	= c(2014, 2019),
+  LACL_2010_01_S999	= c(2014, 2019))
+
+#next identify plots with three plot visits 
+forest_plots_nonvasc <- summary_table_nonvasc %>%
+  filter(Viereck.2 == "Needleleaf Forest", Number_Visits == 2) %>%
+  pull(Plot)
+
+#combine plots with hand selected plots from filter criteria 
+selected_plots <- union(forest_plots_nonvasc, names(filter_criteria_forest_nonvasc))
+
+#subset main presence absence dataframe based on both conditions 
+#first verify that the hand selected plots were correctly pulled 
+subset_hand_selected_nonvasc <- nonvascpresence_absence_df %>%
+  filter(
+    Plot %in% names(filter_criteria_forest_nonvasc) & 
+      Sample_Year %in% unlist(filter_criteria_forest_nonvasc[Plot]))
+table(subset_hand_selected_nonvasc$Park, subset_hand_selected_nonvasc$Plot) 
+
+forest_df_nonvasc <- nonvascpresence_absence_df %>%
+  filter(
+    (Plot %in% forest_plots_nonvasc) | 
+      (Plot %in% names(filter_criteria_forest_nonvasc) &
+         Sample_Year %in% unlist(filter_criteria_forest_nonvasc[Plot])))
+
+forest_df_nonvasc <- forest_df_nonvasc %>%
+  filter(Vegetation_Class != "Beetle kill spruce",
+         Viereck.3 != "Woodland Needleleaf Forest")
+
+table(forest_df_nonvasc$Park, forest_df_nonvasc$Plot) 
+
+forest_df_nonvasc <- forest_df_nonvasc[-7, ]
+
+#convert dataframe to a matrix so you can run permanova successfully 
+forest_composition_nonvasc <- forest_df_nonvasc[,c(13:219)]
+forest_composition_nonvasc <- as.matrix(forest_composition_nonvasc) 
+
+#create env_file 
+
+forest_env_nonvasc <- forest_df_nonvasc[,c(1:12)]
+
+forest_env_nonvasc <- forest_env_nonvasc %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+forest_env_nonvasc <- forest_env_nonvasc %>%
+  left_join(nonvasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
+
+#design permutation structure 
+perm_design_forest_time_nonvasc = how(
+  plots = Plots(strata = forest_env_nonvasc$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+perm_design_forest_nonvasc = how(
+  plots = Plots(strata = forest_env_nonvasc$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+
+#species richness 
+forest_univariate_nonvasc <- adonis2(forest_env_nonvasc$Species_Richness ~ Park + Plot,
+                                     data = forest_env_nonvasc, 
+                                     method = "euclidian",
+                                     permutations = perm_design_forest_nonvasc,
+                                     by = "terms")
+forest_univariate_nonvasc
+
+#create permutation object 
+perms21 <- rbind(1:nrow(forest_env_nonvasc),
+                 shuffleSet(n = nrow(forest_env_nonvasc), control = perm_design_forest_nonvasc, nset = 999))
+
+#create object for Ss to be stored 
+results21 <- matrix(nrow = nrow(perms21), ncol = 4)
+colnames(results21) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms21)) {
+  temp.data <- forest_env_nonvasc[perms21[i, ], ]
+  temp <- adonis2(forest_env_nonvasc$Species_Richness ~ Park + Plot,
+                  data = temp.data,
+                  method = "euclidian",
+                  by = "terms",
+                  permutations = 0)
+  results21[i, ] <- t(temp$SumOfSqs)
+}
+
+#create F value column 
+results21 <- results21 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/22))
+head(results21)
+
+#calculate P value 
+with(results21, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+### Multivariate - species composition 
+forest_result_nonvasc <- adonis2(forest_composition_nonvasc ~ Park + Plot, 
+                                 data = forest_env_nonvasc, method = "bray", 
+                                 permutations = perm_design_forest_nonvasc, 
+                                 by = "terms")
+forest_result_nonvasc
+
+#create permutation structure and results object 
+perms22 <- rbind(1:nrow(forest_composition_nonvasc),
+                 shuffleSet(n = nrow(forest_composition_nonvasc), control = perm_design_forest_nonvasc, nset = 999))
+results22 <- matrix(nrow = nrow(perms22), ncol = 4)
+colnames(results22) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms22)) {
+  temp.data <- forest_env_nonvasc[perms22[i, ], ]
+  temp <- adonis2(forest_composition_nonvasc ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results22[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F statistics for each permutation using correct equation 
+results22 <- results22 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/22))
+head(results22)
+
+#calculate P value 
+with(results22, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+
+#based on visit - time for rest of table 
+forest_univariate_timecross2_nonvasc <- adonis2(forest_env_nonvasc$Species_Richness ~ Park + Plot + Visit,
+                                                data = forest_env_nonvasc, 
+                                                method = "euclidian",
+                                                permutations = perm_design_forest_time_nonvasc,
+                                                by = "terms")
+forest_univariate_timecross2_nonvasc
+
+forest_result_timecross2_nonvasc <- adonis2(forest_composition_nonvasc ~ Park + Plot + Visit, 
+                                            data = forest_env_nonvasc, method = "bray", 
+                                            permutations = perm_design_forest_time_nonvasc, 
+                                            by = "terms")
+forest_result_timecross2_nonvasc
+
+
+
+#viereck classes within - open and closed canopy 
+forest_vascular_perm_nonvasc <- adonis2(forest_composition_nonvasc ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                        data = forest_env_nonvasc, method = "bray", 
+                                        permutations = perm_design_forest_time_nonvasc, 
+                                        by = "terms")
+print(forest_vascular_perm_nonvasc)
+
+
+
+#beta diversity 
+
+#based on park 
+forest_dispersion_result_nonvasc <- betadisper(vegdist(forest_composition_nonvasc, 
+                                                       method = "bray"), forest_env_nonvasc$Park)
+forest_dispersion_result_nonvasc 
+permutest(forest_dispersion_result_nonvasc, permutations = 999)
+
+#based on visit 
+forest_dispersion_result2_nonvasc <- betadisper(vegdist(forest_composition_nonvasc, 
+                                                        method = "bray"), forest_env_nonvasc$Visit)
+forest_dispersion_result2_nonvasc 
+permutest(forest_dispersion_result2_nonvasc, permutations = 999)
+
+#viereck 
+forest_dispersion_result3_nonvasc <- betadisper(vegdist(forest_composition_nonvasc, 
+                                                        method = "bray"), forest_env_nonvasc$Viereck.3)
+forest_dispersion_result3_nonvasc 
+permutest(forest_dispersion_result3_nonvasc, permutations = 999)
+```
+
