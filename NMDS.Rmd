@@ -1,0 +1,2012 @@
+---
+title: "NMDS"
+output: html_document
+date: "2025-02-13"
+---
+
+
+# Setup
+```{r}
+library(vegan)
+library(permute)
+library(lattice)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(tidyverse)
+library(readxl)
+
+
+
+
+
+lichenspresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/lichenspresence_absence_df.xlsx")
+nonvascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/nonvascpresence_absence_df.xlsx")
+vascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/vascpresence_absence_df.xlsx")
+
+presence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/presence_absence_df.xlsx")
+
+alpine_df <- read_xlsx("C:/Users/kmpace/Desktop/alpine_df.xlsx")
+
+
+
+
+
+
+```
+
+
+
+# Vascular - By Park 
+```{r}
+#prepare the dataframe for NMDS 
+presence_absence_matrix <- vascpresence_absence_df[, c(7:280)] #fix this before re-running once you add taxonomy data
+presence_absence_matrix <- as.matrix(presence_absence_matrix)
+
+#run NMDS
+mds_PA <- metaMDS(presence_absence_matrix, distance = "bray", k = 3, autotransform = TRUE, maxit = 500, trymax = 500)
+mds_PA$stress #run stress value 0.105862 (<0.2 desired)
+plot(mds_PA) #circles show plots, crosses show species 
+length(unique(vascpresence_absence_df[["Plot"]]))
+
+
+veg_colors <- c("darkorange", "skyblue2", "blue4", "seagreen3", "gold", "tomato3", "orchid3", "gray50",
+                "chartreuse", "slateblue3", "firebrick3")
+names(veg_colors) <- unique(presence_absence_df$Vegetation_Class)
+ordiplot(mds_PA, type = "n")
+points(scores(mds_PA, display = "sites"),
+       col = veg_colors[presence_absence_df$Vegetation_Class],
+       pch = 19)
+legend("bottomleft", title = "Vegetation Class",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19)
+legend("topright", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.11",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+ordihull(mds_PA, groups = presence_absence_df$Elevation_Band, draw ="polygon", label = TRUE)
+title("Lake Clark and Katmai Vascular Species")
+veg_all <- recordPlot()
+```
+
+
+## LACL - Vascular 
+```{r}
+#subset Lake Clark 
+presence_absence_df_LACL <- vascpresence_absence_df %>% filter(Park %in% c("LACL"))
+
+#prepare the dataframe for NMDS 
+presence_absence_matrix_LACL <- vascpresence_absence_df_LACL[, c(7:280)] #fix this before re-running once you add taxonomy data
+presence_absence_matrix_LACL <- as.matrix(presence_absence_matrix_LACL)
+
+#Lake clark 
+mds_LACL <- metaMDS(presence_absence_matrix_LACL, distance = "bray", k = 3, autotransform = TRUE, trymax = 100)
+mds_LACL$stress #run stress value 0.105862 (<0.2 desired)
+plot(mds_LACL) #circles show plots, crosses show species 
+mds_LACL$iters
+mds_LACL$converged
+
+veg_colors <- c("darkorange", "skyblue2", "blue4", "seagreen3", "gold", "tomato3", "orchid3", "gray50",
+                "chartreuse", "slateblue3", "firebrick3")
+names(veg_colors) <- unique(presence_absence_df_LACL$Vegetation_Class)
+ordiplot(mds_LACL, type = "n")
+points(scores(mds_LACL, display = "sites"),
+       col = veg_colors[presence_absence_df_LACL$Vegetation_Class],
+       pch = 19)
+legend("bottomleft", title = "Vegetation Class",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19)
+legend("topright", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+ordihull(mds_LACL, groups = presence_absence_df_LACL$Elevation_Band, draw ="polygon", label = TRUE)
+title("Lake Clark Vascular Species")
+lacl_veg <- recordPlot()
+```
+
+
+
+
+
+## KATM - Vascular
+```{r}
+presence_absence_df_KATM <- presence_absence_df %>% filter(Park %in% c("KATM"))
+presence_absence_df_KATM <- presence_absence_df_KATM %>% mutate(Plot = paste(Park, EstYear, Elevation_Band, PlotID, sep = "_"))
+presence_absence_matrix_KATM <- presence_absence_df_KATM[, c(7:280)] #fix this before re-running once you add taxonomy data
+presence_absence_matrix_KATM <- as.matrix(presence_absence_matrix_KATM)
+
+mds_KATM <- metaMDS(presence_absence_matrix_KATM, distance = "bray", k = 3, autotransform = TRUE, trymax = 100)
+mds_KATM$stress
+mds_KATM$iters
+
+veg_colors <- c("blue4", "darkorange", "skyblue2", "seagreen3", "gold", "orchid3",
+                "chartreuse", "slateblue3", "firebrick3")
+names(veg_colors) <- unique(presence_absence_df_KATM$Vegetation_Class)
+ordiplot(mds_KATM, type = "n")
+points(scores(mds_KATM, display = "sites"),
+       col = veg_colors[presence_absence_df_KATM$Vegetation_Class],
+       pch = 19)
+legend("bottomleft", title = "Vegetation Class",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19)
+legend("topright", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.08",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+ordihull(mds_KATM, groups = presence_absence_df_KATM$Elevation_Band, draw ="polygon", label = TRUE)
+title("Katmai Vascular Species")
+katm_veg <- recordPlot()
+```
+
+
+# Lichens - By Park 
+
+## Both Parks 
+```{r}
+lichens_composition <- lichenspresence_absence_df[,c(13:179)]
+lichens_composition <- as.matrix(lichens_composition)
+
+mds_lichens <- metaMDS(lichens_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 500, maxit = 500)
+mds_lichens$stress 
+mds_lichens$iters 
+stressplot(mds_lichens)
+
+
+veg_colors <- c("darkorange", "skyblue2", "blue4", "firebrick3", "seagreen3", "gold", "orchid3", "gray50",
+                "chartreuse", "slateblue3")
+#veg_colors.1 <- c("firebrick1", "slateblue", "green")
+#veg_colors.2 <- c("firebrick1", "blue", "green", 
+#                  "purple", "cyan", "seagreen4", "gold")
+names(veg_colors) <- unique(lichenspresence_absence_df$Vegetation_Class)
+ordiplot(mds_lichens, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.11",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_lichens, display = "sites"),
+       col = veg_colors[lichenspresence_absence_df$Vegetation_Class],
+       pch = 19)
+legend("bottomright", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19,
+       cex = 0.9)
+legend("topright", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+ordihull(mds_lichens, groups = lichenspresence_absence_df$Elevation_Band, draw ="polygon", label = TRUE)
+title("Lichen Composition - Lake Clark and Katmai")
+lichen_all <- recordPlot()
+```
+
+## LACL Lichens 
+```{r}
+lichenspresence_absence_df_LACL <- lichenspresence_absence_df %>% filter(Park %in% c("LACL"))
+lichenspresence_absence_df_LACL <- lichenspresence_absence_df_LACL %>% mutate(Plot = paste(Park, EstYear, Elevation_Band, PlotID, sep = "_"))
+length(unique(lichenspresence_absence_df_LACL[["Plot"]]))
+lichenspresence_absence_matrix_LACL <- lichenspresence_absence_df_LACL[, c(13:179)] 
+lichenspresence_absence_matrix_LACL <- as.matrix(lichenspresence_absence_matrix_LACL)
+
+lichensmds_LACL <- metaMDS(lichenspresence_absence_matrix_LACL, distance = "bray", k = 3, autotransform = TRUE, trymax = 500, maxit = 500)
+lichensmds_LACL$stress #0.11
+lichensmds_LACL$iters
+lichensmds_LACL$converged
+
+veg_colors <- c("darkorange", "skyblue2", "blue4", "firebrick3", "seagreen3", "gold", "orchid3", "cyan", "gray50")
+names(veg_colors) <- unique(lichenspresence_absence_df_LACL$Vegetation_Class)
+ordiplot(lichensmds_LACL, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.11",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(lichensmds_LACL, display = "sites"),
+       col = veg_colors[lichenspresence_absence_df_LACL$Vegetation_Class],
+       pch = 19)
+legend("topright", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19,
+       cex = 0.8)
+legend("bottomleft", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+ordihull(lichensmds_LACL, groups = lichenspresence_absence_df_LACL$Elevation_Band, draw ="polygon", label = TRUE)
+title("Lichen Species Composition - Lake Clark")
+lichen_lacl_plot <- recordPlot()
+```
+
+## KATM Lichens 
+```{r}
+lichenspresence_absence_df_KATM <- lichenspresence_absence_df %>% filter(Park %in% c("KATM"))
+lichenspresence_absence_df_KATM <- lichenspresence_absence_df_KATM %>% mutate(Plot = paste(Park, EstYear, Elevation_Band, PlotID, sep = "_"))
+length(unique(lichenspresence_absence_df_KATM[["Plot"]]))
+lichenspresence_absence_matrix_KATM <- lichenspresence_absence_df_KATM[, c(13:179)] 
+lichenspresence_absence_matrix_KATM <- as.matrix(lichenspresence_absence_matrix_KATM)
+
+lichensmds_KATM <- metaMDS(lichenspresence_absence_matrix_KATM, distance = "bray", k = 3, autotransform = TRUE, trymax = 500, maxit = 500)
+lichensmds_KATM$stress #0.10
+lichensmds_KATM$iters
+lichensmds_KATM$converged
+
+veg_colors <- c("darkorange", "skyblue2", "blue4", "firebrick3", "seagreen3", "gold", "orchid3", "cyan", "gray50")
+names(veg_colors) <- unique(lichenspresence_absence_df_KATM$Vegetation_Class)
+ordiplot(lichensmds_KATM, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(lichensmds_KATM, display = "sites"),
+       col = veg_colors[lichenspresence_absence_df_KATM$Vegetation_Class],
+       pch = 19)
+legend("topright", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19,
+       cex = 0.8)
+legend("bottomleft", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+ordihull(lichensmds_KATM, groups = lichenspresence_absence_df_KATM$Elevation_Band, draw ="polygon", label = TRUE)
+title("Lichen Species Composition - Katmai")
+lichen_katm_plot <- recordPlot()
+```
+
+# Nonvascular - By Park 
+```{r}
+nonvascpresence_absence_df <- nonvascpresence_absence_df[-316, ]
+
+nonvasc_composition <- nonvascpresence_absence_df[,c(13:219)]
+nonvasc_composition <- as.matrix(nonvasc_composition)
+
+mds_nonvasc <- metaMDS(nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 500, maxit = 500)
+mds_nonvasc$stress 
+mds_nonvasc$iters 
+stressplot(mds_nonvasc)
+
+
+veg_colors <- c("darkorange", "skyblue2", "blue4", "firebrick3", "seagreen3", "gold", "orchid3", "gray50",
+                "chartreuse", "slateblue3")
+#veg_colors.1 <- c("firebrick1", "slateblue", "green")
+#veg_colors.2 <- c("firebrick1", "blue", "green", 
+#                  "purple", "cyan", "seagreen4", "gold")
+names(veg_colors) <- unique(nonvascpresence_absence_df$Vegetation_Class)
+ordiplot(mds_nonvasc, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.12",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_nonvasc, display = "sites"),
+       col = veg_colors[nonvascpresence_absence_df$Vegetation_Class],
+       pch = 19)
+#text(mds_nonvasc, display = "sites", pch = 21, bg = "blue")
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19,
+       cex = 0.9)
+legend("topright", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+ordihull(mds_nonvasc, groups = nonvascpresence_absence_df$Elevation_Band, draw ="polygon", label = TRUE)
+title("Non-Vascular Species Composition - Lake Clark and Katmai")
+nonvasc_all <- recordPlot()
+```
+
+
+## LACL Nonvascular 
+```{r}
+nonvascpresence_absence_df_LACL <- nonvascpresence_absence_df %>% filter(Park %in% c("LACL"))
+nonvascpresence_absence_df_LACL <- nonvascpresence_absence_df_LACL %>% mutate(Plot = paste(Park, EstYear, Elevation_Band, PlotID, sep = "_"))
+length(unique(nonvascpresence_absence_df_LACL[["Plot"]]))
+nonvascpresence_absence_matrix_LACL <- nonvascpresence_absence_df_LACL[, c(13:219)] 
+nonvascpresence_absence_matrix_LACL <- as.matrix(nonvascpresence_absence_matrix_LACL)
+
+nonvascmds_LACL <- metaMDS(nonvascpresence_absence_matrix_LACL, distance = "bray", k = 3, autotransform = TRUE, trymax = 500, maxit = 500)
+nonvascmds_LACL$stress #0.13
+nonvascmds_LACL$iters
+nonvascmds_LACL$converged
+
+veg_colors <- c("darkorange", "skyblue2", "blue4", "firebrick3", "seagreen3", "gold", "orchid3", "cyan", "gray50")
+names(veg_colors) <- unique(nonvascpresence_absence_df_LACL$Vegetation_Class)
+ordiplot(nonvascmds_LACL, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.13",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(nonvascmds_LACL, display = "sites"),
+       col = veg_colors[nonvascpresence_absence_df_LACL$Vegetation_Class],
+       pch = 19)
+legend("topright", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19,
+       cex = 0.8)
+legend("bottomleft", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+ordihull(nonvascmds_LACL, groups = nonvascpresence_absence_df_LACL$Elevation_Band, draw ="polygon", label = TRUE)
+title("Nonvascular Species Composition - Lake Clark")
+nonvasc_lacl_plot <- recordPlot()
+```
+
+## KATM Nonvascular 
+```{r}
+nonvascpresence_absence_df_KATM <- nonvascpresence_absence_df %>% filter(Park %in% c("KATM"))
+nonvascpresence_absence_df_KATM <- nonvascpresence_absence_df_KATM %>% mutate(Plot = paste(Park, EstYear, Elevation_Band, PlotID, sep = "_"))
+length(unique(nonvascpresence_absence_df_KATM[["Plot"]]))
+nonvascpresence_absence_matrix_KATM <- nonvascpresence_absence_df_KATM[, c(13:219)] 
+nonvascpresence_absence_matrix_KATM <- as.matrix(nonvascpresence_absence_matrix_KATM)
+
+nonvascmds_KATM <- metaMDS(nonvascpresence_absence_matrix_KATM, distance = "bray", k = 3, autotransform = TRUE, trymax = 500, maxit = 500)
+nonvascmds_KATM$stress #0.08
+nonvascmds_KATM$iters
+nonvascmds_KATM$converged
+
+veg_colors <- c("darkorange", "skyblue2", "blue4", "firebrick3", "seagreen3", "gold", "orchid3", "cyan", "gray50")
+names(veg_colors) <- unique(nonvascpresence_absence_df_KATM$Vegetation_Class)
+ordiplot(nonvascmds_KATM, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.08",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(nonvascmds_KATM, display = "sites"),
+       col = veg_colors[nonvascpresence_absence_df_KATM$Vegetation_Class],
+       pch = 19)
+legend("bottomright", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19,
+       cex = 0.8)
+legend("bottomleft", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+ordihull(nonvascmds_KATM, groups = nonvascpresence_absence_df_KATM$Elevation_Band, draw ="polygon", label = TRUE)
+title("Nonvascular Species Composition - Katmai")
+lichen_katm_plot <- recordPlot()
+```
+
+
+# Alpine 
+
+## Vascular 
+
+```{r}
+#vascular
+alpine_composition <- alpine_df[,c(7:280)]
+alpine_composition <- as.matrix(alpine_composition) 
+alpine_env
+
+
+
+alpine_lichen_composition <- alpine_lichen_df[,c(13:179)]
+alpine_lichen_composition <- as.matrix(alpine_lichen_composition) 
+lichens_env_alpine
+
+alpine_nonvasc_composition <- alpine_nonvasc_df[,c(13:219)]
+alpine_nonvasc_composition <- as.matrix(alpine_nonvasc_composition) 
+nonvasc_env_alpine
+
+#Colored by park only 
+length(unique(only_alpine[["Plot"]]))
+mds_alpine$stress
+mds_alpine$iters
+park_colors <- c("firebrick1", "blue")
+names(park_colors) <- unique(only_alpine$Park)
+dev.off()
+ordiplot(mds_alpine, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.11",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_alpine, display = "sites"),
+       col = park_colors[only_alpine$Park],
+       pch = 19)
+legend("bottomleft", title = "Park",
+       legend=names(park_colors),
+       ncol=1,
+       col = park_colors, pch = 19)
+title("Vascular Species")
+#legend("topright", title = "Elevation Band",
+#       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+#       ncol=1)
+alpinevasc_plot <- recordPlot()
+
+#Colored by Viereck.3
+mds_alpine <- metaMDS(alpine_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(alpine_df[["Plot"]]))
+mds_alpine$stress
+mds_alpine$iters
+veg_colors <- c("skyblue2", "darkorange", "blue4", "seagreen3")
+names(veg_colors) <- unique(alpine_df$Viereck.3)
+dev.off()
+ordiplot(mds_alpine, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.13",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_alpine, display = "sites"),
+       col = veg_colors[alpine_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_alpine, groups = alpine_df$Park, draw ="polygon", label = TRUE)
+title("Vascular Species")
+alpinevasc_plot_viereck <- recordPlot()
+alpinevasc_plot_viereck
+```
+
+## Lichen 
+```{r}
+alpine_lichen_df <- lichenspresence_absence_df %>% filter(Vegetation_Class %in% c("Alpine"))
+alpine_lichen_composition <- alpine_lichen_df[,c(13:179)]
+alpine_lichen_composition <- as.matrix(alpine_lichen_composition) 
+
+length(unique(alpine_lichen_df[["Plot"]]))
+mds_alpinelichen <- metaMDS(alpine_lichen_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+mds_alpinelichen$stress 
+mds_alpinelichen$iters 
+stressplot(mds_alpinelichen)
+
+#Colroed by Park 
+park_colors <- c("firebrick1", "blue")
+names(park_colors) <- unique(alpine_lichen_df$Park)
+dev.off()
+ordiplot(mds_alpinelichen, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.11",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_alpinelichen, display = "sites"),
+       col = park_colors[alpine_lichen_df$Park],
+       pch = 19)
+legend("bottomleft", title = "Park",
+       legend=names(park_colors),
+       ncol=1,
+       col = park_colors, pch = 19)
+title("Lichen Species")
+#legend("topright", title = "Elevation Band",
+#       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+#       ncol=1)
+alpinevasclichen_plot <- recordPlot()
+
+#Colored by Viereck.3
+mds_alpine_lichen <- metaMDS(alpine_lichen_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(alpine_lichen_df[["Plot"]]))
+mds_alpine_lichen$stress
+mds_alpine_lichen$iters
+veg_colors <- c("darkorange", "blue4", "seagreen3", "firebrick3", "skyblue2")
+names(veg_colors) <- unique(alpine_lichen_df$Viereck.3)
+dev.off()
+ordiplot(mds_alpine_lichen, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.09",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_alpine_lichen, display = "sites"),
+       col = veg_colors[alpine_lichen_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_alpine_lichen, groups = alpine_lichen_df$Park, draw ="polygon", label = TRUE)
+title("Lichen Species")
+alpinelichen_plot_viereck <- recordPlot()
+
+```
+
+## Nonvascular 
+```{r}
+alpine_nonvasc_df <- nonvascpresence_absence_df %>% filter(Vegetation_Class %in% c("Alpine"))
+alpine_nonvasc_composition <- alpine_nonvasc_df[,c(13:219)]
+alpine_nonvasc_composition <- as.matrix(alpine_nonvasc_composition) 
+
+length(unique(alpine_nonvasc_df[["Plot"]]))
+mds_alpinenonvasc <- metaMDS(alpine_nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+mds_alpinenonvasc$stress 
+mds_alpinenonvasc$iters 
+stressplot(mds_alpinenonvasc)
+
+park_colors <- c("firebrick1", "blue")
+names(park_colors) <- unique(alpine_nonvasc_df$Park)
+dev.off()
+ordiplot(mds_alpinenonvasc, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.14",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "3",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_alpinenonvasc, display = "sites"),
+       col = park_colors[alpine_nonvasc_df$Park],
+       pch = 19)
+legend("bottomleft", title = "Park",
+       legend=names(park_colors),
+       ncol=1,
+       col = park_colors, pch = 19)
+title("Nonvascular Species")
+#legend("topright", title = "Elevation Band",
+#       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+#       ncol=1)
+alpinevascnonvasc_plot <- recordPlot()
+
+#Colored by Viereck.3
+mds_alpine_nonvasc <- metaMDS(alpine_nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(alpine_nonvasc_df[["Plot"]]))
+mds_alpine_nonvasc$stress
+mds_alpine_nonvasc$iters
+veg_colors <- c("darkorange", "blue4", "seagreen3", "firebrick3", "skyblue2")
+names(veg_colors) <- unique(alpine_nonvasc_df$Viereck.3)
+dev.off()
+ordiplot(mds_alpine_nonvasc, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.12",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "3",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_alpine_nonvasc, display = "sites"),
+       col = veg_colors[alpine_nonvasc_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_alpine_nonvasc, groups = alpine_nonvasc_df$Park, draw ="polygon", label = TRUE)
+title("Nonvascular Species")
+alpinenonvasc_plot_viereck <- recordPlot()
+```
+
+
+# Spruce Forest 
+
+## Vascular 
+```{r}
+mds_forest <- metaMDS(forest_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(forest_df[["Plot"]])) #25 
+mds_forest$stress 
+mds_forest$iters #92
+veg_colors <- c("blue4", "seagreen3")
+names(veg_colors) <- unique(forest_df$Viereck.3)
+dev.off()
+ordiplot(mds_forest, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_forest, display = "sites"),
+       col = veg_colors[forest_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_forest, groups = forest_df$Park, draw ="polygon", label = TRUE)
+title("Vascular Species")
+forestvasc_plot_viereck <- recordPlot()
+forestvasc_plot_viereck
+```
+
+## Lichen 
+
+```{r}
+mds_forest_lichen <- metaMDS(forest_composition_lichens, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(forest_df_lichens[["Plot"]]))
+mds_forest_lichen$stress
+mds_forest_lichen$iters #137
+veg_colors <- c("blue4", "seagreen3")
+names(veg_colors) <- unique(forest_df_lichens$Viereck.3)
+dev.off()
+ordiplot(mds_forest_lichen, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.13",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_forest_lichen, display = "sites"),
+       col = veg_colors[forest_df_lichens$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_forest_lichen, groups = forest_df_lichens$Park, draw ="polygon", label = TRUE)
+title("Lichen Species")
+forestlichen_plot_viereck <- recordPlot()
+```
+
+
+## Nonvascular 
+```{r}
+mds_forest_nonvasc <- metaMDS(forest_composition_nonvasc, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(forest_df_nonvasc[["Plot"]]))
+mds_forest_nonvasc$stress
+mds_forest_nonvasc$iters #131
+veg_colors <- c("blue4", "seagreen3")
+names(veg_colors) <- unique(forest_df_nonvasc$Viereck.3)
+dev.off()
+ordiplot(mds_forest_nonvasc, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.14",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "3",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_forest_nonvasc, display = "sites"),
+       col = veg_colors[forest_df_nonvasc$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_forest_nonvasc, groups = forest_df_nonvasc$Park, draw ="polygon", label = TRUE)
+title("Nonvascular Species")
+forestnonvasc_plot_viereck <- recordPlot()
+```
+
+# Dwarf Scrub 
+
+#Vascular 
+```{r}
+dwarfscrub_composition <- dwarfscrub_df[,c(7:280)]
+dwarfscrub_composition <- as.matrix(dwarfscrub_composition) 
+dwarfscrub_env
+
+mds_dwarfscrub <- metaMDS(dwarfscrub_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(dwarfscrub_df[["Plot"]]))
+mds_dwarfscrub$stress
+mds_dwarfscrub$iters #163
+veg_colors <- c("blue4", "seagreen3")
+names(veg_colors) <- unique(dwarfscrub_df$Viereck.3)
+dev.off()
+ordiplot(mds_dwarfscrub, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_dwarfscrub, display = "sites"),
+       col = veg_colors[dwarfscrub_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_dwarfscrub, groups = dwarfscrub_df$Park, draw ="polygon", label = TRUE)
+title("Vascular Species")
+dwarfscrubvasc_plot_viereck <- recordPlot()
+dwarfscrubvasc_plot_viereck
+```
+
+## Lichens 
+
+```{r}
+dwarfscrub_composition_lichens <- dwarfscrub_df_lichens[,c(13:179)]
+dwarfscrub_composition_lichens <- as.matrix(dwarfscrub_composition_lichens) 
+dwarfscrub_env_lichens
+
+mds_dwarfscrub_lichen <- metaMDS(dwarfscrub_composition_lichens, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(dwarfscrub_df_lichens[["Plot"]]))
+mds_dwarfscrub_lichen$stress
+mds_dwarfscrub_lichen$iters #129 
+veg_colors <- c("blue4", "seagreen3", "firebrick")
+names(veg_colors) <- unique(dwarfscrub_df_lichens$Viereck.3)
+dev.off()
+ordiplot(mds_dwarfscrub_lichen, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_dwarfscrub_lichen, display = "sites"),
+       col = veg_colors[dwarfscrub_df_lichens$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_dwarfscrub_lichen, groups = dwarfscrub_df_lichens$Park, draw ="polygon", label = TRUE)
+title("Lichen Species")
+dwarfscrublichen_plot_viereck <- recordPlot()
+```
+
+
+## Nonvascular 
+```{r}
+dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(13:219)]
+dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc) 
+dwarfscrub_env_nonvasc
+
+mds_dwarfscrub_nonvasc <- metaMDS(dwarfscrub_composition_nonvasc, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(dwarfscrub_df_nonvasc[["Plot"]]))
+mds_dwarfscrub_nonvasc$stress
+mds_dwarfscrub_nonvasc$iters #72 
+veg_colors <- c("blue4", "seagreen3", "firebrick")
+names(veg_colors) <- unique(dwarfscrub_df_nonvasc$Viereck.3)
+dev.off()
+ordiplot(mds_dwarfscrub_nonvasc, type = "n")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.13",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "3",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+points(scores(mds_dwarfscrub_nonvasc, display = "sites"),
+       col = veg_colors[dwarfscrub_df_nonvasc$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19)
+ordihull(mds_dwarfscrub_nonvasc, groups = dwarfscrub_df_nonvasc$Park, draw ="polygon", label = TRUE)
+title("Nonvascular Species")
+dwarfscrubnonvasc_plot_viereck <- recordPlot()
+```
+
+
+
+
+# Stepdown Analysis 
+
+## Original, No species removed 
+```{r}
+presence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/presence_absence_df.xlsx")
+presence_absence_matrix <- presence_absence_df[, c(7:280)]  
+presence_absence_matrix <- as.matrix(presence_absence_matrix)
+
+mds_PA <- metaMDS(presence_absence_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 100)
+mds_PA$stress
+mds_PA$iters
+stressplot(mds_PA)
+nmds_perm3 <- adonis2(presence_absence_matrix ~ mds_PA$points, permutations = 999, method = "bray")
+nmds_perm3 
+mds_PA$converged
+
+#run numbers and stress values plots 
+console_output <- "
+Run 0 stress 0.105822 
+Run 1 stress 0.1098654 
+Run 2 stress 0.1086194 
+Run 3 stress 0.1075743 
+Run 4 stress 0.1082861 
+Run 5 stress 0.1100464 
+Run 6 stress 0.1069967 
+Run 7 stress 0.110244 
+Run 8 stress 0.1110138 
+Run 9 stress 0.1062369 
+Run 10 stress 0.1071309 
+Run 11 stress 0.107434 
+Run 12 stress 0.1083732 
+Run 13 stress 0.1092917 
+Run 14 stress 0.1112821 
+Run 15 stress 0.1082839 
+Run 16 stress 0.1104927 
+Run 17 stress 0.1071206 
+Run 18 stress 0.1079104 
+Run 19 stress 0.1092736 
+Run 20 stress 0.1073098 
+Run 21 stress 0.1089363 
+Run 22 stress 0.1074542 
+Run 23 stress 0.1071377 
+Run 24 stress 0.1071448 
+Run 25 stress 0.108753 
+Run 26 stress 0.1084697 
+Run 27 stress 0.1095098 
+Run 28 stress 0.1086396 
+Run 29 stress 0.1076824 
+Run 30 stress 0.1073184 
+Run 31 stress 0.1082657 
+Run 32 stress 0.1066196 
+Run 33 stress 0.1070638 
+Run 34 stress 0.1079281 
+Run 35 stress 0.1091279 
+Run 36 stress 0.110112 
+Run 37 stress 0.1071212 
+Run 38 stress 0.1081177 
+Run 39 stress 0.1076833 
+Run 40 stress 0.1062367 
+Run 41 stress 0.1068637 
+Run 42 stress 0.1087811 
+Run 43 stress 0.108177 
+Run 44 stress 0.1093357 
+Run 45 stress 0.108714 
+Run 46 stress 0.1072285 
+Run 47 stress 0.1082103 
+Run 48 stress 0.1103252 
+Run 49 stress 0.1083443 
+Run 50 stress 0.107299 
+Run 51 stress 0.1081296 
+Run 52 stress 0.1093474 
+Run 53 stress 0.1079456 
+Run 54 stress 0.1072762 
+Run 55 stress 0.1082546 
+Run 56 stress 0.1080521 
+Run 57 stress 0.1079861 
+Run 58 stress 0.1069541 
+Run 59 stress 0.1071679 
+Run 60 stress 0.1094484 
+Run 61 stress 0.1074275 
+Run 62 stress 0.1090347 
+Run 63 stress 0.1075072 
+Run 64 stress 0.1096317 
+Run 65 stress 0.1091171 
+Run 66 stress 0.1088092 
+Run 67 stress 0.1093627 
+Run 68 stress 0.1102438 
+Run 69 stress 0.1086704 
+Run 70 stress 0.1075101 
+Run 71 stress 0.1078859 
+Run 72 stress 0.108983 
+Run 73 stress 0.1096279 
+Run 74 stress 0.109392 
+Run 75 stress 0.1094702 
+Run 76 stress 0.1061103 
+Run 77 stress 0.1094569 
+Run 78 stress 0.1081975 
+Run 79 stress 0.1089078 
+Run 80 stress 0.1084812 
+Run 81 stress 0.1085828 
+Run 82 stress 0.1099863 
+Run 83 stress 0.1087134 
+Run 84 stress 0.1080331 
+Run 85 stress 0.1067763 
+Run 86 stress 0.1092575 
+Run 87 stress 0.1097345 
+Run 88 stress 0.1104582 
+Run 89 stress 0.1081143 
+Run 90 stress 0.1068049 
+Run 91 stress 0.1071286 
+Run 92 stress 0.1063498 
+Run 93 stress 0.1073121 
+Run 94 stress 0.1105416 
+Run 95 stress 0.1088914 
+Run 96 stress 0.1103212 
+Run 97 stress 0.1110593 
+Run 98 stress 0.1097989 
+Run 99 stress 0.10903 
+Run 100 stress 0.1093084 
+"
+
+#create dataframe
+lines <- unlist(strsplit(console_output, "\n")) 
+run_stress_lines <- grep("^Run \\d+ stress", lines, value = TRUE)  
+run_numbers <- as.numeric(sub("Run (\\d+) stress.*", "\\1", run_stress_lines))  
+stress_values <- as.numeric(sub("Run \\d+ stress ([0-9.]+)", "\\1", run_stress_lines))  
+
+nmds_data <- data.frame(
+  Run = run_numbers,
+  Stress = stress_values)
+
+ggplot(nmds_data, aes(x = Run, y = Stress)) +
+  geom_point(color = "blue", size = 3) +
+  geom_line(color = "darkgray", linetype = "dashed") +
+  labs(title = "NMDS Stress Values Across Runs",
+       x = "Run Number",
+       y = "Stress Value") +
+  theme_minimal()
+```
+
+
+## Removing species that only occur on one plot 
+```{r}
+#filter to remove species that occur at only one plot 
+species_counts <- presence_absence_df %>%
+  select(-Plot, -Plot_Year, -Park, -Elevation_Band, -EstYear, -Vegetation_Class, -PlotID, -Sample_Year) %>%
+  colSums()
+filtered_species <- names(species_counts[species_counts > 1])
+filtered_presence_absence <- presence_absence_df %>%
+  select(Plot, Plot_Year, all_of(filtered_species))
+
+presence_absence_matrix1 <- filtered_presence_absence[, c(3:230)]  
+presence_absence_matrix1 <- as.matrix(presence_absence_matrix1)
+
+
+mds_PA1 <- metaMDS(presence_absence_matrix1, distance = "bray", k = 3, autotransform = TRUE, trymax = 100)
+mds_PA1$stress
+mds_PA1$iters
+stressplot(mds_PA1)
+nmds_perm3 <- adonis2(presence_absence_matrix1 ~ mds_PA1$points, permutations = 999, method = "bray")
+nmds_perm3 
+mds_PA1$converged
+plot(mds_PA1) 
+
+#run numbers and stress values plots 
+console_output <- "
+Run 0 stress 0.1056743 
+Run 1 stress 0.1086317 
+Run 2 stress 0.107313 
+Run 3 stress 0.1074919 
+Run 4 stress 0.1068883 
+Run 5 stress 0.1075018 
+Run 6 stress 0.1083246 
+Run 7 stress 0.1086751 
+Run 8 stress 0.1064131 
+Run 9 stress 0.1088395 
+Run 10 stress 0.1106565 
+Run 11 stress 0.1071166 
+Run 12 stress 0.1078242 
+Run 13 stress 0.1085676 
+Run 14 stress 0.1082809 
+Run 15 stress 0.1108192 
+Run 16 stress 0.1084835 
+Run 17 stress 0.1078389 
+Run 18 stress 0.1074423 
+Run 19 stress 0.1095502 
+Run 20 stress 0.1067968 
+Run 21 stress 0.1094819 
+Run 22 stress 0.1097424 
+Run 23 stress 0.1089144 
+Run 24 stress 0.1065705 
+Run 25 stress 0.1085109 
+Run 26 stress 0.1094794 
+Run 27 stress 0.1075363 
+Run 28 stress 0.1074128 
+Run 29 stress 0.1084231 
+Run 30 stress 0.1086663 
+Run 31 stress 0.1081313 
+Run 32 stress 0.1092612 
+Run 33 stress 0.1091584 
+Run 34 stress 0.1083643 
+Run 35 stress 0.1088673 
+Run 36 stress 0.1059095 
+Run 37 stress 0.1089609 
+Run 38 stress 0.1075933 
+Run 39 stress 0.1090149 
+Run 40 stress 0.107044 
+Run 41 stress 0.1089256 
+Run 42 stress 0.1066206 
+Run 43 stress 0.1094173 
+Run 44 stress 0.1094409 
+Run 45 stress 0.1078831 
+Run 46 stress 0.1086394 
+Run 47 stress 0.1083939 
+Run 48 stress 0.1091201 
+Run 49 stress 0.1079204 
+Run 50 stress 0.1073241 
+Run 51 stress 0.1077824 
+Run 52 stress 0.1095822 
+Run 53 stress 0.1077402 
+Run 54 stress 0.108729 
+Run 55 stress 0.1086861 
+Run 56 stress 0.1076044 
+Run 57 stress 0.1072668 
+Run 58 stress 0.107926 
+Run 59 stress 0.1067787 
+Run 60 stress 0.1075848 
+Run 61 stress 0.1090494 
+Run 62 stress 0.1094765 
+Run 63 stress 0.1081908 
+Run 64 stress 0.1073365 
+Run 65 stress 0.106352 
+Run 66 stress 0.1089908 
+Run 67 stress 0.108205 
+Run 68 stress 0.1066217 
+Run 69 stress 0.1076833 
+Run 70 stress 0.1081656 
+Run 71 stress 0.1083026 
+Run 72 stress 0.1073145 
+Run 73 stress 0.1092793 
+Run 74 stress 0.1097262 
+Run 75 stress 0.109121 
+Run 76 stress 0.108034 
+Run 77 stress 0.1082541 
+Run 78 stress 0.1092219 
+Run 79 stress 0.1081639 
+Run 80 stress 0.107465 
+Run 81 stress 0.1104242 
+Run 82 stress 0.1073289 
+Run 83 stress 0.1077555 
+Run 84 stress 0.1083904 
+Run 85 stress 0.1087404 
+Run 86 stress 0.1065485 
+Run 87 stress 0.1092638 
+Run 88 stress 0.1082784 
+Run 89 stress 0.1087179 
+Run 90 stress 0.1082153 
+Run 91 stress 0.1067765 
+Run 92 stress 0.1067739 
+Run 93 stress 0.1097979 
+Run 94 stress 0.1082041 
+Run 95 stress 0.1120428 
+Run 96 stress 0.1077949 
+Run 97 stress 0.1094099 
+Run 98 stress 0.1081199 
+Run 99 stress 0.1103314 
+Run 100 stress 0.1064198 
+"
+
+lines <- unlist(strsplit(console_output, "\n"))  
+run_stress_lines <- grep("^Run \\d+ stress", lines, value = TRUE) 
+run_numbers <- as.numeric(sub("Run (\\d+) stress.*", "\\1", run_stress_lines)) 
+stress_values <- as.numeric(sub("Run \\d+ stress ([0-9.]+)", "\\1", run_stress_lines)) 
+nmds_data <- data.frame(
+  Run = run_numbers,
+  Stress = stress_values)
+
+ggplot(nmds_data, aes(x = Run, y = Stress)) +
+  geom_point(color = "blue", size = 3) +
+  geom_line(color = "darkgray", linetype = "dashed") +
+  labs(title = "NMDS Stress Values Across Runs",
+       x = "Run Number",
+       y = "Stress Value") +
+  theme_minimal()
+```
+
+
+
+
+## Removing species that only occur on 5% or less plots 
+```{r}
+
+threshold_5_percent <- 0.05 * nrow(presence_absence_df)
+filtered_species_5 <- names(species_counts[species_counts > threshold_5_percent])
+filtered_presence_absence_5 <- presence_absence_df %>%
+  select(Plot, Plot_Year, all_of(filtered_species_5))
+
+presence_absence_matrix2 <- filtered_presence_absence_5[, c(3:88)]  
+presence_absence_matrix2 <- as.matrix(presence_absence_matrix2)
+
+mds_PA2 <- metaMDS(presence_absence_matrix2, distance = "bray", k = 3, autotransform = TRUE, trymax = 100)
+mds_PA2$stress
+mds_PA2$iters
+stressplot(mds_PA2)
+nmds_perm3 <- adonis2(presence_absence_matrix2 ~ mds_PA2$points, permutations = 999, method = "bray")
+nmds_perm3 
+mds_PA2$converged
+plot(mds_PA2)
+
+#run numbers and stress values plots 
+console_output <- "
+Run 0 stress 0.1060636 
+Run 1 stress 0.1099747 
+Run 2 stress 0.1081927 
+Run 3 stress 0.1078287 
+Run 4 stress 0.1077541 
+Run 5 stress 0.1095672 
+Run 6 stress 0.1075993 
+Run 7 stress 0.1081528 
+Run 8 stress 0.1093773 
+Run 9 stress 0.1079207 
+Run 10 stress 0.1060517 
+Run 11 stress 0.1089094 
+Run 12 stress 0.1080083 
+Run 13 stress 0.1081631 
+Run 14 stress 0.1066578 
+Run 15 stress 0.1093969 
+Run 16 stress 0.108503 
+Run 17 stress 0.1082523 
+Run 18 stress 0.1076378 
+Run 19 stress 0.1071997 
+Run 20 stress 0.1080965 
+Run 21 stress 0.1067788 
+Run 22 stress 0.1085568 
+Run 23 stress 0.108212 
+Run 24 stress 0.1089156 
+Run 25 stress 0.1080278 
+Run 26 stress 0.1072475 
+Run 27 stress 0.1094835 
+Run 28 stress 0.1096968 
+Run 29 stress 0.1094309 
+Run 30 stress 0.1087878 
+Run 31 stress 0.1098875 
+Run 32 stress 0.1089892 
+Run 33 stress 0.1080592 
+Run 34 stress 0.1082036 
+Run 35 stress 0.1090317 
+Run 36 stress 0.1089041 
+Run 37 stress 0.1077366 
+Run 38 stress 0.1072548 
+Run 39 stress 0.1095864 
+Run 40 stress 0.1099087 
+Run 41 stress 0.1087804 
+Run 42 stress 0.1075245 
+Run 43 stress 0.1101888 
+Run 44 stress 0.1099253 
+Run 45 stress 0.1102108 
+Run 46 stress 0.109725 
+Run 47 stress 0.1096517 
+Run 48 stress 0.1096868 
+Run 49 stress 0.1099494 
+Run 50 stress 0.1099419 
+Run 51 stress 0.1069951 
+Run 52 stress 0.1068704 
+Run 53 stress 0.1074722 
+Run 54 stress 0.1085754 
+Run 55 stress 0.1082569 
+Run 56 stress 0.1089363 
+Run 57 stress 0.109836 
+Run 58 stress 0.1083206 
+Run 59 stress 0.110539 
+Run 60 stress 0.108525 
+Run 61 stress 0.1068721 
+Run 62 stress 0.1093022 
+Run 63 stress 0.1079479 
+Run 64 stress 0.1076061 
+Run 65 stress 0.109293 
+Run 66 stress 0.1100718 
+Run 67 stress 0.1096619 
+Run 68 stress 0.1093131 
+Run 69 stress 0.1095827 
+Run 70 stress 0.1088496 
+Run 71 stress 0.1089047 
+Run 72 stress 0.1098266 
+Run 73 stress 0.1107215 
+Run 74 stress 0.1086392 
+Run 75 stress 0.1079375 
+Run 76 stress 0.1093176 
+Run 77 stress 0.1085461 
+Run 78 stress 0.1097336 
+Run 79 stress 0.1092802 
+Run 80 stress 0.1103726 
+Run 81 stress 0.1080607 
+Run 82 stress 0.1064928 
+Run 83 stress 0.1090225 
+Run 84 stress 0.1107669 
+Run 85 stress 0.1072957 
+Run 86 stress 0.1072445 
+Run 87 stress 0.1081032 
+Run 88 stress 0.1109995 
+Run 89 stress 0.1072086 
+Run 90 stress 0.1086324 
+Run 91 stress 0.1072875 
+Run 92 stress 0.1097378 
+Run 93 stress 0.108906 
+Run 94 stress 0.1094072 
+Run 95 stress 0.1102132 
+Run 96 stress 0.108819 
+Run 97 stress 0.1085966 
+Run 98 stress 0.1086148 
+Run 99 stress 0.1076164 
+Run 100 stress 0.106482  
+"
+
+lines <- unlist(strsplit(console_output, "\n")) 
+run_stress_lines <- grep("^Run \\d+ stress", lines, value = TRUE) 
+run_numbers <- as.numeric(sub("Run (\\d+) stress.*", "\\1", run_stress_lines)) 
+stress_values <- as.numeric(sub("Run \\d+ stress ([0-9.]+)", "\\1", run_stress_lines)) 
+nmds_data <- data.frame(
+  Run = run_numbers,
+  Stress = stress_values)
+
+ggplot(nmds_data, aes(x = Run, y = Stress)) +
+  geom_point(color = "blue", size = 3) +
+  geom_line(color = "darkgray", linetype = "dashed") +
+  labs(title = "NMDS Stress Values Across Runs",
+       x = "Run Number",
+       y = "Stress Value") +
+  theme_minimal()
+```
+
+
+
+## Removing species that only occur on 10% or less plots 
+```{r}
+
+threshold_10_percent <- 0.10 * nrow(presence_absence_df)
+filtered_species_10 <- names(species_counts[species_counts > threshold_10_percent])
+filtered_presence_absence_10 <- presence_absence_df %>%
+  select(Plot, Plot_Year, all_of(filtered_species_10))
+
+presence_absence_matrix3 <- filtered_presence_absence_10[, c(3:64)]  
+presence_absence_matrix3 <- as.matrix(presence_absence_matrix3)
+
+
+mds_PA3 <- metaMDS(presence_absence_matrix3, distance = "bray", k = 3, autotransform = TRUE, trymax = 100)
+mds_PA3$stress
+mds_PA3$iters
+stressplot(mds_PA3)
+nmds_perm3 <- adonis2(presence_absence_matrix3 ~ mds_PA3$points, permutations = 999, method = "bray")
+nmds_perm3 
+mds_PA3$converged
+plot(mds_PA3)
+
+#run numbers and stress values plots 
+console_output <- "
+Run 0 stress 0.1057704 
+Run 1 stress 0.109045 
+Run 2 stress 0.1105241 
+Run 3 stress 0.1078137 
+Run 4 stress 0.1105936 
+Run 5 stress 0.1076395 
+Run 6 stress 0.1078795 
+Run 7 stress 0.1095057 
+Run 8 stress 0.1070144 
+Run 9 stress 0.106963 
+Run 10 stress 0.1072511 
+Run 11 stress 0.1070813 
+Run 12 stress 0.1067263 
+Run 13 stress 0.1070273 
+Run 14 stress 0.1072665 
+Run 15 stress 0.1089514 
+Run 16 stress 0.1067059 
+Run 17 stress 0.1092687 
+Run 18 stress 0.1071931 
+Run 19 stress 0.1094967 
+Run 20 stress 0.1098972 
+Run 21 stress 0.1061022 
+Run 22 stress 0.1093268 
+Run 23 stress 0.1103527 
+Run 24 stress 0.1083207 
+Run 25 stress 0.1079743 
+Run 26 stress 0.1102208 
+Run 27 stress 0.1085788 
+Run 28 stress 0.1065249 
+Run 29 stress 0.1122615 
+Run 30 stress 0.1075237 
+Run 31 stress 0.1084255 
+Run 32 stress 0.1099926 
+Run 33 stress 0.1074503 
+Run 34 stress 0.1096085 
+Run 35 stress 0.107081 
+Run 36 stress 0.1089466 
+Run 37 stress 0.109875 
+Run 38 stress 0.1103504 
+Run 39 stress 0.1099864 
+Run 40 stress 0.1097388 
+Run 41 stress 0.1076683 
+Run 42 stress 0.1096345 
+Run 43 stress 0.1099383 
+Run 44 stress 0.1074376 
+Run 45 stress 0.106331 
+Run 46 stress 0.1086951 
+Run 47 stress 0.1076308 
+Run 48 stress 0.1100668 
+Run 49 stress 0.1104589 
+Run 50 stress 0.1073469 
+Run 51 stress 0.1099133 
+Run 52 stress 0.1089162 
+Run 53 stress 0.1070278 
+Run 54 stress 0.1083828 
+Run 55 stress 0.1097071 
+Run 56 stress 0.1076184 
+Run 57 stress 0.1074999 
+Run 58 stress 0.1108102 
+Run 59 stress 0.1094232 
+Run 60 stress 0.1113617 
+Run 61 stress 0.110614 
+Run 62 stress 0.107902 
+Run 63 stress 0.1084476 
+Run 64 stress 0.1060635 
+Run 65 stress 0.1094094 
+Run 66 stress 0.1088022 
+Run 67 stress 0.1081681 
+Run 68 stress 0.1075817 
+Run 69 stress 0.1065038 
+Run 70 stress 0.1087343 
+Run 71 stress 0.1090846 
+Run 72 stress 0.1075126 
+Run 73 stress 0.1103302 
+Run 74 stress 0.110623 
+Run 75 stress 0.1078202 
+Run 76 stress 0.1094802 
+Run 77 stress 0.1078423 
+Run 78 stress 0.1081968 
+Run 79 stress 0.1077591 
+Run 80 stress 0.1087888 
+Run 81 stress 0.1111379 
+Run 82 stress 0.1070544 
+Run 83 stress 0.1081057 
+Run 84 stress 0.106333 
+Run 85 stress 0.1079622 
+Run 86 stress 0.1091133 
+Run 87 stress 0.1095968 
+Run 88 stress 0.1091287 
+Run 89 stress 0.1093696 
+Run 90 stress 0.1071877 
+Run 91 stress 0.1111122 
+Run 92 stress 0.1070506 
+Run 93 stress 0.1089585 
+Run 94 stress 0.1075566 
+Run 95 stress 0.1083439 
+Run 96 stress 0.1127208 
+Run 97 stress 0.1072553 
+Run 98 stress 0.1088709 
+Run 99 stress 0.1066136 
+Run 100 stress 0.1086844   
+"
+
+lines <- unlist(strsplit(console_output, "\n"))  
+run_stress_lines <- grep("^Run \\d+ stress", lines, value = TRUE) 
+run_numbers <- as.numeric(sub("Run (\\d+) stress.*", "\\1", run_stress_lines)) 
+stress_values <- as.numeric(sub("Run \\d+ stress ([0-9.]+)", "\\1", run_stress_lines))  
+nmds_data <- data.frame(
+  Run = run_numbers,
+  Stress = stress_values)
+
+ggplot(nmds_data, aes(x = Run, y = Stress)) +
+  geom_point(color = "blue", size = 3) +
+  geom_line(color = "darkgray", linetype = "dashed") +
+  labs(title = "NMDS Stress Values Across Runs",
+       x = "Run Number",
+       y = "Stress Value") +
+  theme_minimal()
+```
+
+
+# Viereck Class Coloring 
+
+## Shrubs + High Elevation Only 
+```{r}
+viereck_composition <- Viereck_PA[,c(1,7:280)]
+viereck_composition <- Viereck_PA[,c(7:280)]
+viereck_composition <- as.matrix(viereck_composition)
+
+mds_viereck <- metaMDS(viereck_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 500, maxit = 500)
+mds_viereck$stress 
+mds_viereck$iters 
+stressplot(mds_viereck)
+
+
+grouping_comp <- Viereck_PA %>% filter(Viereck.3 %in% c("Ericaceous Dwarf Scrub", "Dryas Dwarf Scrub", 
+                                                        "Lichen Bryoid Herbaceous", "Willow Dwarf Scrub", 
+                                                        "Open Low Scrub", "Mesic forb", "Mesic Forb Herbaceous", 
+                                                        "Mesic Graminoid Herbaceous"))
+env_grouping <- Viereck_env %>% filter(Viereck.3 %in% c("Ericaceous Dwarf Scrub", "Dryas Dwarf Scrub", 
+                                                        "Lichen Bryoid Herbaceous", "Willow Dwarf Scrub", 
+                                                        "Open Low Scrub", "Mesic forb", "Mesic Forb Herbaceous", 
+                                                        "Mesic Graminoid Herbaceous")) 
+
+#high elevation NMDS for viereck tier three classes 
+grouping_composition <- grouping_comp[,c(1,7:280)]
+grouping_composition <- grouping_comp[,c(7:280)]
+grouping_composition <- as.matrix(grouping_composition)
+
+mds_grouping <- metaMDS(grouping_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+mds_grouping$stress 
+mds_grouping$iters 
+stressplot(mds_grouping)
+
+
+veg_colors <- c("blue4", "seagreen3", "gold", "orchid3", 
+                "chartreuse", "firebrick3", "cyan", "dodgerblue3")
+names(veg_colors) <- unique(grouping_comp$Viereck.3)
+ordiplot(mds_grouping, type = "n")
+points(scores(mds_grouping, display = "sites"),
+       col = veg_colors[grouping_comp$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19)
+legend("topright", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+ordihull(mds_grouping, groups = grouping_comp$Elevation_Band, draw ="polygon", label = TRUE)
+title("Viereck Tier 3 Classification - Vascular Species")
+mergingclasses_plot <- recordPlot()
+```
+
+## Vascular Species - Coloring by Different Tiers 
+```{r}
+library(stringr)
+Viereck <- Viereck %>% mutate(Plot_Year = paste(Plot, Sample_Year, sep = "_"))
+Viereck_PA <- presence_absence_df %>%
+  left_join(Viereck %>% select(Plot_Year, Viereck.3, Viereck.1, Viereck.2, Viereck.4), by = c("Plot_Year"))
+
+Viereck_PA <- Viereck_PA %>%
+  mutate(Viereck.3 = str_trim(Viereck.3))
+Viereck_env <- Viereck_env %>%
+  mutate(Viereck.3 = str_trim(Viereck.3))
+Viereck_PA <- Viereck_PA %>%
+  mutate(Viereck.1 = str_trim(Viereck.1))
+Viereck_env <- Viereck_env %>%
+  mutate(Viereck.1 = str_trim(Viereck.1))
+Viereck_PA <- Viereck_PA %>%
+  mutate(Viereck.2 = str_trim(Viereck.2))
+Viereck_env <- Viereck_env %>%
+  mutate(Viereck.2 = str_trim(Viereck.2))
+Viereck_PA <- Viereck_PA %>%
+  mutate(Viereck.4 = str_trim(Viereck.4))
+Viereck_env <- Viereck_env %>%
+  mutate(Viereck.4 = str_trim(Viereck.4))
+
+Viereck_PA <- Viereck_PA %>%
+  filter(Viereck.3 != "" & !is.na(Viereck.3))
+Viereck_env <- Viereck_env %>%
+  filter(Viereck.3 != "" & !is.na(Viereck.3))
+Viereck_PA <- Viereck_PA %>%
+  filter(Viereck.2 != "" & !is.na(Viereck.2))
+Viereck_env <- Viereck_env %>%
+  filter(Viereck.2 != "" & !is.na(Viereck.2))
+Viereck_PA <- Viereck_PA %>%
+  filter(Viereck.1 != "" & !is.na(Viereck.1))
+Viereck_env <- Viereck_env %>%
+  filter(Viereck.1 != "" & !is.na(Viereck.1))
+
+viereck_composition <- Viereck_PA[,c(1,7:280)]
+viereck_composition <- Viereck_PA[,c(7:280)]
+viereck_composition <- as.matrix(viereck_composition)
+
+mds_viereck <- metaMDS(viereck_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 500, maxit = 500)
+mds_viereck$stress 
+mds_viereck$iters 
+stressplot(mds_viereck)
+
+veg_colors.3 <- c("darkorange", "skyblue2", "blue4", "seagreen3", "gold", "tomato3", "orchid3", "gray50",
+                  "chartreuse", "slateblue3", "firebrick3", "cyan", "darkmagenta", "rosybrown3", "dodgerblue3")
+
+veg_colors.1 <- c("firebrick3", "gold2", "blue4")
+
+veg_colors.2 <- c("darkorange", "skyblue2", "blue4", "seagreen3", "gold", "orchid3", 
+                  "firebrick3")
+
+#First Tier 
+names(veg_colors.1) <- unique(Viereck_PA$Viereck.1)
+ordiplot(mds_viereck, type = "n")
+points(scores(mds_viereck, display = "sites"),
+       col = veg_colors.1[Viereck_PA$Viereck.1],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors.1),
+       ncol=2,
+       col = veg_colors.1, pch = 19,
+       cex = 0.9)
+legend("topright", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.11",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+ordihull(mds_viereck, groups = Viereck_PA$Elevation_Band, draw ="polygon", label = TRUE)
+title("Viereck Tier 1 Classifications - Vascular Species")
+viereck1_nmds <- recordPlot()
+
+#Second Tier
+names(veg_colors.2) <- unique(Viereck_PA$Viereck.2)
+ordiplot(mds_viereck, type = "n")
+points(scores(mds_viereck, display = "sites"),
+       col = veg_colors.2[Viereck_PA$Viereck.2],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors.2),
+       ncol=2,
+       col = veg_colors.2, pch = 19,
+       cex = 0.9)
+legend("topright", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.11",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+ordihull(mds_viereck, groups = Viereck_PA$Elevation_Band, draw ="polygon", label = TRUE)
+title("Viereck Tier 2 Classifications - Vascular Species")
+viereck2_nmds <- recordPlot()
+
+#Third Tier 
+names(veg_colors.3) <- unique(Viereck_PA$Viereck.3)
+ordiplot(mds_viereck, type = "n")
+points(scores(mds_viereck, display = "sites"),
+       col = veg_colors.3[Viereck_PA$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors.3),
+       ncol=2,
+       col = veg_colors.3, pch = 19,
+       cex = 0.7)
+legend("topright", title = "Elevation Band",
+       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
+       ncol=1)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.11",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.2, #size 
+     col = "black")
+ordihull(mds_viereck, groups = Viereck_PA$Elevation_Band, draw ="polygon", label = TRUE)
+title("Viereck Tier 3 Classifications - Vascular Species")
+viereck3_nmds <- recordPlot()
+```
+
+## NMDS With Arrows - Colored by Viereck Classes 
+```{r}
+#Fancy plot with arrows 
+nmds_scores300 <- as.data.frame(scores(mds_viereck, display = "sites"))
+write_xlsx(nmds_scores300, "T:/Users/KPace/nmds_scores300.xlsx")
+write_xlsx(Viereck_PA, "T:/Users/KPace/viereckpa.xlsx")
+nmds_scores300 <- read_xlsx("T:/Users/KPace/nmds_scores300.xlsx")
+plot_data300 <- merge(nmds_scores300, Viereck_PA, by = "Plot_Year")
+
+#calculate arrows for each plot
+arrows_data300 <- plot_data300 %>%
+  group_by(Plot) %>%
+  arrange(Sample_Year) %>%
+  mutate(
+    x1 = lag(NMDS1),  
+    y1 = lag(NMDS2), 
+    x2 = NMDS1,      
+    y2 = NMDS2) %>%   
+  filter(!is.na(x1)) 
+
+#calculate polygon hulls for Elevation_Band
+hull_data300 <- plot_data300 %>%
+  group_by(Elevation_Band) %>%
+  slice(chull(NMDS1, NMDS2))
+
+viereck1_plot <- ggplot() +
+  geom_polygon(
+    data = hull_data300,
+    aes(x = NMDS1, y = NMDS2, fill = Elevation_Band, group = Elevation_Band),
+    alpha = 0.2,  #transparency for polygons
+    color = "black") +
+  geom_point(
+    data = plot_data300,
+    aes(x = NMDS1, y = NMDS2, color = Viereck.1),
+    size = 2) +
+  scale_color_manual(values = c("Scrub" = "slateblue", "Forest" = "seagreen3", "Herbaceous" = "red")) +
+  geom_segment(
+    data = arrows_data300,
+    aes(x = x1, y = y1, xend = x2, yend = y2, color = Viereck.1),
+    arrow = arrow(length = unit(0.2, "cm")),
+    size = 0.7) +
+  scale_fill_brewer(palette = "Set2", name = "Elevation Band") +
+  theme_minimal() +
+  labs(
+    title = "Viereck Tier 1",
+    x = "NMDS Axis 1",
+    y = "NMDS Axis 2",
+    color = "Classification") +
+  theme(legend.position = "bottom")+
+  #annotate("text", x = Inf, y = Inf, label = "1", hjust = 1.5, vjust = 1.5, size = 5)
+  geom_label(aes(x = Inf, y = Inf, label = "1"), 
+             hjust = 1.2, vjust = 1.2, 
+             size = 5, 
+             label.size = 0.5, 
+             fill = "white", 
+             color = "black")+
+  geom_label(aes(x = -Inf, y = Inf, label = "Stress = 0.11"), 
+             hjust = -0.1, vjust = 1.2, 
+             size = 4, 
+             label.size = 0.5, 
+             fill = "white", 
+             color = "black")
+viereck1_plot
+
+
+
+viereck2_plot <- ggplot() +
+  geom_polygon(
+    data = hull_data300,
+    aes(x = NMDS1, y = NMDS2, fill = Elevation_Band, group = Elevation_Band),
+    alpha = 0.2,  #transparency for polygons
+    color = "black") +
+  geom_point(
+    data = plot_data300,
+    aes(x = NMDS1, y = NMDS2, color = Viereck.2),
+    size = 2) +
+  scale_color_manual(values = c("Dwarf Scrub" = "slateblue", "Needleleaf Forest" = "seagreen3", "Low Scrub" = "red",
+                                "Bryoid Herbaceous" = "darkorange", "Mixed Forest" = "cyan", "Forb Herbaceous" = "purple",
+                                "Graminoid Herbaceous" = "gold2")) +
+  geom_segment(
+    data = arrows_data300,
+    aes(x = x1, y = y1, xend = x2, yend = y2, color = Viereck.2),
+    arrow = arrow(length = unit(0.2, "cm")),
+    size = 0.7) +
+  scale_fill_brewer(palette = "Set2", name = "Elevation Band") +
+  theme_minimal() +
+  labs(
+    title = "Viereck Tier 2",
+    x = "NMDS Axis 1",
+    y = "NMDS Axis 2",
+    color = "Classification") +
+  theme(legend.position = "bottom")+
+  #annotate("text", x = Inf, y = Inf, label = "1", hjust = 1.5, vjust = 1.5, size = 5)
+  geom_label(aes(x = Inf, y = Inf, label = "2"), 
+             hjust = 1.2, vjust = 1.2, 
+             size = 5, 
+             label.size = 0.5, 
+             fill = "white", 
+             color = "black")+
+  geom_label(aes(x = -Inf, y = Inf, label = "Stress = 0.11"), 
+             hjust = -0.1, vjust = 1.2, 
+             size = 4, 
+             label.size = 0.5, 
+             fill = "white", 
+             color = "black")
+viereck2_plot
+
+
+viereck3_plot <- ggplot() +
+  geom_polygon(
+    data = hull_data300,
+    aes(x = NMDS1, y = NMDS2, fill = Elevation_Band, group = Elevation_Band),
+    alpha = 0.2,  #transparency for polygons
+    color = "black") +
+  geom_point(
+    data = plot_data300,
+    aes(x = NMDS1, y = NMDS2, color = Viereck.3),
+    size = 2) +
+  scale_color_manual(values = c("Ericaceous Dwarf Scrub" = "slateblue", "Open Low Scrub" = "seagreen3", "Woodland Needleleaf Forest" = "red",
+                                "Open Needleleaf Forest" = "darkorange", "Dryas Dwarf Scrub" = "cyan", "Lichen Bryoid Herbaceous" = "purple",
+                                "Moss Bryoid Herbaceous" = "gold2", "Closed Needleleaf Forest" = "black", "Willow Dwarf Scrub" = "blue", 
+                                "Closed Mixed Forest" = "green", "Closed Low Scrub" = "gray", "Mesic Forb" = "hotpink", "Mesic Forb Herbaceous" = "brown",
+                                "Mesic Graminoid Herbaceous" = "dodgerblue2", "Woodland Mixed Forest" = "violetred4")) +
+  geom_segment(
+    data = arrows_data300,
+    aes(x = x1, y = y1, xend = x2, yend = y2, color = Viereck.3),
+    arrow = arrow(length = unit(0.2, "cm")),
+    size = 0.7) +
+  scale_fill_brewer(palette = "Set2", name = "Elevation Band") +
+  theme_minimal() +
+  labs(
+    title = "Viereck Tier 3",
+    x = "NMDS Axis 1",
+    y = "NMDS Axis 2",
+    color = "Classification") +
+  theme(legend.position = "bottom")+
+  guides(color=guide_legend(nrow=6, byrow=TRUE))+
+  #annotate("text", x = Inf, y = Inf, label = "1", hjust = 1.5, vjust = 1.5, size = 5)
+  geom_label(aes(x = Inf, y = Inf, label = "3"), 
+             hjust = 1.2, vjust = 1.2, 
+             size = 5, 
+             label.size = 0.5, 
+             fill = "white", 
+             color = "black")+
+  geom_label(aes(x = -Inf, y = Inf, label = "Stress = 0.11"), 
+             hjust = -0.1, vjust = 1.2, 
+             size = 4, 
+             label.size = 0.5, 
+             fill = "white", 
+             color = "black")
+viereck3_plot
+
+
+
+viereck_combinedplot <- ggarrange(
+  plots = viereck1_plot, viereck2_plot,
+  ncol = 1,      
+  nrow = 2,
+  common.legend = FALSE)
+viereck_combinedplot <- annotate_figure(
+  viereck_combinedplot,
+  top = text_grob("Viereck Classes", face = "bold", size = 14))
+viereck_combinedplot
+
+
+
+viereck_combinedplot2 <- ggarrange(
+  plots = viereck2_plot, viereck3_plot,
+  ncol = 1,      
+  nrow = 2,
+  common.legend = FALSE)
+viereck_combinedplot2 <- annotate_figure(
+  viereck_combinedplot2,
+  top = text_grob("Viereck Classes", face = "bold", size = 14))
+viereck_combinedplot2
+```
+
+
+
+# Cluster Analysis NMDS 
+
+## Alpine - Vascular Species
+
+```{r}
+dist_matrix <- vegdist(alpine_composition, method = "bray")
+
+clustering_ward <- hclust(dist_matrix, method = "ward.D2")
+coph_corr <- cor(cophenetic(clustering_ward), dist_matrix)
+coph_corr
+
+clustering_centroid <- hclust(dist_matrix, method = "centroid")
+coph_corr <- cor(cophenetic(clustering_centroid), dist_matrix)
+coph_corr
+
+clustering_median <- hclust(dist_matrix, method = "median")
+coph_corr <- cor(cophenetic(clustering_median), dist_matrix)
+coph_corr
+
+clustering_average <- hclust(dist_matrix, method = "average")
+coph_corr <- cor(cophenetic(clustering_average), dist_matrix)
+coph_corr
+
+clustering_single <- hclust(dist_matrix, method = "single")
+coph_corr <- cor(cophenetic(clustering_single), dist_matrix)
+coph_corr
+
+#choose number of clusters after deciding based on the methods for determining 
+
+#centroid method 
+#nmds colored by cluster only 
+  k <- 4
+  clusters_centroid <- cutree(clustering_centroid, k = k)
+  alpine_composition$Cluster <- clusters_centroid
+  nmds <- metaMDS(alpine_composition, distance = "bray", k = 3)
+  nmds$stress
+  scores_df_centroid <- data.frame(nmds$points, Cluster = as.factor(clusters_centroid))
+  
+  ggplot(scores_df_centroid, aes(MDS1, MDS2, color = Cluster)) +
+    geom_point(size = 3) +
+    theme_minimal() + 
+    labs(title = "NMDS Cluster Visualization - Centroid")
+  
+#nmds colored by cluster and viereck class 
+  nmds_scores <- data.frame(nmds$points)
+  nmds_scores$Cluster <- as.factor(clusters_centroid)
+  nmds_scores$Viereck.3 <- alpine_env$Viereck.3
+  nmds_scores$Park <- alpine_env$Park
+  
+centroid_vascular <-  ggplot(nmds_scores, aes(x = MDS1, y = MDS2, color = Cluster, shape = Viereck.3)) +
+    geom_point(size = 3) +
+    scale_color_manual(values = rainbow(length(unique(clusters_centroid)))) +
+    theme_minimal() + 
+    labs(title = "Centroid Method", x = "NMDS Axis1", y = "NMDS Axis2") +
+    theme(legend.position = "right")+
+    geom_label(aes(x = Inf, y = Inf, label = "1"), 
+                hjust = 1.2, vjust = 1.2, 
+                size = 5, 
+                label.size = 0.5, 
+                fill = "white", 
+                color = "black")
+
+centroid_vascular
+
+ #Ward method 
+  #nmds colored by cluster only 
+  k <- 4
+  clusters_ward <- cutree(clustering_ward, k = k)
+  alpine_composition$Cluster <- clusters_ward
+  nmds <- metaMDS(alpine_composition, distance = "bray", k = 3)
+  scores_df_ward <- data.frame(nmds$points, Cluster = as.factor(clusters_ward))
+
+  ggplot(scores_df_ward, aes(MDS1, MDS2, color = Cluster)) +
+    geom_point(size = 3) +
+    theme_minimal() + 
+    labs(title = "NMDS Cluster Visualization (Ward) - Alpine Vascular Species")
+
+  #nmds colored by cluster and viereck class 
+  nmds_scores <- data.frame(nmds$points)
+  nmds_scores$Cluster <- as.factor(clusters_ward)
+  nmds_scores$Viereck.3 <- alpine_env$Viereck.3
+  nmds_scores$Park <- alpine_env$Park
+
+  ward_vascular <- ggplot(nmds_scores, aes(x = MDS1, y = MDS2, color = Cluster, shape = Viereck.3)) +
+    geom_point(size = 3) +
+    scale_color_manual(values = rainbow(length(unique(clusters_ward)))) +
+    theme_minimal() + 
+    labs(title = "Ward D2 Method", x = "NMDS Axis1", y = "NMDS Axis2") +
+    theme(legend.position = "right")+
+    geom_label(aes(x = Inf, y = Inf, label = "2"), 
+               hjust = 1.2, vjust = 1.2, 
+               size = 5, 
+               label.size = 0.5, 
+               fill = "white", 
+               color = "black")
+
+#Average method 
+  #nmds colored by cluster only 
+  k <- 4
+  clusters_average <- cutree(clustering_average, k = k)
+  alpine_composition$Cluster <- clusters_average
+  nmds <- metaMDS(alpine_composition, distance = "bray", k = 3)
+  scores_df_average <- data.frame(nmds$points, Cluster = as.factor(clusters_average))
+  
+  ggplot(scores_df_average, aes(MDS1, MDS2, color = Cluster)) +
+    geom_point(size = 3) +
+    theme_minimal() + 
+    labs(title = "NMDS Cluster Visualization (Average) - Alpine Vascular Species")
+  
+  #nmds colored by cluster and viereck class 
+  nmds_scores <- data.frame(nmds$points)
+  nmds_scores$Cluster <- as.factor(clusters_average)
+  nmds_scores$Viereck.3 <- alpine_env$Viereck.3
+  nmds_scores$Park <- alpine_env$Park
+  
+  average_vascular <- ggplot(nmds_scores, aes(x = MDS1, y = MDS2, color = Cluster, shape = Viereck.3)) +
+    geom_point(size = 3) +
+    scale_color_manual(values = rainbow(length(unique(clusters_average)))) +
+    theme_minimal() + 
+    labs(title = "Average Method", x = "NMDS Axis1", y = "NMDS Axis2") +
+    theme(legend.position = "right")+
+    geom_label(aes(x = Inf, y = Inf, label = "3"), 
+               hjust = 1.2, vjust = 1.2, 
+               size = 5, 
+               label.size = 0.5, 
+               fill = "white", 
+               color = "black")
+
+#median method 
+  #nmds colored by cluster only 
+  k <- 4
+  clusters_median <- cutree(clustering_median, k = k)
+  alpine_composition$Cluster <- clusters_median
+  nmds <- metaMDS(alpine_composition, distance = "bray", k = 3)
+  scores_df_median <- data.frame(nmds$points, Cluster = as.factor(clusters_median))
+  
+  ggplot(scores_df_median, aes(MDS1, MDS2, color = Cluster)) +
+    geom_point(size = 3) +
+    theme_minimal() + 
+    labs(title = "NMDS Cluster Visualization (Median) - Alpine Vascular Species")
+  
+  #nmds colored by cluster and viereck class 
+  nmds_scores <- data.frame(nmds$points)
+  nmds_scores$Cluster <- as.factor(clusters_median)
+  nmds_scores$Viereck.3 <- alpine_env$Viereck.3
+  nmds_scores$Park <- alpine_env$Park
+  
+  median_vascular <-  ggplot(nmds_scores, aes(x = MDS1, y = MDS2, color = Cluster, shape = Viereck.3)) +
+    geom_point(size = 3) +
+    scale_color_manual(values = rainbow(length(unique(clusters_median)))) +
+    theme_minimal() + 
+    labs(title = "Median Method", x = "NMDS Axis1", y = "NMDS Axis2") +
+    theme(legend.position = "right")+
+    geom_label(aes(x = Inf, y = Inf, label = "4"), 
+               hjust = 1.2, vjust = 1.2, 
+               size = 5, 
+               label.size = 0.5, 
+               fill = "white", 
+               color = "black")
+
+#single method 
+  #nmds colored by cluster only 
+  k <- 4
+  clusters_single <- cutree(clustering_single, k = k)
+  alpine_composition$Cluster <- clusters_single
+  nmds <- metaMDS(alpine_composition, distance = "bray", k = 3)
+  scores_df_single <- data.frame(nmds$points, Cluster = as.factor(clusters_single))
+  
+  ggplot(scores_df_single, aes(MDS1, MDS2, color = Cluster)) +
+    geom_point(size = 3) +
+    theme_minimal() + 
+    labs(title = "NMDS Cluster Visualization (Single) - Alpine Vascular Species")
+  
+  #nmds colored by cluster and viereck class 
+  nmds_scores <- data.frame(nmds$points)
+  nmds_scores$Cluster <- as.factor(clusters_single)
+  nmds_scores$Viereck.3 <- alpine_env$Viereck.3
+  nmds_scores$Park <- alpine_env$Park
+  
+ single_vascular <- ggplot(nmds_scores, aes(x = MDS1, y = MDS2, color = Cluster, shape = Viereck.3)) +
+    geom_point(size = 3) +
+    scale_color_manual(values = rainbow(length(unique(clusters_single)))) +
+    theme_minimal() + 
+    labs(title = "Single Method", x = "NMDS Axis1", y = "NMDS Axis2") +
+    theme(legend.position = "right")+
+   geom_label(aes(x = Inf, y = Inf, label = "5"), 
+              hjust = 1.2, vjust = 1.2, 
+              size = 5, 
+              label.size = 0.5, 
+              fill = "white", 
+              color = "black")
+
+#combined plot 
+  Vascular_Cluster_Plot <- ggarrange(
+    plots = centroid_vascular, ward_vascular, average_vascular, median_vascular, single_vascular,
+    ncol = 2,      
+    nrow = 3,
+    common.legend = TRUE,  
+    legend = "bottom")
+  Vascular_Cluster_Plot <- annotate_figure(
+    Vascular_Cluster_Plot,
+    top = text_grob("Cluster Visualization - Alpine Vascular Species", face = "bold", size = 14))
+  Vascular_Cluster_Plot
+```

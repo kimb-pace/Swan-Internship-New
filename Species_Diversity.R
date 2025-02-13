@@ -7,7 +7,6 @@ library(ggplot2)
 library(ggpubr) 
 
 #Dataframe Creation:
-
 sp_richness <- fulldata %>%
   group_by(Park, Elevation_Band, Plot, Sample_Year) %>% 
   summarize(Species_Richness = n_distinct(Species_Code), .groups = "keep") #keep - same grouping structure as data
@@ -22,7 +21,6 @@ species_richness_park <- sp_richness %>%
             .groups = 'drop')
 
 #Summary of species richness per elevation band:
-
 species_richness_elevation_park <- sp_richness %>%
   group_by(Park, Elevation_Band) %>%
   summarise(Average_Species_Richness = mean(Species_Richness),
@@ -30,7 +28,6 @@ species_richness_elevation_park <- sp_richness %>%
             .groups = 'drop')
 
 #Figures
-
 rich_bar <- ggplot(species_richness_elevation_park, aes(x = Elevation_Band, y = Average_Species_Richness, fill = Park)) +
   geom_bar(stat = "identity", position = "dodge") +
   geom_errorbar(aes(ymin = Average_Species_Richness - Species_Richness_SE, 

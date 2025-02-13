@@ -14,44 +14,27 @@ library(dplyr)
 library(readxl)
 library(writexl)
 
-summary_table_vasc <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/summary_table_vasc.xlsx")
-summary_table_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/summary_table_nonvasc.xlsx")
-summary_table_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/summary_table_lichens.xlsx")
+summary_table_vasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_vasc.xlsx")
+summary_table_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_nonvasc.xlsx")
+summary_table_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_lichens.xlsx")
 
-vasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/vasc_df_balanced.xlsx")
-nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/nonvasc_df_balanced.xlsx")
-lichens_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/lichens_df_balanced.xlsx")
+vasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/vasc_df_balanced.xlsx")
+nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/nonvasc_df_balanced.xlsx")
+lichens_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/lichens_df_balanced.xlsx")
 
-lichen_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/Lichen_Species_Richness.xlsx")
-nonvasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/Nonvascular_Species_Richness.xlsx")
-vasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/Vascular_Species_Richness.xlsx")
+lichen_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Lichen_Species_Richness.xlsx")
+nonvasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Nonvascular_Species_Richness.xlsx")
+vasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Vascular_Species_Richness.xlsx")
 
-lichens_env <- lichenspresence_absence_df[,c(1:12)]
-nonvasc_env <- nonvascpresence_absence_df[,c(1:12)]
-vasc_env <- vascpresence_absence_df[,c(1:10)]
+lichen_sp_richness <- lichen_sp_richness %>% mutate(Plot_Year = paste(Plot, Sample_Year, sep="_")) 
+vasc_sp_richness <- vasc_sp_richness %>% mutate(Plot_Year = paste(Plot, Sample_Year, sep="_")) 
+nonvasc_sp_richness <- nonvasc_sp_richness %>% mutate(Plot_Year = paste(Plot, Sample_Year, sep="_")) 
 
+vascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/presence_absence_df_full.xlsx")
+lichenspresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/lichenspresence_absence_df_full.xlsx")
+nonvascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/nonvascpresence_absence_df_full.xlsx")
 
-vascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/presence_absence_df_full.xlsx")
-lichenspresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/lichenspresence_absence_df_full.xlsx")
-nonvascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/nonvascpresence_absence_df_full.xlsx")
-
-lichens_env <- lichens_df[,c(1:12)]
-nonvasc_env <- nonvasc_df[,c(1:12)]
-vasc_env <- vasc_df[,c(1:10)]
-
-viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship/Viereck_env.xlsx")
-
-
-
-dwarfscrub_env <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_env.xlsx")
-dwarfscrub_env_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_env_lichens.xlsx")
-dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_env_nonvasc.xlsx")
-
-dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_df.xlsx")
-dwarfscrub_df_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_df_lichens.xlsx")
-dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/dwarfscrub_df_nonvasc.xlsx")
-
-
+viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_env.xlsx")
 ```
 
 
@@ -68,16 +51,13 @@ alpine_env
 
 alpine_df <- read_xlsx("C:/Users/kmpace/Desktop/alpine_df.xlsx")
 
-
 alpine_lichen_composition <- alpine_lichen_df[,c(13:179)]
 alpine_lichen_composition <- as.matrix(alpine_lichen_composition) 
 lichens_env_alpine
 
-
 alpine_nonvasc_composition <- alpine_nonvasc_df[,c(13:219)]
 alpine_nonvasc_composition <- as.matrix(alpine_nonvasc_composition) 
 nonvasc_env_alpine
-
 
 #vascular, but colored by viereck 3
 mds_alpine <- metaMDS(alpine_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
