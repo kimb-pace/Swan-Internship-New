@@ -331,5 +331,344 @@ print(simpson_df)
 
 
 
+library(writexl)
+library(readxl)
+library(dplyr)
+
+
+write_xlsx(Viereck_env, "T:/Users/KPace/SWAN-Internship/Viereck_env.xlsx")
+transition_plots <- read_xlsx("T:/Users/KPace/SWAN-Internship/Transition_Plots.xlsx")
+
+summary_table_transition <- Viereck_env %>%
+  group_by(Plot) %>%
+  summarise(
+    Initial_Class = Viereck.3[which.min(Sample_Year)],
+    New_Class = Viereck.3[which.max(Sample_Year)]
+  )
+
+transition_plots <- transition_plots %>%
+  left_join(summary_table_transition, by = "Plot")
+
+write_xlsx(transition_plots, "T:/Users/KPace/SWAN-Internship/transition_plots_viereck.xlsx")
+
+
+twoband_plot_viereck
+
+
+
+
+
+
+
+
+fulldata <- read.csv("T:/Users/KPace/SWAN Internship/Quadrat_Frequency.csv")
+library(dplyr)
+library(tidyverse)
+library(tidyr)
+library(ggplot2)
+library(ggpubr)
+
+# Basic Dataframe Summaries
+n_plots <- fulldata %>% 
+  distinct(Plot) %>%
+  nrow()
+
+n_species <- fulldata %>%
+  distinct(Species_Code) %>%
+  nrow()
+
+n_nest <- fulldata %>%
+  distinct(Frame_Size_sqm) %>%
+  nrow()
+n_nest
+
+n_nest1 <- fulldata %>%
+  distinct(Frame_Text) %>%
+  count(Frame_Text)
+n_nest1
+
+elev_plot <- fulldata %>%
+  distinct(Park, Elevation_Band, Plot) %>%
+  count(Park, Elevation_Band)
+elev_plot
+
+#73 plots at Katmai 
+#110 plots at lake clark 
+
+#Next I created a basic graph reflecting this data:
+elev_graph <- ggplot(elev_plot, aes(x = Elevation_Band, y=n, fill = Park)) + 
+  geom_bar(stat = "identity", position = "dodge") + 
+  labs(title = "Number of Plots Per Elevation Band", x = "Elevation Band", y = "Number of Plots") +
+  theme_minimal()
+elev_graph
+
+visits_per_plot <- fulldata %>%
+  distinct(Plot, Sample_Year) %>%
+  count(Plot, name = "Times_Visited")
+
+#multiple visits per year 
+multiple_visits <- fulldata %>%
+  group_by(Plot, Sample_Year) %>%
+  filter(n_distinct(Sample_Date) > 1) %>%
+  summarize(Sample_Dates = toString(unique(Sample_Date)))
+multiple_visits
+
+#seeing which plots have  quadrats and which have four
+quadrat_added <- fulldata %>%
+  group_by(Plot) %>%
+  summarize(Frame_Codes = list(sort(unique(Frame_Code)))) %>%
+  mutate(Category = case_when(
+    all(c(1, 2, 3) %in% Frame_Codes) & !(0 %in% Frame_Codes) ~ "Contains 1, 2, 3", 
+    all(c(0, 1, 2, 3) %in% Frame_Codes) ~ "Contains 0, 1, 2, 3", 
+    TRUE ~ "Other"
+  )) %>%
+  arrange(Frame_Codes)
+quadrat_added
+
+#Transects per Plot
+transects_per_plot <- fulldata %>% 
+  distinct(Plot, Transect) %>%
+  count(Plot, name = "Transects per Plot")
+
+#Quadrats per plot:
+
+fulldata <- fulldata %>% 
+  mutate(Quad_Num = paste(Transect, Quadrat, sep = "_"))
+quadrats_per_plot <- fulldata %>% 
+  distinct(Plot, Quad_Num) %>%
+  count(Plot, name = "Quadrats_per_Plot")
+
+#Next, I sorted this and created a histogram to better visualize it.
+quad_sorted <- quadrats_per_plot %>% 
+  arrange(`Quadrats_per_Plot`)
+quad_hist <- ggplot(quadrats_per_plot, aes(x = Quadrats_per_Plot)) + 
+  geom_bar() + 
+  labs(title = "Histogram of Quadrats per Plot", x = "Number of Quadrats", y = "Frequency") +
+  theme_minimal()
+quad_hist
+high_quad <- quadrats_per_plot %>%
+  filter(Quadrats_per_Plot > 15)
+high_quad
+
+
+#How many plots were visited each year:
+visits_per_year <- fulldata %>%
+  distinct(Sample_Year, Plot) %>%
+  count(Sample_Year, name = "Plots_Visited_PerYear")
+
+# Most Common Species
+top_species <- fulldata %>%
+  group_by(Park, Elevation_Band, Vascular_Code, Species_Code) %>%
+  summarise(Species_Count = n(), .groups = 'drop') %>%
+  arrange(Park, Elevation_Band, Vascular_Code, desc(Species_Count)) %>%
+  group_by(Park, Elevation_Band, Vascular_Code) %>%
+  slice_max(Species_Count, n=3)
+top_species <- top_species[, c(1:4)]
+
+species_code_info <- fulldata %>%
+  select(Species_Code, Species_With_Authority) %>%
+  distinct()
+top_species$Species_Code <- as.character(top_species$Species_Code)
+species_code_info$Species_Code <- as.character(species_code_info$Species_Code)
+top_species_with_names <- top_species %>%
+  left_join(species_code_info, by = "Species_Code")
+top_species_with_names <- top_species_with_names[, c(1:5)]
+
+#What the top species were in each elevation band regardless of classification.
+
+top_species2 <- fulldata %>%
+  group_by(Park, Elevation_Band, Species_Code) %>%
+  summarise(Species_Count = n(), .groups = 'drop') %>%
+  arrange(Park, Elevation_Band, desc(Species_Count)) %>%
+  group_by(Park, Elevation_Band) %>%
+  slice_max(Species_Count, n=3)
+top_species2 <- top_species2[, c(1:3)]
+
+top_species2$Species_Code <- as.character(top_species2$Species_Code)
+species_code_info$Species_Code <- as.character(species_code_info$Species_Code)
+species_code_info <- fulldata %>%
+  select(Species_Code, Vascular_Code, Species_With_Authority) %>%
+  distinct()
+top_species_with_names2 <- top_species2 %>%
+  left_join(species_code_info, by = c("Species_Code"))
+top_species_with_names2 <- top_species_with_names2[, c(1:5)]
+
+
+load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_metadata.rdata")
+file.choose() #to get pathway
+library(mapview)
+library(sf)
+library(dplyr)
+
+out$plot_loc_summary 
+out$plot_sample
+
+plot_elevation_data <- out$plot_loc_summary[c(1,2,3)]
+plot_elevation_data
+
+#dataframe creation 
+veg_class_df <- out$plot_sample[c(1,3,4)]
+veg_class_df <- veg_class_df %>%
+  separate(Plot, into = c("Park", "EstYear", "Elevation_Band", "PlotID"), sep = "_", remove = FALSE)
+veg_class_df <- veg_class_df[, c(1,2,4,6,7)]
+veg_class_df
+#make a plot year column so you can join it 
+veg_class_df <- veg_class_df %>% 
+  mutate(Plot_Year = paste(Plot, Sample_Year, sep="_"))
+
+#exploration: how many veg classes and what are they? 
+#which ones are in which elevation class? 
+#are there any that are only in one park? 
+
+Classes <- veg_class_df %>%
+  distinct(Vegetation_Class) %>%
+  count(Vegetation_Class)
+Classes
+
+#maps
+plot(out$plot_loc_summary)
+mapview(out$plot_loc_summary)
+
+elev_class <- veg_class_df %>%
+  distinct(Park, Elevation_Band, Vegetation_Class) %>%
+  count(Park, Elevation_Band)
+
+elev_class_named <- veg_class_df %>%
+  distinct(Park, Elevation_Band, Vegetation_Class) %>%
+  group_by(Park, Elevation_Band) %>%
+  summarize(
+    n = n(),
+    Vegetation_Classes = paste(unique(Vegetation_Class), collapse = ", "))
+elev_class_named
+
+
+
+
+#making presence absence dataframes 
+library(vegan)
+library(ggplot2)
+library(dplyr)
+library(permute)
+library(lattice)
+library(tidyverse)
+library(readxl)
+
+fulldata <- read.csv("T:/Users/KPace/SWAN-Internship/Quadrat_Frequency.csv")
+taxa <- read.csv("T:/Users/KPace/SWAN-Internship/taxa.csv")
+load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_metadata.rdata")
+
+fulldata <- fulldata %>% mutate(Quad_Num = paste(Transect, Quadrat, sep = "_"))
+fulldata <- fulldata %>% mutate(Plot_Year = paste(Plot, Sample_Year, sep="_")) %>%
+  group_by(Plot) %>%
+  mutate(Quad_Total = n_distinct(Quad_Num))
+
+veg_class_df <- out$plot_sample[c(1,3,4)]
+veg_class_df <- veg_class_df %>%
+  separate(Plot, into = c("Park", "EstYear", "Elevation_Band", "PlotID"), sep = "_", remove = FALSE)
+veg_class_df <- veg_class_df[, c(1,2,4,6,7)]
+veg_class_df <- veg_class_df %>% mutate(Plot_Year = paste(Plot, Sample_Year, sep="_"))
+
+#Group by classification 
+lichens_only <- fulldata %>% filter(Vascular_Code %in% c("Lichen"))
+vascular_only <- fulldata %>% filter(Vascular_Code %in% c("Vascular"))
+nonvasc_only <- fulldata %>% filter(Vascular_Code %in% c("Nonvascular"))
+
+#create quadrat frequency dataframe 
+vasc_df <- vascular_only %>% 
+  group_by(Plot_Year, Species_Code) %>% 
+  summarise(Species_Quad_Count =n_distinct(Quad_Num)) %>% 
+  ungroup() 
+quad_abundance_df <- vasc_df %>%
+  pivot_wider(names_from = Species_Code, values_from = Species_Quad_Count, values_fill = 0)
+quad_freq_df <- quad_abundance_df %>%
+  mutate(across(where(is.numeric), ~ ifelse(. >0, . /15, .)))
+#long_form <- quad_freq_df %>%
+#pivot_longer(cols = -c(Plot_Year), 
+#names_to = "Species_Code",
+#values_to = "Quad_Frequency")
+
+#create presence absence DF
+presence_absence_df <- quad_abundance_df %>%
+  mutate(across(-Plot_Year, ~ifelse(. > 1, 1, .)))
+
+presence_absence_df <- presence_absence_df %>%
+  separate(Plot_Year, into = c("Park", "EstYear", "Elevation_Band", "PlotID", "Sample_Year"), sep = "_", remove = FALSE)
+
+#add veg class
+presence_absence_df <- presence_absence_df %>%
+  left_join(veg_class_df %>% select(Plot_Year, Vegetation_Class),
+            by = "Plot_Year")
+presence_absence_df$Elevation_Band <- gsub("03[SN]", "03", presence_absence_df$Elevation_Band)
+#maybe just use the longform data as the input for taxon ellipses dont add to overlay df? 
+
+
+#create quadrat frequency dataframe for lichens 
+lichens_df <- lichens_only %>% 
+  group_by(Plot_Year, Species_Code) %>% 
+  summarise(Species_Quad_Count =n_distinct(Quad_Num)) %>% 
+  ungroup() 
+lichensquad_abundance_df <- lichens_df %>%
+  pivot_wider(names_from = Species_Code, values_from = Species_Quad_Count, values_fill = 0)
+lichensquad_freq_df <- quad_abundance_df %>%
+  mutate(across(where(is.numeric), ~ ifelse(. >0, . /15, .)))
+#long_form <- quad_freq_df %>%
+#pivot_longer(cols = -c(Plot_Year), 
+#names_to = "Species_Code",
+#values_to = "Quad_Frequency")
+
+#create presence absence DF
+lichenspresence_absence_df <- lichensquad_abundance_df %>%
+  mutate(across(-Plot_Year, ~ifelse(. > 1, 1, .)))
+
+lichenspresence_absence_df <- lichenspresence_absence_df %>%
+  separate(Plot_Year, into = c("Park", "EstYear", "Elevation_Band", "PlotID", "Sample_Year"), sep = "_", remove = FALSE)
+
+#add veg class
+lichenspresence_absence_df <- lichenspresence_absence_df %>%
+  left_join(Viereck_env %>% select(Plot_Year, Vegetation_Class, Viereck.1, Viereck.2, Viereck.3, Viereck.4),
+            by = "Plot_Year")
+lichenspresence_absence_df$Elevation_Band <- gsub("03[SN]", "03", lichenspresence_absence_df$Elevation_Band)
+lichenspresence_absence_df <- lichenspresence_absence_df %>%
+  left_join(Viereck_env %>% select(Plot_Year, Plot),
+            by = "Plot_Year")
+
+
+write_xlsx(lichenspresence_absence_df, "T:/Users/KPace/SWAN-Internship/lichenspresence_absence_df.xlsx")
+
+
+#create quadrat frequency dataframe for nonvasc 
+nonvasc_df <- nonvasc_only %>% 
+  group_by(Plot_Year, Species_Code) %>% 
+  summarise(Species_Quad_Count =n_distinct(Quad_Num)) %>% 
+  ungroup() 
+nonvascquad_abundance_df <- nonvasc_df %>%
+  pivot_wider(names_from = Species_Code, values_from = Species_Quad_Count, values_fill = 0)
+nonvascquad_freq_df <- nonvascquad_abundance_df %>%
+  mutate(across(where(is.numeric), ~ ifelse(. >0, . /15, .)))
+#long_form <- quad_freq_df %>%
+#pivot_longer(cols = -c(Plot_Year), 
+#names_to = "Species_Code",
+#values_to = "Quad_Frequency")
+
+#create presence absence DF
+nonvascpresence_absence_df <- nonvascquad_abundance_df %>%
+  mutate(across(-Plot_Year, ~ifelse(. > 1, 1, .)))
+
+nonvascpresence_absence_df <- nonvascpresence_absence_df %>%
+  separate(Plot_Year, into = c("Park", "EstYear", "Elevation_Band", "PlotID", "Sample_Year"), sep = "_", remove = FALSE)
+
+#add veg class
+nonvascpresence_absence_df <- nonvascpresence_absence_df %>%
+  left_join(Viereck_env %>% select(Plot_Year, Vegetation_Class, Viereck.1, Viereck.2, Viereck.3, Viereck.4),
+            by = "Plot_Year")
+nonvascpresence_absence_df$Elevation_Band <- gsub("03[SN]", "03", nonvascpresence_absence_df$Elevation_Band)
+
+nonvascpresence_absence_df <- nonvascpresence_absence_df %>%
+  left_join(Viereck_env %>% select(Plot_Year, Plot),
+            by = "Plot_Year")
+
+write_xlsx(nonvascpresence_absence_df, "T:/Users/KPace/SWAN-Internship/nonvascpresence_absence_df.xlsx")
+
+
 
  
