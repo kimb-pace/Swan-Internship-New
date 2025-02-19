@@ -572,7 +572,7 @@ veg_class_df <- veg_class_df %>% mutate(Plot_Year = paste(Plot, Sample_Year, sep
 lichens_only <- fulldata %>% filter(Vascular_Code %in% c("Lichen"))
 vascular_only <- fulldata %>% filter(Vascular_Code %in% c("Vascular"))
 nonvasc_only <- fulldata %>% filter(Vascular_Code %in% c("Nonvascular"))
-
+ 
 #create quadrat frequency dataframe 
 vasc_df <- vascular_only %>% 
   group_by(Plot_Year, Species_Code) %>% 

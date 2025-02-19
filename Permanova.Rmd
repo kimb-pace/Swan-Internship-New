@@ -1120,7 +1120,7 @@ beetle_nonvasc_df <- nonvascpresence_absence_df %>%
 
 #verify everything has two sample visits 
 table(beetle_nonvasc_df$Park, beetle_nonvasc_df$Plot)
-
+ 
 #convert dataframe to a matrix so you can run permanova successfully 
 beetle_nonvasc_composition <- beetle_nonvasc_df[,c(13:219)]
 beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition) 
