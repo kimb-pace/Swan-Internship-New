@@ -296,7 +296,7 @@ alpine_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine
                        data = alpine_env, method = "bray", 
                        permutations = perm_design_alpine, 
                        by = "terms")
-
+          alpine_result
           #create permutation framework + results object 
           perms2 <- rbind(1:nrow(alpine_composition),
                 shuffleSet(n = nrow(alpine_composition), control = perm_design_alpine, nset = 999))
@@ -317,7 +317,7 @@ alpine_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine
           #calculate F values for permutations 
           results2 <- results2 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/20))
+            mutate(F.Park = (Park/1)/(Plot/17))
           head(results2)
           
           #calculate P value 
@@ -670,7 +670,7 @@ alpine_nonvasc_result <- adonis2(alpine_nonvasc_composition ~ Park + Plot,
                                 data = nonvasc_env_alpine, method = "bray", 
                                 permutations = perm_design_alpine_nonvasc, 
                                 by = "terms")
-
+alpine_nonvasc_result
 #create permutation object 
 perms2 <- rbind(1:nrow(alpine_nonvasc_composition),
                 shuffleSet(n = nrow(alpine_nonvasc_composition), control = perm_design_alpine_nonvasc, nset = 999))
