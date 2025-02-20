@@ -125,6 +125,152 @@ summary_df <- species_cor_sorted %>%
 
 
 
+#permanova test for alpine lichen 
+alpine_lichen_abundance_df
+
+alpine_abundance_balanced <- alpine_lichen_abundance_df %>%
+  filter(Plot_Year %in% alpine_lichen_df$Plot_Year)
+alpine_abundance_balanced <- alpine_abundance_balanced[-19, ]
+alpine_abundance_balanced <- alpine_abundance_balanced %>%
+  left_join(viereck %>% select(Plot_Year, Sample_Year), by = "Plot_Year")
+
+alpine_lichen_abundance_matrix <- alpine_abundance_balanced[,c(11:177)]
+alpine_lichen_abundance_matrix <- as.matrix(alpine_lichen_abundance_matrix) 
+
+
+alpine_lichen_abundance_env <- alpine_abundance_balanced[,c(1:9,178:179)]
+
+
+#recode time as visit 
+alpine_lichen_abundance_env <- alpine_lichen_abundance_env %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+#restrict permutations 
+perm_design_alpine_lichen = how(
+  plots = Plots(strata = alpine_lichen_abundance_env$Plot, type = c("free")),
+  within = Within(type = "none"),
+  nperm = 999)
+
+perm_design_alpine_lichen_time = how(
+  plots = Plots(strata = alpine_lichen_abundance_env$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+
+### Multivariate - presence absence composition 
+alpine_lichen_result <- adonis2(alpine_lichen_abundance_matrix ~ Park + Plot, 
+                                data = alpine_lichen_abundance_env, method = "bray", 
+                                permutations = perm_design_alpine_lichen, 
+                                by = "terms")
+
+alpine_lichen_result
+
+#create permutation object 
+perms4 <- rbind(1:nrow(alpine_lichen_abundance_matrix),
+                shuffleSet(n = nrow(alpine_lichen_abundance_matrix), control = perm_design_alpine_lichen, nset = 999))
+
+results4 <- matrix(nrow = nrow(perms4), ncol = 4)
+colnames(results4) <- c("Park", "Plot", "Residual", "Total")
+
+#loop 
+for (i in 1:nrow(perms4)) {
+  temp.data <- alpine_lichen_abundance_env[perms4[i, ], ]
+  temp <- adonis2(alpine_lichen_abundance_matrix ~ Park + Plot,
+                  data = temp.data,
+                  method = "bray",
+                  by = "terms",
+                  permutations = 0)
+  results4[i, ] <- t(temp$SumOfSqs)
+}
+
+#calculate F values for permutations 
+results4 <- results4 |>
+  data.frame() |>
+  mutate(F.Park = (Park/1)/(Plot/13))
+head(results4)
+
+#calculate P value 
+with(results4, sum(F.Park >= F.Park[1]) / length(F.Park))
+
+#interaction model for rest of term values 
+alpine_lichen_result_timecross <- adonis2(alpine_lichen_abundance_matrix ~ Park + Plot + Visit + Park*Visit, 
+                                          data = alpine_lichen_abundance_env, method = "bray", 
+                                          permutations = perm_design_alpine_lichen_time, 
+                                          by = "terms")
+alpine_lichen_result_timecross
+
+
+#to look for changes amongst viereck classes in alpine 
+alpine_lichen_perm <- adonis2(alpine_lichen_abundance_matrix ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                              data = alpine_lichen_abundance_env, method = "bray", 
+                              permutations = perm_design_alpine_lichen_time, 
+                              by = "terms")
+print(alpine_lichen_perm)
+
+
+
+
+#beta diversity 
+
+#based on park 
+alpine_lichen_dispersion_result <- betadisper(vegdist(alpine_lichen_abundance_matrix, 
+                                                      method = "bray"), alpine_lichen_abundance_env$Park)
+alpine_lichen_dispersion_result 
+permutest(alpine_lichen_dispersion_result, permutations = 999)
+
+#based on visit 
+alpine_lichen_dispersion_result2 <- betadisper(vegdist(alpine_lichen_abundance_matrix, 
+                                                       method = "bray"), alpine_lichen_abundance_env$Visit)
+alpine_lichen_dispersion_result2 
+permutest(alpine_lichen_dispersion_result2, permutations = 999)
+
+#based on viereck
+alpine_lichen_dispersion_result3 <- betadisper(vegdist(alpine_lichen_abundance_matrix, 
+                                                       method = "bray"), alpine_lichen_abundance_env$Viereck.3)
+alpine_lichen_dispersion_result3 
+permutest(alpine_lichen_dispersion_result3, permutations = 999)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #quad abundance open low shrub 
 
 openlow_lichen_abundance_df <- lichen_abundance_df %>% filter(Viereck.3 %in% c("Open Low Scrub"))
