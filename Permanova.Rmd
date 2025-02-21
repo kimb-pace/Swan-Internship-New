@@ -1940,8 +1940,6 @@ for (i in 1:nrow(perms19)) {
   results19[i, ] <- t(temp$SumOfSqs)
 }
 
-#results 
-#print(results19)
 
 #create F value column 
 results19 <- results19 |>

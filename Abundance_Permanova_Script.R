@@ -5,6 +5,9 @@ library(writexl)
 library(readr)
 library(tibble)
 library(dplyr)
+library(vegan)
+library(permute)
+library(lattice)
 
 #quick load of prepared dataframes
 lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
@@ -150,7 +153,7 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
           
           dwarfscrub_lichen_abundance_balanced <- lichen_abundance_df %>%
             filter(Plot_Year %in% dwarfscrub_df_lichen$Plot_Year)
-          dwarfscrub_lichen_df <- dwarfscrub_lichen_abundance_balanced 
+          dwarfscrub_df_lichens <- dwarfscrub_lichen_abundance_balanced 
           
                   dwarfscrub_composition_lichens <- dwarfscrub_df_lichens[,c(12:178)]
                   dwarfscrub_composition_lichens <- as.matrix(dwarfscrub_composition_lichens) 
@@ -165,7 +168,7 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
           
           dwarfscrub_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
             filter(Plot_Year %in% dwarfscrub_df_nonvasc$Plot_Year)
-          dwarfscrub_nonvasc_df <- dwarfscrub_nonvasc_abundance_balanced
+          dwarfscrub_df_nonvasc <- dwarfscrub_nonvasc_abundance_balanced
           
                   dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(12:218)]
                   dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc) 
@@ -238,7 +241,7 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
                       beetle_composition <- beetle_df[,c(8:281)]
                       beetle_composition <- as.matrix(beetle_composition) 
                       
-                      beetle_env <- beetle_env[,c(1:7)]
+                      beetle_env <- beetle_df[,c(1:7)]
             
                       beetle_env <- beetle_env %>%
                         arrange(Plot, Sample_Year) %>%
@@ -256,7 +259,7 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
             filter(Plot_Year %in% needle_df_lichen$Plot_Year)
           needle_lichen_df <- needle_lichen_abundance_balanced 
           
-                    needle_composition_lichen <- needle_df_lichen[,c(12:178)]
+                    needle_composition_lichen <- needle_df_lichen[,c(13:178)]
                     needle_composition_lichen <- as.matrix(needle_composition_lichen) 
                     
                     #create env_file 
@@ -268,15 +271,15 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
                       mutate(Visit = paste0("visit_", row_number())) %>%
                       ungroup()
           
-          needle_nonvasc_abundance_balanced <- needle_abundance_df %>%
+          needle_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
             filter(Plot_Year %in% needle_df_nonvasc$Plot_Year)
           needle_nonvasc_df <- needle_nonvasc_abundance_balanced
           
-                      needle_composition_nonvasc <- needle_df_nonvasc[,c(12:218)]
+                      needle_composition_nonvasc <- needle_df_nonvasc[,c(13:218)]
                       needle_composition_nonvasc <- as.matrix(needle_composition_nonvasc) 
                       
                       #create env_file 
-                      needle_env_nonvasc <- needle_df_nonvasc[,c(1:11)]
+                      needle_env_nonvasc <- needle_df_nonvasc[,c(1:13)]
                       
                       needle_env_nonvasc <- needle_env_nonvasc %>%
                         arrange(Plot, Sample_Year) %>%
@@ -307,7 +310,7 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
           
           forest_lichen_abundance_balanced <- lichen_abundance_df %>%
             filter(Plot_Year %in% forest_df_lichen$Plot_Year)
-          forest_lichen_df <- forest_lichen_abundance_balanced 
+          forest_df_lichens <- forest_lichen_abundance_balanced 
           
                     forest_composition_lichens <- forest_df_lichens[,c(12:178)]
                     forest_composition_lichens <- as.matrix(forest_composition_lichens) 
@@ -324,10 +327,10 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
             filter(Plot_Year %in% forest_df_nonvasc$Plot_Year)
           forest_nonvasc_df <- forest_nonvasc_abundance_balanced
           
-                    forest_composition_nonvasc <- forest_df_nonvasc[,c(12:218)]
+                    forest_composition_nonvasc <- forest_df_nonvasc[,c(13:218)]
                     forest_composition_nonvasc <- as.matrix(forest_composition_nonvasc) 
 
-                    forest_env_nonvasc <- forest_df_nonvasc[,c(1:11)]
+                    forest_env_nonvasc <- forest_df_nonvasc[,c(1:12)]
                     
                     forest_env_nonvasc <- forest_env_nonvasc %>%
                       arrange(Plot, Sample_Year) %>%
