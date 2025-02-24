@@ -19,7 +19,7 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
 lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
 alpine_lichen_abundance_df <- lichen_abundance_df %>% filter(Vegetation_Class %in% c("Alpine"))
 
-alpine_lichen_abundance_matrix <- alpine_lichen_abundance_df[,c(11:177)]
+alpine_lichen_abundance_matrix <- alpine_lichen_abundance_df[,c(12:178)]
 alpine_lichen_abundance_matrix <- as.matrix(alpine_lichen_abundance_matrix) 
 
 #lichen, colored by viereck 3
@@ -57,11 +57,24 @@ legend("bottomleft", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
        col = veg_colors, pch = 19)
-ordiarrows(mds_alpine_lichen_ab, groups = alpine_lichen_abundance_df$PlotID, levels = alpine_lichen_abundance_df$Sample_Year, col = 'blue')
+ordiarrows(mds_alpine_lichen_ab, groups = alpine_lichen_abundance_df$Plot, levels = alpine_lichen_abundance_df$Sample_Year, col = 'blue')
 #ordihull(mds_alpine_lichen_ab, groups = alpine_lichen_abundance_df$Park, draw ="polygon", label = TRUE)
 title("Lichen Species - Quadrat Abundance")
+
+#plotID labels
+text(mds_alpine_lichen_ab, display = "sites", labels = alpine_lichen_abundance_df$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("022", "999", "998")
+nmds_scores <- as.data.frame(scores(mds_alpine_lichen_ab, display = "sites"))
+nmds_scores$PlotID <- alpine_lichen_abundance_df$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
+#record plot 
 alpinelichen_plot_viereck <- recordPlot()
 
+#add species vector arrows 
 species_fit <- envfit(mds_alpine_lichen_ab, alpine_lichen_abundance_matrix, perm = 999)
 species_scores <- as.data.frame(species_fit$vectors$arrows)
 species_scores$Species_Code <- rownames(species_scores)
@@ -122,149 +135,6 @@ species_cor_sorted <-species_cor_sorted %>% distinct()
 summary_df <- species_cor_sorted %>%
   arrange(Loadings) %>%
   slice(c(1:10, (n()-9):n()))
-
-
-
-#permanova test for alpine lichen 
-alpine_lichen_abundance_df
-
-alpine_abundance_balanced <- alpine_lichen_abundance_df %>%
-  filter(Plot_Year %in% alpine_lichen_df$Plot_Year)
-alpine_abundance_balanced <- alpine_abundance_balanced[-19, ]
-alpine_abundance_balanced <- alpine_abundance_balanced %>%
-  left_join(viereck %>% select(Plot_Year, Sample_Year), by = "Plot_Year")
-
-alpine_lichen_abundance_matrix <- alpine_abundance_balanced[,c(11:177)]
-alpine_lichen_abundance_matrix <- as.matrix(alpine_lichen_abundance_matrix) 
-
-
-alpine_lichen_abundance_env <- alpine_abundance_balanced[,c(1:9,178:179)]
-
-
-#recode time as visit 
-alpine_lichen_abundance_env <- alpine_lichen_abundance_env %>%
-  arrange(Plot, Sample_Year) %>%
-  group_by(Plot) %>%
-  mutate(Visit = paste0("visit_", row_number())) %>%
-  ungroup()
-
-#restrict permutations 
-perm_design_alpine_lichen = how(
-  plots = Plots(strata = alpine_lichen_abundance_env$Plot, type = c("free")),
-  within = Within(type = "none"),
-  nperm = 999)
-
-perm_design_alpine_lichen_time = how(
-  plots = Plots(strata = alpine_lichen_abundance_env$Plot, type = c("free")),
-  within = Within(type = "series", mirror = FALSE),
-  nperm = 999)
-
-
-### Multivariate - presence absence composition 
-alpine_lichen_result <- adonis2(alpine_lichen_abundance_matrix ~ Park + Plot, 
-                                data = alpine_lichen_abundance_env, method = "bray", 
-                                permutations = perm_design_alpine_lichen, 
-                                by = "terms")
-
-alpine_lichen_result
-
-#create permutation object 
-perms4 <- rbind(1:nrow(alpine_lichen_abundance_matrix),
-                shuffleSet(n = nrow(alpine_lichen_abundance_matrix), control = perm_design_alpine_lichen, nset = 999))
-
-results4 <- matrix(nrow = nrow(perms4), ncol = 4)
-colnames(results4) <- c("Park", "Plot", "Residual", "Total")
-
-#loop 
-for (i in 1:nrow(perms4)) {
-  temp.data <- alpine_lichen_abundance_env[perms4[i, ], ]
-  temp <- adonis2(alpine_lichen_abundance_matrix ~ Park + Plot,
-                  data = temp.data,
-                  method = "bray",
-                  by = "terms",
-                  permutations = 0)
-  results4[i, ] <- t(temp$SumOfSqs)
-}
-
-#calculate F values for permutations 
-results4 <- results4 |>
-  data.frame() |>
-  mutate(F.Park = (Park/1)/(Plot/13))
-head(results4)
-
-#calculate P value 
-with(results4, sum(F.Park >= F.Park[1]) / length(F.Park))
-
-#interaction model for rest of term values 
-alpine_lichen_result_timecross <- adonis2(alpine_lichen_abundance_matrix ~ Park + Plot + Visit + Park*Visit, 
-                                          data = alpine_lichen_abundance_env, method = "bray", 
-                                          permutations = perm_design_alpine_lichen_time, 
-                                          by = "terms")
-alpine_lichen_result_timecross
-
-
-#to look for changes amongst viereck classes in alpine 
-alpine_lichen_perm <- adonis2(alpine_lichen_abundance_matrix ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
-                              data = alpine_lichen_abundance_env, method = "bray", 
-                              permutations = perm_design_alpine_lichen_time, 
-                              by = "terms")
-print(alpine_lichen_perm)
-
-
-
-
-#beta diversity 
-
-#based on park 
-alpine_lichen_dispersion_result <- betadisper(vegdist(alpine_lichen_abundance_matrix, 
-                                                      method = "bray"), alpine_lichen_abundance_env$Park)
-alpine_lichen_dispersion_result 
-permutest(alpine_lichen_dispersion_result, permutations = 999)
-
-#based on visit 
-alpine_lichen_dispersion_result2 <- betadisper(vegdist(alpine_lichen_abundance_matrix, 
-                                                       method = "bray"), alpine_lichen_abundance_env$Visit)
-alpine_lichen_dispersion_result2 
-permutest(alpine_lichen_dispersion_result2, permutations = 999)
-
-#based on viereck
-alpine_lichen_dispersion_result3 <- betadisper(vegdist(alpine_lichen_abundance_matrix, 
-                                                       method = "bray"), alpine_lichen_abundance_env$Viereck.3)
-alpine_lichen_dispersion_result3 
-permutest(alpine_lichen_dispersion_result3, permutations = 999)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -446,6 +316,16 @@ legend("bottomleft", title = "Site Classification",
 ordiarrows(mds_alpine, groups = alpine_df$PlotID, levels = alpine_df$Sample_Year, col = 'blue')
 ordihull(mds_alpine, groups = alpine_df$Park, draw ="polygon", label = TRUE)
 title("Vascular Species")
+
+#plotID labels
+text(mds_alpine, display = "sites", labels = alpine_df$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("001", "002", "003", "006")
+nmds_scores <- as.data.frame(scores(mds_alpine, display = "sites"))
+nmds_scores$PlotID <- alpine_df$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
 
 alpinevasc_plot_viereck <- recordPlot()
 alpinevasc_plot_viereck
@@ -970,6 +850,16 @@ ordiarrows(mds_forest_lichen,
            levels = forest_df_lichens$Sample_Year, col = 'blue')
 ordihull(mds_forest_lichen, groups = forest_df_lichens$Park, draw ="polygon", label = TRUE)
 title("Lichen Species")
+#plotID labels
+text(mds_forest_lichen, display = "sites", labels = forest_df_lichens$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_forest_lichen, display = "sites"))
+nmds_scores$PlotID <- forest_df_lichens$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
 forestlichen_plot_viereck <- recordPlot()
 
 #axis2 scores
@@ -1054,6 +944,18 @@ ordiarrows(mds_forest_nonvasc,
            levels = forest_df_nonvasc$Sample_Year, col = 'blue')
 ordihull(mds_forest_nonvasc, groups = forest_df_nonvasc$Park, draw ="polygon", label = TRUE)
 title("Nonvascular Species")
+
+#plotID labels
+text(mds_forest_nonvasc, display = "sites", labels = forest_df_nonvasc$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_forest_nonvasc, display = "sites"))
+nmds_scores$PlotID <- forest_df_nonvasc$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
+
 forestnonvasc_plot_viereck <- recordPlot()
 
 
@@ -1142,6 +1044,21 @@ ordiarrows(mds_needle,
            levels = needle_df$Sample_Year, col = 'blue')
 ordihull(mds_needle, groups = needle_df$Park, draw ="polygon", label = TRUE)
 title("Vascular Species")
+
+#plotID labels
+text(mds_needle, display = "sites", labels = needle_df$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_needle, display = "sites"))
+nmds_scores$PlotID <- needle_df$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
+
+
+
+
 needlevasc_plot_viereck <- recordPlot()
 needlevasc_plot_viereck
 
@@ -1178,7 +1095,7 @@ legend("bottomleft", title = "Site Classification",
        ncol=1,
        col = veg_colors, pch = 19)
 ordiarrows(mds_needle_lichens, 
-           groups = needle_df_lichens$PlotID, 
+           groups = needle_df_lichens$Plot, 
            levels = needle_df_lichens$Sample_Year, col = 'blue')
 ordihull(mds_needle_lichens, groups = needle_df_lichens$Park, draw ="polygon", label = TRUE)
 ordihull(mds_needle_lichens, groups = needle_df_lichens$Elevation_Band, draw ="polygon", label = TRUE)
@@ -1189,6 +1106,17 @@ legend("bottomright", title = "Elevation Band",
 #       legend=c("01 (<450 m)", "02 (450-900 m)", "03 (>900 m)"),
 #       ncol=1)
 title("Lichen Species")
+
+#plotID labels
+text(mds_needle_lichens, display = "sites", labels = needle_df_lichens$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_needle_lichens, display = "sites"))
+nmds_scores$PlotID <- needle_df_lichens$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
 needlelichen_plot_viereck <- recordPlot()
 needlelichen_plot_viereck
 
@@ -1370,10 +1298,21 @@ legend("bottomleft", title = "Site Classification",
        ncol=1,
        col = veg_colors, pch = 19)
 ordiarrows(mds_beetle, 
-           groups = beetle_df$PlotID, 
+           groups = beetle_df$Plot, 
            levels = beetle_df$Sample_Year, col = 'blue')
 ordihull(mds_beetle, groups = beetle_df$Park, draw ="polygon", label = TRUE)
 title("Vascular Species")
+
+#plotID labels
+text(mds_beetle, display = "sites", labels = beetle_df$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_beetle, display = "sites"))
+nmds_scores$PlotID <- beetle_df$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
 beetlevasc_plot_viereck <- recordPlot()
 beetlevasc_plot_viereck
 
@@ -1408,10 +1347,20 @@ legend("bottomleft", title = "Site Classification",
        ncol=1,
        col = veg_colors, pch = 19)
 ordiarrows(mds_beetle_lichen, 
-           groups = beetle_lichen_df$PlotID, 
+           groups = beetle_lichen_df$Plot, 
            levels = beetle_lichen_df$Sample_Year, col = 'blue')
 ordihull(mds_beetle_lichen, groups = beetle_lichen_df$Park, draw ="polygon", label = TRUE)
 title("Lichen Species")
+#plotID labels
+text(mds_beetle_lichen, display = "sites", labels = beetle_lichen_df$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_beetle_lichen, display = "sites"))
+nmds_scores$PlotID <- beetle_lichen_df$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
 beetle_lichen_plot_viereck <- recordPlot()
 beetle_lichen_plot_viereck
 
@@ -1446,10 +1395,20 @@ legend("bottomleft", title = "Site Classification",
        ncol=1,
        col = veg_colors, pch = 19)
 ordiarrows(mds_beetle_nonvasc, 
-           groups = beetle_nonvasc_df$PlotID, 
+           groups = beetle_nonvasc_df$Plot, 
            levels = beetle_nonvasc_df$Sample_Year, col = 'blue')
 ordihull(mds_beetle_nonvasc, groups = beetle_nonvasc_df$Park, draw ="polygon", label = TRUE)
 title("Nonvascular Species")
+#plotID labels
+text(mds_beetle_nonvasc, display = "sites", labels = beetle_nonvasc_df$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_beetle_nonvasc, display = "sites"))
+nmds_scores$PlotID <- beetle_nonvasc_df$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
 beetle_nonvasc_plot_viereck <- recordPlot()
 beetle_nonvasc_plot_viereck
 
@@ -1508,15 +1467,22 @@ text(x = par("usr")[2],
 points(scores(mds_openlow, display = "sites"),
        col = veg_colors[openlow_df$Viereck.3],
        pch = 19)
-legend("bottomleft", title = "Site Classification",
-       legend=names(veg_colors),
-       ncol=1,
-       col = veg_colors, pch = 19)
 ordiarrows(mds_openlow, 
-           groups = openlow_df$PlotID, 
+           groups = openlow_df$Plot, 
            levels = openlow_df$Sample_Year, col = 'blue')
 ordihull(mds_openlow, groups = openlow_df$Park, draw ="polygon", label = TRUE)
 title("Vascular Species")
+
+#plotID labels
+text(mds_openlow, display = "sites", labels = openlow_df$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_openlow, display = "sites"))
+nmds_scores$PlotID <- openlow_df$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
 openlowvasc_plot_viereck <- recordPlot()
 openlowvasc_plot_viereck
 
@@ -1580,10 +1546,21 @@ points(scores(mds_openlow_lichen, display = "sites"),
 #       ncol=1,
 #       col = veg_colors, pch = 19)
 ordiarrows(mds_openlow_lichen, 
-           groups = openlow_df_lichen$PlotID, 
+           groups = openlow_df_lichen$Plot, 
            levels = openlow_df_lichen$Sample_Year, col = 'blue')
 ordihull(mds_openlow_lichen, groups = openlow_df_lichen$Park, draw ="polygon", label = TRUE)
 title("Lichen Species")
+
+#plotID labels
+text(mds_openlow_lichen, display = "sites", labels = openlow_df_lichen$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_openlow_lichen, display = "sites"))
+nmds_scores$PlotID <- openlow_df_lichen$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
 openlow_lichen_plot_viereck <- recordPlot()
 openlow_lichen_plot_viereck
 
@@ -1654,27 +1631,6 @@ summary_df <- species_cor_sorted %>%
   slice(c(1:10, (n()-9):n()))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #nonvasc
 mds_openlow_nonvasc <- metaMDS(openlow_nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
 length(unique(openlow_df_nonvasc[["Plot"]])) #25 
@@ -1704,9 +1660,20 @@ points(scores(mds_openlow_nonvasc, display = "sites"),
 #       ncol=1,
 #       col = veg_colors, pch = 19)
 ordiarrows(mds_openlow_nonvasc, 
-           groups = openlow_df_nonvasc$PlotID, 
+           groups = openlow_df_nonvasc$Plot, 
            levels = openlow_df_nonvasc$Sample_Year, col = 'blue')
 ordihull(mds_openlow_nonvasc, groups = openlow_df_nonvasc$Park, draw ="polygon", label = TRUE)
+
+#plotID labels
+text(mds_openlow_nonvasc, display = "sites", labels = openlow_df_nonvasc$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_openlow_nonvasc, display = "sites"))
+nmds_scores$PlotID <- openlow_df_nonvasc$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
 title("Nonvascular Species")
 beetle_nonvasc_plot_viereck <- recordPlot()
 beetle_nonvasc_plot_viereck
