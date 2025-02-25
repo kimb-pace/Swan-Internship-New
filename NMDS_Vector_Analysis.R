@@ -8,6 +8,31 @@ library(readr)
 library(dplyr)
 library(tibble)
 
+
+
+load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_metadata.rdata")
+file.choose() #to get pathway
+library(mapview)
+library(sf)
+library(dplyr)
+
+out$plot_loc_summary 
+out$plot_sample
+
+plot_elevation_data <- out$plot_loc_summary[c(1,2,3)]
+plot_elevation_data
+
+#maps
+plot(out$plot_loc_summary)
+mapview(out$plot_loc_summary)
+
+selected_plots <- c("KATM_2009_02_006", "KATM_2011_03_022")
+filtered_data <- out$plot_loc_summary %>% filter(ID %in% selected_plots)
+mapview(filtered_data)
+
+
+
+
 #quick load of prepared dataframes - presence_absence
 alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine_df.xlsx")
 alpine_lichen_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine_lichen_df.xlsx")

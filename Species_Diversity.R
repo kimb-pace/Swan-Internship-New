@@ -494,6 +494,10 @@ top_species_with_names2 <- top_species2 %>%
 top_species_with_names2 <- top_species_with_names2[, c(1:5)]
 
 
+
+
+
+
 load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_metadata.rdata")
 file.choose() #to get pathway
 library(mapview)
