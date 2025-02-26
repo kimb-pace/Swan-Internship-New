@@ -10,6 +10,9 @@ library(tibble)
 
 
 
+
+
+
 load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_metadata.rdata")
 file.choose() #to get pathway
 library(mapview)
@@ -30,7 +33,7 @@ selected_plots <- c("KATM_2009_02_006", "KATM_2011_03_022")
 filtered_data <- out$plot_loc_summary %>% filter(ID %in% selected_plots)
 mapview(filtered_data)
 
-
+write_xlsx(alpine_env, "C:/Users/kmpace/Desktop/alpine_env_sprich.xlsx")
 
 
 #quick load of prepared dataframes - presence_absence
@@ -42,7 +45,9 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
 
 #quad abundance alpine 
 lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
-alpine_lichen_abundance_df <- lichen_abundance_df %>% filter(Vegetation_Class %in% c("Alpine"))
+
+alpine_lichen_abundance_df <- lichen_abundance_df %>%
+  filter(Plot_Year %in% alpine_lichen_df$Plot_Year)
 
 alpine_lichen_abundance_matrix <- alpine_lichen_abundance_df[,c(12:178)]
 alpine_lichen_abundance_matrix <- as.matrix(alpine_lichen_abundance_matrix) 
@@ -60,20 +65,19 @@ names(veg_colors) <- unique(alpine_lichen_abundance_df$Viereck.3)
 dev.off()
 ordiplot(mds_alpine_lichen_ab, type = "n")
 xlim <- c(-1.5, 1)
-ylim <- c(-1.5, 1.5)
-plot(mds_alpine_lichen_ab, type = "n", xlim = xlim, ylim = ylim)
-
+ylim <- c(-1.5, 1)
+plot(mds_alpine_lichen_ab, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4)
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
-     labels = "Stress = 0.11",
+     labels = "Stress = 0.10",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
      labels = "2",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 points(scores(mds_alpine_lichen_ab, display = "sites"),
        col = veg_colors[alpine_lichen_abundance_df$Viereck.3],
@@ -81,10 +85,10 @@ points(scores(mds_alpine_lichen_ab, display = "sites"),
 legend("bottomleft", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
-       col = veg_colors, pch = 19)
+       col = veg_colors, pch = 19, cex = 1.3)
 ordiarrows(mds_alpine_lichen_ab, groups = alpine_lichen_abundance_df$Plot, levels = alpine_lichen_abundance_df$Sample_Year, col = 'blue')
-#ordihull(mds_alpine_lichen_ab, groups = alpine_lichen_abundance_df$Park, draw ="polygon", label = TRUE)
-title("Lichen Species - Quadrat Abundance")
+ordihull(mds_alpine_lichen_ab, groups = alpine_lichen_abundance_df$Park, draw ="polygon", label = TRUE)
+title("Lichen Species")
 
 #plotID labels
 text(mds_alpine_lichen_ab, display = "sites", labels = alpine_lichen_abundance_df$PlotID, col = "black", cex = 0.7, pos = 4)
@@ -160,6 +164,283 @@ species_cor_sorted <-species_cor_sorted %>% distinct()
 summary_df <- species_cor_sorted %>%
   arrange(Loadings) %>%
   slice(c(1:10, (n()-9):n()))
+
+
+
+
+
+
+#quad abundance alpine vascular NMDS 
+#quad abundance alpine 
+vasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_vascular.xlsx")
+
+alpine_vasc_abundance_df <- vasc_abundance_df %>%
+  filter(Plot_Year %in% alpine_df$Plot_Year)
+
+alpine_vasc_abundance_matrix <- alpine_vasc_abundance_df[,c(8:281)]
+alpine_vasc_abundance_matrix <- as.matrix(alpine_vasc_abundance_matrix) 
+
+mds_alpine_vasc_ab <- metaMDS(alpine_vasc_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+#ordination information for caption (#plots, #iterations, stress value, if it converged)
+length(unique(alpine_vasc_abundance_df[["Plot"]]))
+mds_alpine_vasc_ab$stress
+mds_alpine_vasc_ab$iters
+mds_alpine_vasc_ab$converged
+
+veg_colors <- c("darkorange", "blue4", "seagreen3", "firebrick3")
+names(veg_colors) <- unique(alpine_vasc_abundance_df$Viereck.3)
+dev.off()
+ordiplot(mds_alpine_vasc_ab, type = "n")
+xlim <- c(-1, 1.5)
+ylim <- c(-1, 1)
+plot(mds_alpine_vasc_ab, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4)
+
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.10",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+points(scores(mds_alpine_vasc_ab, display = "sites"),
+       col = veg_colors[alpine_vasc_abundance_df$Viereck.3],
+       pch = 19)
+legend("bottomright", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19, cex = 1.3)
+ordiarrows(mds_alpine_vasc_ab, groups = alpine_vasc_abundance_df$Plot, levels = alpine_vasc_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_alpine_vasc_ab, groups = alpine_vasc_abundance_df$Park, draw ="polygon", label = TRUE)
+title("Vascular Species")
+
+#plotID labels
+text(mds_alpine_vasc_ab, display = "sites", labels = alpine_vasc_abundance_df$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("022", "999", "998")
+nmds_scores <- as.data.frame(scores(mds_alpine_vasc_ab, display = "sites"))
+nmds_scores$PlotID <- alpine_vasc_abundance_df$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
+#record plot 
+alpinelichen_plot_viereck <- recordPlot()
+
+#add species vector arrows 
+species_fit <- envfit(mds_alpine_vasc_ab, alpine_vasc_abundance_matrix, perm = 999)
+species_scores <- as.data.frame(species_fit$vectors$arrows)
+species_scores$Species_Code <- rownames(species_scores)
+
+arrows(0,0,species_scores$NMDS1, species_scores$NMDS2, length = 0.1, col = "red")
+text(species_scores$NMDS1, species_scores$NMDS2, labels = species_scores$Species_Code, 
+     col = "red", pos = c(3, 1, 4), offset = 0.5)
+
+selected_species <- c("EMNI", "GEGL", "ARARA2", "FEBR", "ANFR", "DROC")
+filtered_scores <- species_scores %>% filter(Species_Code %in% selected_species)
+arrows(0, 0, filtered_scores$NMDS1, filtered_scores$NMDS2, length = 0.1, col = "red")
+text(filtered_scores$NMDS1, filtered_scores$NMDS2, labels = filtered_scores$Species_Code, 
+     col = "red", pos = c(4, 3, 1, 2), offset = 0.5)
+
+#axis2 scores
+axis2_scores <- scores(mds_alpine_vasc_ab, display = "sites")[, 2]
+species_cor <- apply(alpine_vasc_abundance_matrix, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+#axis1 scores 
+axis1_scores <- scores(mds_alpine_vasc_ab, display = "sites")[, 1]
+species_cor <- apply(alpine_vasc_abundance_matrix, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+
+
+
+
+#quad abundance alpine 
+nonvasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_nonvasc.xlsx")
+
+alpine_nonvasc_abundance_df <- nonvasc_abundance_df %>%
+  filter(Plot_Year %in% alpine_nonvasc_df$Plot_Year)
+
+alpine_nonvasc_abundance_matrix <- alpine_nonvasc_abundance_df[,c(12:218)]
+alpine_nonvasc_abundance_matrix <- as.matrix(alpine_nonvasc_abundance_matrix) 
+
+#lichen, colored by viereck 3
+mds_alpine_nonvasc_ab <- metaMDS(alpine_nonvasc_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+#ordination information for caption (#plots, #iterations, stress value, if it converged)
+length(unique(alpine_nonvasc_abundance_df[["Plot"]]))
+mds_alpine_nonvasc_ab$stress
+mds_alpine_nonvasc_ab$iters
+mds_alpine_nonvasc_ab$converged
+
+veg_colors <- c("darkorange", "blue4", "seagreen3", "firebrick3", "skyblue2")
+names(veg_colors) <- unique(alpine_nonvasc_abundance_df$Viereck.3)
+dev.off()
+ordiplot(mds_alpine_nonvasc_ab, type = "n")
+xlim <- c(-1, 1)
+ylim <- c(-1.5, 1)
+plot(mds_alpine_nonvasc_ab, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.13",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+points(scores(mds_alpine_nonvasc_ab, display = "sites"),
+       col = veg_colors[alpine_nonvasc_abundance_df$Viereck.3],
+       pch = 19)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19, cex = 1.3)
+ordiarrows(mds_alpine_nonvasc_ab, groups = alpine_nonvasc_abundance_df$Plot, levels = alpine_nonvasc_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_alpine_nonvasc_ab, groups = alpine_nonvasc_abundance_df$Park, draw ="polygon", label = TRUE)
+title("Nonvascular Species")
+
+#plotID labels
+text(mds_alpine_nonvasc_ab, display = "sites", labels = alpine_nonvasc_abundance_df$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("022", "999", "998")
+nmds_scores <- as.data.frame(scores(mds_alpine_nonvasc_ab, display = "sites"))
+nmds_scores$PlotID <- alpine_nonvasc_abundance_df$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
+#record plot 
+alpinenonvasc_plot_viereck <- recordPlot()
+
+#add species vector arrows 
+species_fit <- envfit(mds_alpine_nonvasc_ab, alpine_nonvasc_abundance_matrix, perm = 999)
+species_scores <- as.data.frame(species_fit$vectors$arrows)
+species_scores$Species_Code <- rownames(species_scores)
+
+arrows(0,0,species_scores$NMDS1, species_scores$NMDS2, length = 0.1, col = "red")
+text(species_scores$NMDS1, species_scores$NMDS2, labels = species_scores$Species_Code, 
+     col = "red", pos = c(3, 1, 4), offset = 0.5)
+
+selected_species <- c("CLGR13", "UMHY2", "STERE2", "CLMA12", "UMHYH", "THAMN3", 
+                      "FLCU", "BRDI60", "ALOC60", "CEFA60", "STVE60")
+filtered_scores <- species_scores %>% filter(Species_Code %in% selected_species)
+arrows(0, 0, filtered_scores$NMDS1, filtered_scores$NMDS2, length = 0.1, col = "red")
+text(filtered_scores$NMDS1, filtered_scores$NMDS2, labels = filtered_scores$Species_Code, 
+     col = "red", pos = c(4), offset = 0.5)
+
+#axis2 scores
+axis2_scores <- scores(mds_alpine_nonvasc_ab, display = "sites")[, 2]
+species_cor <- apply(alpine_nonvasc_abundance_matrix, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+#axis1 scores 
+axis1_scores <- scores(mds_alpine_nonvasc_ab, display = "sites")[, 1]
+species_cor <- apply(alpine_nonvasc_abundance_matrix, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -259,33 +540,6 @@ summary_df <- species_cor_sorted %>%
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #turn into matrices for NMDS 
 alpine_composition <- alpine_df[,c(7:280)]
 alpine_composition <- as.matrix(alpine_composition) 
@@ -369,19 +623,19 @@ dev.off()
 ordiplot(mds_alpine_lichen, type = "n")
 xlim <- c(-1.5, 1)
 ylim <- c(-1.5, 1.5)
-plot(mds_alpine_lichen, type = "n", xlim = xlim, ylim = ylim)
+plot(mds_alpine_lichen, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4)
 
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
      labels = "Stress = 0.09",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
-     labels = "2",
+     labels = "1",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 points(scores(mds_alpine_lichen, display = "sites"),
        col = veg_colors[alpine_lichen_df$Viereck.3],
@@ -389,10 +643,10 @@ points(scores(mds_alpine_lichen, display = "sites"),
 legend("bottomleft", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
-       col = veg_colors, pch = 19)
-ordiarrows(mds_alpine_lichen, groups = alpine_lichen_df$PlotID, levels = alpine_lichen_df$Sample_Year, col = 'blue')
+       col = veg_colors, pch = 19, cex = 1.3)
+ordiarrows(mds_alpine_lichen, groups = alpine_lichen_df$Plot, levels = alpine_lichen_df$Sample_Year, col = 'blue')
 ordihull(mds_alpine_lichen, groups = alpine_lichen_df$Park, draw ="polygon", label = TRUE)
-title("Lichen Species")
+title("Lichen Species - Presence/Absence")
 alpinelichen_plot_viereck <- recordPlot()
 
 
@@ -457,17 +711,23 @@ veg_colors <- c("darkorange", "blue4", "seagreen3", "firebrick3", "skyblue2")
 names(veg_colors) <- unique(alpine_nonvasc_df$Viereck.3)
 dev.off()
 ordiplot(mds_alpine_nonvasc, type = "n")
+
+xlim <- c(-1.5, 1)
+ylim <- c(-1.5, 1.5)
+plot(mds_alpine_nonvasc, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4)
+     
+     
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
      labels = "Stress = 0.12",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
      labels = "3",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 points(scores(mds_alpine_nonvasc, display = "sites"),
        col = veg_colors[alpine_nonvasc_df$Viereck.3],
@@ -475,7 +735,9 @@ points(scores(mds_alpine_nonvasc, display = "sites"),
 legend("bottomleft", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
-       col = veg_colors, pch = 19)
+       col = veg_colors, pch = 19, cex = 1.3)
+
+
 #only katmai arrows 
 ordiarrows(mds_alpine_nonvasc, 
            groups = alpine_nonvasc_df$PlotID[alpine_nonvasc_df$Park == "KATM"], 

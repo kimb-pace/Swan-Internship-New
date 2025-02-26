@@ -221,8 +221,6 @@ alpine_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine
             alpine_env <- alpine_df[,c(1:6, 281:283)]
             alpine_env <- alpine_env %>%
               left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
-            alpine_env <- alpine_env %>%
-              left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
             #create visit column 
             alpine_env <- alpine_env %>%
               arrange(Plot, Sample_Year) %>%
