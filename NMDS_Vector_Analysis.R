@@ -13,14 +13,25 @@ library(tibble)
 
 
 
-load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_metadata.rdata")
+load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_fire.rdata")
+loaded_objects <- ls()
+print(loaded_objects)
+
+plot_fire_df <- as.data.frame(plot_fire)
+
+
 file.choose() #to get pathway
 library(mapview)
 library(sf)
 library(dplyr)
 
+
+
+
 out$plot_loc_summary 
 out$plot_sample
+
+
 
 plot_elevation_data <- out$plot_loc_summary[c(1,2,3)]
 plot_elevation_data
@@ -1555,47 +1566,126 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
 #            by = "Plot_Year")
 
 
+beetle_vasc_abundance_df <- vasc_abundance_df %>%
+  filter(Plot_Year %in% beetle_df$Plot_Year)
+
+beetle_vasc_abundance_matrix <- beetle_vasc_abundance_df[,c(8:281)]
+beetle_vasc_abundance_matrix <- as.matrix(beetle_vasc_abundance_matrix) 
+
+
+beetle_lichen_abundance_df <- lichen_abundance_df %>%
+  filter(Plot_Year %in% beetle_lichen_df$Plot_Year)
+
+beetle_lichen_abundance_matrix <- beetle_lichen_abundance_df[,c(12:178)]
+beetle_lichen_abundance_matrix <- as.matrix(beetle_lichen_abundance_matrix) 
+
+
+beetle_nonvasc_abundance_df <- nonvasc_abundance_df %>%
+  filter(Plot_Year %in% beetle_nonvasc_df$Plot_Year)
+
+beetle_nonvasc_abundance_matrix <- beetle_nonvasc_abundance_df[,c(12:218)]
+beetle_nonvasc_abundance_matrix <- as.matrix(beetle_nonvasc_abundance_matrix) 
+
+
+
+
+
+#color by canopy cover gradient 
+canopy_cover <- read_csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Canopy_Cover_PtInt.csv")
+canopy_cover <- canopy_cover %>%
+  mutate(Plot_Year = paste(Plot, Sample_Year, sep = "_")) %>%
+  group_by(Plot_Year) %>%
+  mutate(Percent_Cover = (sum(hits) / 177) * 100) %>% 
+  ungroup()
+
+
+beetle_vasc_abundance_df <- beetle_vasc_abundance_df %>%
+  left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
+beetle_vasc_abundance_df <- beetle_vasc_abundance_df %>% distinct()
+
+beetle_vasc_abundance_matrix <- beetle_vasc_abundance_df[,c(8:281)]
+beetle_vasc_abundance_matrix <- as.matrix(beetle_vasc_abundance_matrix) 
+
+
+
+mds_beetle_ab_CC <- metaMDS(beetle_vasc_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+nmds_scores <- scores(mds_beetle_ab_CC, display = "sites")
+nmds_scores <- as.data.frame(nmds_scores)
+nmds_scores$Plot_Year <- beetle_vasc_abundance_df$Plot_Year
+nmds_scores$Percent_Cover <- beetle_vasc_abundance_df$Percent_Cover
+color_gradient <- colorRampPalette(c("blue", "red"))(100)
+point_colors <- color_gradient[cut(nmds_scores$Percent_Cover, breaks = 100)]
+ordiplot(mds_beetle_ab_CC, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Vascular Species", cex.main = 2)
+points(nmds_scores$NMDS1, nmds_scores$NMDS2, col = point_colors, pch = 19, cex = 1.5)
+legend("bottomleft", legend = round(range(nmds_scores$Percent_Cover), 2),
+       fill = color_gradient[c(1, 100)], title = "Percent Cover", bty = "n")
+
+
+ordiplot(mds_beetle_ab_CC, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Vascular Species", cex.main = 2)
+points(nmds_scores$NMDS1, nmds_scores$NMDS2, col =  "black", pch = 19, cex = 1)
+ordisurf(mds_beetle_ab_CC, beetle_vasc_abundance_df$Percent_Cover, method = "REML", add = TRUE, col = "blue")
+legend("topright", legend = "Canopy Cover Percent", col = "blue", lty = 1, bty = "n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #vascualar
-mds_beetle <- metaMDS(beetle_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(beetle_df[["Plot"]])) #25 
-mds_beetle$stress 
-mds_beetle$iters #92
+mds_beetle_ab <- metaMDS(beetle_vasc_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(beetle_vasc_abundance_df[["Plot"]])) #15 
+mds_beetle_ab$stress 
+mds_beetle_ab$iters #107
 veg_colors <- c("blue4", "seagreen3")
-names(veg_colors) <- unique(beetle_df$Viereck.3)
+names(veg_colors) <- unique(beetle_vasc_abundance_df$Viereck.3)
 dev.off()
-ordiplot(mds_beetle, type = "n")
+
+xlim <- c(-1.5, 1.5)
+ylim <- c(-1, 1)
+ordiplot(mds_beetle_ab, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Vascular Species", cex.main = 2)
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
      labels = "Stress = 0.07",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
-     labels = "1",
+     labels = "2",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
-points(scores(mds_beetle, display = "sites"),
-       col = veg_colors[beetle_df$Viereck.3],
+points(scores(mds_beetle_ab, display = "sites"),
+       col = veg_colors[beetle_vasc_abundance_df$Viereck.3],
        pch = 19)
-legend("bottomleft", title = "Site Classification",
+legend("bottomright", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
-       col = veg_colors, pch = 19)
-ordiarrows(mds_beetle, 
-           groups = beetle_df$Plot, 
-           levels = beetle_df$Sample_Year, col = 'blue')
-ordihull(mds_beetle, groups = beetle_df$Park, draw ="polygon", label = TRUE)
-title("Vascular Species")
+       col = veg_colors, pch = 19,
+       cex = 1.3)
+ordiarrows(mds_beetle_ab, 
+           groups = beetle_vasc_abundance_df$Plot, 
+           levels = beetle_vasc_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_beetle_ab, groups = beetle_vasc_abundance_df$Park, draw ="polygon", label = TRUE)
+#title("Vascular Species")
 
 #plotID labels
-text(mds_beetle, display = "sites", labels = beetle_df$PlotID, col = "black", cex = 0.7, pos = 4)
+text(mds_beetle_ab, display = "sites", labels = beetle_vasc_abundance_df$PlotID, col = "black", cex = 0.7, pos = 4)
 #adding only select labels 
 selected_plots <- c("116", "S980")
-nmds_scores <- as.data.frame(scores(mds_beetle, display = "sites"))
-nmds_scores$PlotID <- beetle_df$PlotID
+nmds_scores <- as.data.frame(scores(mds_beetle_ab, display = "sites"))
+nmds_scores$PlotID <- beetle_vasc_abundance_df$PlotID
 selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
 text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
      col = "black", cex = 0.7, pos = 4)
@@ -1606,44 +1696,47 @@ beetlevasc_plot_viereck
 
 
 #lichen
-mds_beetle_lichen <- metaMDS(beetle_lichen_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(beetle_lichen_df[["Plot"]])) #25 
-mds_beetle_lichen$stress 
-mds_beetle_lichen$iters #92
+mds_beetle_lichen_ab <- metaMDS(beetle_lichen_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(beetle_lichen_abundance_df[["Plot"]])) #25 
+mds_beetle_lichen_ab$stress 
+mds_beetle_lichen_ab$iters #131
 veg_colors <- c("blue4", "seagreen3")
-names(veg_colors) <- unique(beetle_lichen_df$Viereck.3)
+names(veg_colors) <- unique(beetle_lichen_abundance_df$Viereck.3)
 dev.off()
-ordiplot(mds_beetle_lichen, type = "n")
+xlim <- c(-1.5, 1.5)
+ylim <- c(-1, 1)
+ordiplot(mds_beetle_lichen_ab, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Lichen Species", cex.main = 2)
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
-     labels = "Stress = 0.11",
+     labels = "Stress = 0.13",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
-     labels = "1",
+     labels = "2",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
-points(scores(mds_beetle_lichen, display = "sites"),
-       col = veg_colors[beetle_lichen_df$Viereck.3],
+points(scores(mds_beetle_lichen_ab, display = "sites"),
+       col = veg_colors[beetle_lichen_abundance_df$Viereck.3],
        pch = 19)
-legend("bottomleft", title = "Site Classification",
+legend("bottomright", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
-       col = veg_colors, pch = 19)
-ordiarrows(mds_beetle_lichen, 
-           groups = beetle_lichen_df$Plot, 
-           levels = beetle_lichen_df$Sample_Year, col = 'blue')
-ordihull(mds_beetle_lichen, groups = beetle_lichen_df$Park, draw ="polygon", label = TRUE)
+       col = veg_colors, pch = 19, 
+       cex = 1.3)
+ordiarrows(mds_beetle_lichen_ab, 
+           groups = beetle_lichen_abundance_df$Plot, 
+           levels = beetle_lichen_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_beetle_lichen_ab, groups = beetle_lichen_abundance_df$Park, draw ="polygon", label = TRUE)
 title("Lichen Species")
 #plotID labels
-text(mds_beetle_lichen, display = "sites", labels = beetle_lichen_df$PlotID, col = "black", cex = 0.7, pos = 4)
+text(mds_beetle_lichen_ab, display = "sites", labels = beetle_lichen_abundance_df$PlotID, col = "black", cex = 0.7, pos = 4)
 #adding only select labels 
 selected_plots <- c("116", "S980")
-nmds_scores <- as.data.frame(scores(mds_beetle_lichen, display = "sites"))
-nmds_scores$PlotID <- beetle_lichen_df$PlotID
+nmds_scores <- as.data.frame(scores(mds_beetle_lichen_ab, display = "sites"))
+nmds_scores$PlotID <- beetle_lichen_abundance_df$PlotID
 selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
 text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
      col = "black", cex = 0.7, pos = 4)
@@ -1654,44 +1747,47 @@ beetle_lichen_plot_viereck
 
 
 #nonvasc
-mds_beetle_nonvasc <- metaMDS(beetle_nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(beetle_nonvasc_df[["Plot"]])) #25 
-mds_beetle_nonvasc$stress 
-mds_beetle_nonvasc$iters #92
+mds_beetle_nonvasc_ab <- metaMDS(beetle_nonvasc_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(beetle_nonvasc_abundance_df[["Plot"]])) #25 
+mds_beetle_nonvasc_ab$stress 
+mds_beetle_nonvasc_ab$iters #170
 veg_colors <- c("blue4", "seagreen3")
-names(veg_colors) <- unique(beetle_nonvasc_df$Viereck.3)
+names(veg_colors) <- unique(beetle_nonvasc_abundance_df$Viereck.3)
 dev.off()
-ordiplot(mds_beetle_nonvasc, type = "n")
+xlim <- c(-1.5, 1.5)
+ylim <- c(-1, 1)
+ordiplot(mds_beetle_nonvasc_ab, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Nonvascular Species", cex.main = 2)
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
-     labels = "Stress = 0.12",
+     labels = "Stress = 0.11",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
-     labels = "1",
+     labels = "2",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
-points(scores(mds_beetle_nonvasc, display = "sites"),
-       col = veg_colors[beetle_nonvasc_df$Viereck.3],
+points(scores(mds_beetle_nonvasc_ab, display = "sites"),
+       col = veg_colors[beetle_nonvasc_abundance_df$Viereck.3],
        pch = 19)
-legend("bottomleft", title = "Site Classification",
+legend("bottomright", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
-       col = veg_colors, pch = 19)
-ordiarrows(mds_beetle_nonvasc, 
-           groups = beetle_nonvasc_df$Plot, 
-           levels = beetle_nonvasc_df$Sample_Year, col = 'blue')
-ordihull(mds_beetle_nonvasc, groups = beetle_nonvasc_df$Park, draw ="polygon", label = TRUE)
+       col = veg_colors, pch = 19,
+       cex = 1.3)
+ordiarrows(mds_beetle_nonvasc_ab, 
+           groups = beetle_nonvasc_abundance_df$Plot, 
+           levels = beetle_nonvasc_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_beetle_nonvasc_ab, groups = beetle_nonvasc_abundance_df$Park, draw ="polygon", label = TRUE)
 title("Nonvascular Species")
 #plotID labels
-text(mds_beetle_nonvasc, display = "sites", labels = beetle_nonvasc_df$PlotID, col = "black", cex = 0.7, pos = 4)
+text(mds_beetle_nonvasc_ab, display = "sites", labels = beetle_nonvasc_abundance_df$PlotID, col = "black", cex = 0.7, pos = 4)
 #adding only select labels 
 selected_plots <- c("116", "S980")
-nmds_scores <- as.data.frame(scores(mds_beetle_nonvasc, display = "sites"))
-nmds_scores$PlotID <- beetle_nonvasc_df$PlotID
+nmds_scores <- as.data.frame(scores(mds_beetle_nonvasc_ab, display = "sites"))
+nmds_scores$PlotID <- beetle_nonvasc_abundance_df$PlotID
 selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
 text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
      col = "black", cex = 0.7, pos = 4)
