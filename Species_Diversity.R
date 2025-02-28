@@ -510,6 +510,12 @@ out$plot_sample
 plot_elevation_data <- out$plot_loc_summary[c(1,2,3)]
 plot_elevation_data
 
+plot_location_data <- out$plot_loc_summary[c(1,7)]
+plot_location_data
+
+
+
+
 #dataframe creation 
 veg_class_df <- out$plot_sample[c(1,3,4)]
 veg_class_df <- veg_class_df %>%

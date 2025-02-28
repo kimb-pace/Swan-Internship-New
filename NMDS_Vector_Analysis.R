@@ -19,19 +19,10 @@ print(loaded_objects)
 
 plot_fire_df <- as.data.frame(plot_fire)
 
-
 file.choose() #to get pathway
 library(mapview)
 library(sf)
 library(dplyr)
-
-
-
-
-out$plot_loc_summary 
-out$plot_sample
-
-
 
 plot_elevation_data <- out$plot_loc_summary[c(1,2,3)]
 plot_elevation_data
@@ -1607,7 +1598,8 @@ beetle_vasc_abundance_matrix <- beetle_vasc_abundance_df[,c(8:281)]
 beetle_vasc_abundance_matrix <- as.matrix(beetle_vasc_abundance_matrix) 
 
 
-
+xlim <- c(-1, 1.5)
+ylim <- c(-1, 1)
 mds_beetle_ab_CC <- metaMDS(beetle_vasc_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
 nmds_scores <- scores(mds_beetle_ab_CC, display = "sites")
 nmds_scores <- as.data.frame(nmds_scores)
@@ -1615,18 +1607,116 @@ nmds_scores$Plot_Year <- beetle_vasc_abundance_df$Plot_Year
 nmds_scores$Percent_Cover <- beetle_vasc_abundance_df$Percent_Cover
 color_gradient <- colorRampPalette(c("blue", "red"))(100)
 point_colors <- color_gradient[cut(nmds_scores$Percent_Cover, breaks = 100)]
+
+
 ordiplot(mds_beetle_ab_CC, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Vascular Species", cex.main = 2)
-points(nmds_scores$NMDS1, nmds_scores$NMDS2, col = point_colors, pch = 19, cex = 1.5)
+points(nmds_scores$NMDS1, nmds_scores$NMDS2, col = point_colors, pch = 19, cex = 1)
 legend("bottomleft", legend = round(range(nmds_scores$Percent_Cover), 2),
        fill = color_gradient[c(1, 100)], title = "Percent Cover", bty = "n")
+ordiarrows(mds_beetle_ab_CC, 
+           groups = beetle_vasc_abundance_df$Plot, 
+           levels = beetle_vasc_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_beetle_ab_CC, groups = beetle_vasc_abundance_df$Park, draw ="polygon", label = TRUE)
+ordihull(mds_beetle_ab_CC, groups = beetle_vasc_abundance_df$Viereck.4, draw ="polygon", label = TRUE)
 
+text(mds_beetle_ab_CC, display = "sites", labels = beetle_vasc_abundance_df$Plot, col = "black", cex = 0.7, pos = 4)
 
 ordiplot(mds_beetle_ab_CC, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Vascular Species", cex.main = 2)
 points(nmds_scores$NMDS1, nmds_scores$NMDS2, col =  "black", pch = 19, cex = 1)
 ordisurf(mds_beetle_ab_CC, beetle_vasc_abundance_df$Percent_Cover, method = "REML", add = TRUE, col = "blue")
 legend("topright", legend = "Canopy Cover Percent", col = "blue", lty = 1, bty = "n")
+ordiarrows(mds_beetle_ab_CC, 
+           groups = beetle_vasc_abundance_df$Plot, 
+           levels = beetle_vasc_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_beetle_ab_CC, groups = beetle_vasc_abundance_df$Park, draw ="polygon", label = TRUE)
 
 
+#seeing if its white vs black spruce forest but it is not 
+#viereck_classes <- read_csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Viereck_Classes.csv")
+#beetle_vasc_abundance_df <- beetle_vasc_abundance_df %>%
+#  left_join(viereck_classes %>% select(Plot, Viereck.4), by = c("Plot"))
+#beetle_vasc_abundance_df <- beetle_vasc_abundance_df %>% distinct()
+
+
+#lichen 
+beetle_lichen_abundance_df <- beetle_lichen_abundance_df %>%
+  left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
+beetle_lichen_abundance_df <- beetle_lichen_abundance_df %>% distinct()
+
+beetle_lichen_abundance_matrix <- beetle_lichen_abundance_df[,c(12:178)]
+beetle_lichen_abundance_matrix <- as.matrix(beetle_lichen_abundance_matrix) 
+
+mds_beetle_ab_CC_lichen <- metaMDS(beetle_lichen_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+nmds_scores <- scores(mds_beetle_ab_CC_lichen, display = "sites")
+nmds_scores <- as.data.frame(nmds_scores)
+nmds_scores$Plot_Year <- beetle_lichen_abundance_df$Plot_Year
+nmds_scores$Percent_Cover <- beetle_lichen_abundance_df$Percent_Cover
+color_gradient <- colorRampPalette(c("blue", "red"))(100)
+point_colors <- color_gradient[cut(nmds_scores$Percent_Cover, breaks = 100)]
+
+xlim <- c(-1.5, 1.5)
+ylim <- c(-1.5, 1.5)
+ordiplot(mds_beetle_ab_CC_lichen, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Lichen Species", cex.main = 2)
+points(nmds_scores$NMDS1, nmds_scores$NMDS2, col = point_colors, pch = 19, cex = 1)
+legend("bottomright", legend = round(range(nmds_scores$Percent_Cover), 2),
+       fill = color_gradient[c(1, 100)], title = "Percent Cover", bty = "n")
+ordiarrows(mds_beetle_ab_CC_lichen, 
+           groups = beetle_lichen_abundance_df$Plot, 
+           levels = beetle_lichen_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_beetle_ab_CC_lichen, groups = beetle_lichen_abundance_df$Park, draw ="polygon", label = TRUE)
+ordihull(mds_beetle_ab_CC_lichen, groups = beetle_lichen_abundance_df$Viereck.4, draw ="polygon", label = TRUE)
+
+text(mds_beetle_ab_CC_lichen, display = "sites", labels = beetle_lichen_abundance_df$Plot, col = "black", cex = 0.7, pos = 4)
+
+ordiplot(mds_beetle_ab_CC_lichen, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Lichen Species", cex.main = 2)
+points(nmds_scores$NMDS1, nmds_scores$NMDS2, col =  "black", pch = 19, cex = 1)
+ordisurf(mds_beetle_ab_CC_lichen, beetle_lichen_abundance_df$Percent_Cover, method = "REML", add = TRUE, col = "blue")
+legend("topright", legend = "Canopy Cover Percent", col = "blue", lty = 1, bty = "n")
+ordiarrows(mds_beetle_ab_CC_lichen, 
+           groups = beetle_lichen_abundance_df$Plot, 
+           levels = beetle_lichen_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_beetle_ab_CC_lichen, groups = beetle_lichen_abundance_df$Park, draw ="polygon", label = TRUE)
+
+
+
+
+#nonvascular
+beetle_nonvasc_abundance_df <- beetle_nonvasc_abundance_df %>%
+  left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
+beetle_nonvasc_abundance_df <- beetle_nonvasc_abundance_df %>% distinct()
+
+beetle_nonvasc_abundance_matrix <- beetle_nonvasc_abundance_df[,c(12:218)]
+beetle_nonvasc_abundance_matrix <- as.matrix(beetle_nonvasc_abundance_matrix) 
+
+mds_beetle_ab_CC_nonvasc <- metaMDS(beetle_nonvasc_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+nmds_scores <- scores(mds_beetle_ab_CC_nonvasc, display = "sites")
+nmds_scores <- as.data.frame(nmds_scores)
+nmds_scores$Plot_Year <- beetle_nonvasc_abundance_df$Plot_Year
+nmds_scores$Percent_Cover <- beetle_nonvasc_abundance_df$Percent_Cover
+color_gradient <- colorRampPalette(c("blue", "red"))(100)
+point_colors <- color_gradient[cut(nmds_scores$Percent_Cover, breaks = 100)]
+
+xlim <- c(-1.5, 1.5)
+ylim <- c(-1.5, 1.5)
+ordiplot(mds_beetle_ab_CC_nonvasc, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Nonvascular Species", cex.main = 2)
+points(nmds_scores$NMDS1, nmds_scores$NMDS2, col = point_colors, pch = 19, cex = 1)
+legend("bottomright", legend = round(range(nmds_scores$Percent_Cover), 2),
+       fill = color_gradient[c(1, 100)], title = "Percent Cover", bty = "n")
+ordiarrows(mds_beetle_ab_CC_nonvasc, 
+           groups = beetle_nonvasc_abundance_df$Plot, 
+           levels = beetle_nonvasc_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_beetle_ab_CC_nonvasc, groups = beetle_nonvasc_abundance_df$Park, draw ="polygon", label = TRUE)
+
+text(mds_beetle_ab_CC_nonvasc, display = "sites", labels = beetle_nonvasc_abundance_df$Plot, col = "black", cex = 0.7, pos = 4)
+
+ordiplot(mds_beetle_ab_CC_nonvasc, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Nonvascular Species", cex.main = 2)
+points(nmds_scores$NMDS1, nmds_scores$NMDS2, col =  "black", pch = 19, cex = 1)
+ordisurf(mds_beetle_ab_CC_nonvasc, beetle_nonvasc_abundance_df$Percent_Cover, method = "REML", add = TRUE, col = "blue")
+legend("topright", legend = "Canopy Cover Percent", col = "blue", lty = 1, bty = "n")
+ordiarrows(mds_beetle_ab_CC_nonvasc, 
+           groups = beetle_nonvasc_abundance_df$Plot, 
+           levels = beetle_nonvasc_abundance_df$Sample_Year, col = 'blue')
+ordihull(mds_beetle_ab_CC_nonvasc, groups = beetle_nonvasc_abundance_df$Park, draw ="polygon", label = TRUE)
 
 
 

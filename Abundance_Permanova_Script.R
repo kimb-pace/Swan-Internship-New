@@ -198,7 +198,7 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
 
 
 #beetle kill 
-          beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/dwarfscrub_df.xlsx")
+          beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/beetle_df.xlsx")
           beetle_lichen_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/beetle_lichen_df.xlsx")
           beetle_nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/beetle_nonvasc_df.xlsx")
           
@@ -217,6 +217,14 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
                         group_by(Plot) %>%
                         mutate(Visit = paste0("visit_", row_number())) %>%
                         ungroup()
+                      
+                      canopy_cover <- canopy_cover %>% 
+                        mutate(Plot_Year = paste(Plot, Sample_Year, sep="_"))
+                      canopy_cover <- canopy_cover %>% distinct()
+                      
+                      lichens_env_beetle <- lichens_env_beetle %>%
+                        left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
+                      lichens_env_beetle <- lichens_env_beetle %>% distinct()
           
           beetle_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
             filter(Plot_Year %in% beetle_nonvasc_df$Plot_Year)
@@ -233,6 +241,9 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
                         mutate(Visit = paste0("visit_", row_number())) %>%
                         ungroup()
           
+                      nonvasc_env_beetle <- nonvasc_env_beetle %>%
+                        left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
+                      nonvasc_env_beetle <- nonvasc_env_beetle %>% distinct()
           
           beetle_vasc_abundance_balanced <- vasc_abundance_df %>%
             filter(Plot_Year %in% beetle_df$Plot_Year)
@@ -248,7 +259,10 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
                         group_by(Plot) %>%
                         mutate(Visit = paste0("visit_", row_number())) %>%
                         ungroup()
-
+                      
+                      beetle_env <- beetle_env %>%
+                        left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
+                      beetle_env <- beetle_env %>% distinct()
 
 #spruce woodlands 
           needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/needle_df.xlsx")

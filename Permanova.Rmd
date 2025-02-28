@@ -834,7 +834,7 @@ beetle_univariate <- adonis2(beetle_env$Species_Richness ~ Park + Plot,
                              method = "euclidian",
                              permutations = perm_design_beetle,
                              by = "terms")
-
+beetle_univariate
 #create permutation object 
 perms7 <- rbind(1:nrow(beetle_env),
                 shuffleSet(n = nrow(beetle_env), control = perm_design_beetle, nset = 999))
@@ -872,6 +872,8 @@ beetle_result <- adonis2(beetle_composition ~ Park + Plot,
                          data = beetle_env, method = "bray", 
                          permutations = perm_design_beetle, 
                          by = "terms")
+
+beetle_result
 
 #create permutation structure and results object 
 perms8 <- rbind(1:nrow(beetle_composition),
@@ -914,6 +916,19 @@ beetle_result_timecross2 <- adonis2(beetle_composition ~ Park + Plot + Visit,
                                     permutations = perm_design_beetle_time, 
                                     by = "terms")
 beetle_result_timecross2
+
+
+#canopy cover effects on frequency 
+beetle_CC_result_first <- adonis2(beetle_composition ~ Percent_Cover + Park + Plot + Visit, 
+                                    data = beetle_env, method = "bray", 
+                                    permutations = perm_design_beetle_time, 
+                                    by = "terms")
+beetle_CC_result_last <- adonis2(beetle_composition ~ Park + Plot + Visit + Percent_Cover, 
+                                    data = beetle_env, method = "bray", 
+                                    permutations = perm_design_beetle_time, 
+                                    by = "terms")
+beetle_CC_result_first 
+beetle_CC_result_last 
 
 
 ### Beta Diversity 
@@ -1077,6 +1092,19 @@ beetle_lichen_result_timecross3 <- adonis2(beetle_lichen_composition ~ Park + Pl
 beetle_lichen_result_timecross3
 
 
+
+#canopy cover effects on frequency 
+beetle_CC_result_first_lichen <- adonis2(beetle_lichen_composition ~ Percent_Cover + Park + Plot + Visit, 
+                                    data = lichens_env_beetle, method = "bray", 
+                                    permutations = perm_design_beetle_lichen_time, 
+                                    by = "terms")
+beetle_CC_result_last_lichen <- adonis2(beetle_lichen_composition ~ Park + Plot + Visit + Percent_Cover, 
+                                    data = lichens_env_beetle, method = "bray", 
+                                    permutations = perm_design_beetle_lichen_time, 
+                                    by = "terms")
+beetle_CC_result_first_lichen 
+beetle_CC_result_last_lichen 
+
 #based on visit 
 beetle_dispersion_result3 <- betadisper(vegdist(beetle_lichen_composition, 
                                                 method = "bray"), lichens_env_beetle$Visit)
@@ -1232,6 +1260,20 @@ beetle_nonvasc_result_timecross3 <- adonis2(beetle_nonvasc_composition ~ Park + 
                                            by = "terms")
 beetle_nonvasc_result_timecross3
 
+#canopy cover effects on frequency 
+beetle_CC_result_first_nonvasc <- adonis2(beetle_nonvasc_composition ~ Percent_Cover + Park + Plot + Visit, 
+                                    data = nonvasc_env_beetle, method = "bray", 
+                                    permutations = perm_design_beetle_nonvasc_time, 
+                                    by = "terms")
+beetle_CC_result_last_nonvasc <- adonis2(beetle_nonvasc_composition ~ Park + Plot + Visit + Percent_Cover, 
+                                    data = nonvasc_env_beetle, method = "bray", 
+                                    permutations = perm_design_beetle_nonvasc_time, 
+                                    by = "terms")
+beetle_CC_result_first_nonvasc 
+beetle_CC_result_last_nonvasc 
+
+
+
 
 #based on visit 
 
@@ -1364,7 +1406,7 @@ for (i in 1:nrow(perms21)) {
 #create F value column 
 results21 <- results21 |>
   data.frame() |>
-  mutate(F.Park = (Park/1)/(Plot/35))
+  mutate(F.Park = (Park/1)/(Plot/28))
 head(results21)
 
 #calculate P value 
@@ -1398,7 +1440,7 @@ for (i in 1:nrow(perms22)) {
 #calculate F statistics for each permutation using correct equation 
 results22 <- results22 |>
   data.frame() |>
-  mutate(F.Park = (Park/1)/(Plot/35))
+  mutate(F.Park = (Park/1)/(Plot/28))
 head(results22)
 
 #calculate P value 
@@ -1942,7 +1984,7 @@ for (i in 1:nrow(perms19)) {
 #create F value column 
 results19 <- results19 |>
   data.frame() |>
-  mutate(F.Park = (Park/1)/(Plot/40))
+  mutate(F.Park = (Park/1)/(Plot/34))
 head(results19)
 
 #calculate P value 
@@ -1976,7 +2018,7 @@ for (i in 1:nrow(perms20)) {
 #calculate F statistics for each permutation using correct equation 
 results20 <- results20 |>
   data.frame() |>
-  mutate(F.Park = (Park/1)/(Plot/40))
+  mutate(F.Park = (Park/1)/(Plot/34))
 head(results20)
 
 #calculate P value 
@@ -2122,7 +2164,7 @@ for (i in 1:nrow(perms19)) {
 #create F value column 
 results19 <- results19 |>
   data.frame() |>
-  mutate(F.Park = (Park/1)/(Plot/28))
+  mutate(F.Park = (Park/1)/(Plot/26))
 head(results19)
 
 #calculate P value 
@@ -2156,7 +2198,7 @@ for (i in 1:nrow(perms20)) {
 #calculate F statistics for each permutation using correct equation 
 results20 <- results20 |>
   data.frame() |>
-  mutate(F.Park = (Park/1)/(Plot/28))
+  mutate(F.Park = (Park/1)/(Plot/26))
 head(results20)
 
 #calculate P value 
@@ -2301,7 +2343,7 @@ for (i in 1:nrow(perms19)) {
 #create F value column 
 results19 <- results19 |>
   data.frame() |>
-  mutate(F.Park = (Park/1)/(Plot/28))
+  mutate(F.Park = (Park/1)/(Plot/26))
 head(results19)
 
 #calculate P value 
@@ -2335,7 +2377,7 @@ for (i in 1:nrow(perms20)) {
 #calculate F statistics for each permutation using correct equation 
 results20 <- results20 |>
   data.frame() |>
-  mutate(F.Park = (Park/1)/(Plot/28))
+  mutate(F.Park = (Park/1)/(Plot/26))
 head(results20)
 
 #calculate P value 
