@@ -27,6 +27,15 @@ library(dplyr)
 plot_elevation_data <- out$plot_loc_summary[c(1,2,3)]
 plot_elevation_data
 
+data <- as.data.frame(out$plot_loc_summary)
+data2 <- as.data.frame(out$plot_sample)
+join <- inner_join(data, data2, by = c("ID" = "Plot"))
+
+join <- alpine_df %>%
+  left_join(data %>% select(Plot, Elevation), by = "Plot")
+
+names(data)[names(data) == "ID"] <- "Plot"
+
 #maps
 plot(out$plot_loc_summary)
 mapview(out$plot_loc_summary)
@@ -43,6 +52,58 @@ alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine_
 alpine_lichen_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine_lichen_df.xlsx")
 alpine_nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine_nonvasc_df.xlsx")
 fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat_Frequency.csv")
+
+summary <- alpine_lichen_df %>%
+  select(13:179) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+
+summary <- alpine_nonvasc_df %>%
+  select(13:219) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+
+summary <- alpine_df %>%
+  select(7:280) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+
+
+alpine_lichen_matrix <- alpine_lichen_df[,c(13:179)]
+alpine_lichen_matrix <- as.matrix(alpine_lichen_matrix)
+mds_alpine_lichen <- metaMDS(alpine_lichen_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+#axis2 scores
+axis2_scores <- scores(mds_alpine_lichen, display = "sites")[, 2]
+species_cor <- apply(alpine_lichen_matrix, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+
+
+
 
 
 #quad abundance alpine 
@@ -453,7 +514,10 @@ summary_df <- species_cor_sorted %>%
 
 openlow_lichen_abundance_df <- lichen_abundance_df %>% filter(Viereck.3 %in% c("Open Low Scrub"))
 
-openlow_lichen_abundance_matrix <- openlow_lichen_abundance_df[,c(11:177)]
+openlow_lichen_abundance_df <- lichen_abundance_df %>%
+  filter(Plot_Year %in% openlow_df_lichen$Plot_Year)
+
+openlow_lichen_abundance_matrix <- openlow_lichen_abundance_df[,c(12:177)]
 openlow_lichen_abundance_matrix <- as.matrix(openlow_lichen_abundance_matrix)
 
 
@@ -465,38 +529,31 @@ mds_openlow_lichen_ab$stress
 mds_openlow_lichen_ab$iters
 mds_openlow_lichen_ab$converged
 
-veg_colors <- c("seagreen3", "firebrick3", "skyblue2")
+veg_colors <- c("orchid3")
 names(veg_colors) <- unique(openlow_lichen_abundance_df$Viereck.3)
 dev.off()
-ordiplot(mds_openlow_lichen_ab, type = "n")
 xlim <- c(-1.5, 1)
 ylim <- c(-1.5, 1.5)
-plot(mds_openlow_lichen_ab, type = "n", xlim = xlim, ylim = ylim)
+plot(mds_openlow_lichen_ab, type = "n", xlim = xlim, ylim = ylim,cex.axis = 1.5, cex.lab = 1.4, main = "Lichen Species", cex.main = 2)
 
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
-     labels = "Stress = 0.14",
+     labels = "Stress = 0.13",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
-     labels = "2",
+     labels = "1",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 points(scores(mds_openlow_lichen_ab, display = "sites"),
        col = veg_colors[openlow_lichen_abundance_df$Viereck.3],
        pch = 19)
-#legend("bottomleft", title = "Site Classification",
-#       legend=names(veg_colors),
-#       ncol=1,
-#       col = veg_colors, pch = 19)
-
-ordiarrows(mds_openlow_lichen_ab, groups = openlow_lichen_abundance_df$PlotID, levels = openlow_lichen_abundance_df$Sample_Year, col = 'blue')
+ordiarrows(mds_openlow_lichen_ab, groups = openlow_lichen_abundance_df$Plot, levels = openlow_lichen_abundance_df$Sample_Year, col = 'blue')
 ordihull(mds_openlow_lichen_ab, groups = openlow_lichen_abundance_df$Park, draw ="polygon", label = TRUE)
 ordihull(mds_openlow_lichen_ab, groups = openlow_lichen_abundance_df$Elevation_Band, draw ="polygon", label = TRUE)
-title("Lichen Species - Quadrat Abundance")
 openlowlichen_plot_viereck <- recordPlot()
 
 species_fit <- envfit(mds_openlow_lichen_ab, openlow_lichen_abundance_matrix, perm = 999)
@@ -1598,8 +1655,8 @@ beetle_vasc_abundance_matrix <- beetle_vasc_abundance_df[,c(8:281)]
 beetle_vasc_abundance_matrix <- as.matrix(beetle_vasc_abundance_matrix) 
 
 
-xlim <- c(-1, 1.5)
-ylim <- c(-1, 1)
+xlim <- c(-1.5, 1.5)
+ylim <- c(-1.5, 1.5)
 mds_beetle_ab_CC <- metaMDS(beetle_vasc_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
 nmds_scores <- scores(mds_beetle_ab_CC, display = "sites")
 nmds_scores <- as.data.frame(nmds_scores)
@@ -1624,11 +1681,28 @@ text(mds_beetle_ab_CC, display = "sites", labels = beetle_vasc_abundance_df$Plot
 ordiplot(mds_beetle_ab_CC, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Vascular Species", cex.main = 2)
 points(nmds_scores$NMDS1, nmds_scores$NMDS2, col =  "black", pch = 19, cex = 1)
 ordisurf(mds_beetle_ab_CC, beetle_vasc_abundance_df$Percent_Cover, method = "REML", add = TRUE, col = "blue")
-legend("topright", legend = "Canopy Cover Percent", col = "blue", lty = 1, bty = "n")
-ordiarrows(mds_beetle_ab_CC, 
-           groups = beetle_vasc_abundance_df$Plot, 
-           levels = beetle_vasc_abundance_df$Sample_Year, col = 'blue')
-ordihull(mds_beetle_ab_CC, groups = beetle_vasc_abundance_df$Park, draw ="polygon", label = TRUE)
+legend("bottomright", legend = "Point Intercept Canopy Cover Percent", col = "blue", lty = 1, bty = "n", cex = 1.5)
+#ordiarrows(mds_beetle_ab_CC, 
+#           groups = beetle_vasc_abundance_df$Plot, 
+#           levels = beetle_vasc_abundance_df$Sample_Year, col = 'blue')
+#ordihull(mds_beetle_ab_CC, groups = beetle_vasc_abundance_df$Park, draw ="polygon", label = TRUE)
+mds_beetle_ab_CC$stress
+length(unique(beetle_vasc_abundance_df[["Plot"]]))
+mds_beetle_ab_CC_lichen$iters #158
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.07",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+
+
 
 
 #seeing if its white vs black spruce forest but it is not 
@@ -1671,12 +1745,26 @@ text(mds_beetle_ab_CC_lichen, display = "sites", labels = beetle_lichen_abundanc
 ordiplot(mds_beetle_ab_CC_lichen, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Lichen Species", cex.main = 2)
 points(nmds_scores$NMDS1, nmds_scores$NMDS2, col =  "black", pch = 19, cex = 1)
 ordisurf(mds_beetle_ab_CC_lichen, beetle_lichen_abundance_df$Percent_Cover, method = "REML", add = TRUE, col = "blue")
-legend("topright", legend = "Canopy Cover Percent", col = "blue", lty = 1, bty = "n")
-ordiarrows(mds_beetle_ab_CC_lichen, 
-           groups = beetle_lichen_abundance_df$Plot, 
-           levels = beetle_lichen_abundance_df$Sample_Year, col = 'blue')
-ordihull(mds_beetle_ab_CC_lichen, groups = beetle_lichen_abundance_df$Park, draw ="polygon", label = TRUE)
-
+#ordiarrows(mds_beetle_ab_CC_lichen, 
+#           groups = beetle_lichen_abundance_df$Plot, 
+#           levels = beetle_lichen_abundance_df$Sample_Year, col = 'blue')
+#ordihull(mds_beetle_ab_CC_lichen, groups = beetle_lichen_abundance_df$Park, draw ="polygon", label = TRUE)
+legend("bottomright", legend = "Point Intercept Canopy Cover Percent", col = "blue", lty = 1, bty = "n", cex = 1.5)
+mds_beetle_ab_CC_lichen$stress
+length(unique(beetle_lichen_abundance_df[["Plot"]]))
+mds_beetle_ab_CC_lichen$iters #126
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.13",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
 
 
 
@@ -1712,13 +1800,28 @@ text(mds_beetle_ab_CC_nonvasc, display = "sites", labels = beetle_nonvasc_abunda
 ordiplot(mds_beetle_ab_CC_nonvasc, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Nonvascular Species", cex.main = 2)
 points(nmds_scores$NMDS1, nmds_scores$NMDS2, col =  "black", pch = 19, cex = 1)
 ordisurf(mds_beetle_ab_CC_nonvasc, beetle_nonvasc_abundance_df$Percent_Cover, method = "REML", add = TRUE, col = "blue")
-legend("topright", legend = "Canopy Cover Percent", col = "blue", lty = 1, bty = "n")
-ordiarrows(mds_beetle_ab_CC_nonvasc, 
-           groups = beetle_nonvasc_abundance_df$Plot, 
-           levels = beetle_nonvasc_abundance_df$Sample_Year, col = 'blue')
-ordihull(mds_beetle_ab_CC_nonvasc, groups = beetle_nonvasc_abundance_df$Park, draw ="polygon", label = TRUE)
+#legend("topright", legend = "Canopy Cover Percent", col = "blue", lty = 1, bty = "n")
+#ordiarrows(mds_beetle_ab_CC_nonvasc, 
+#           groups = beetle_nonvasc_abundance_df$Plot, 
+#           levels = beetle_nonvasc_abundance_df$Sample_Year, col = 'blue')
+#ordihull(mds_beetle_ab_CC_nonvasc, groups = beetle_nonvasc_abundance_df$Park, draw ="polygon", label = TRUE)
 
-
+legend("bottomright", legend = "Point Intercept Canopy Cover Percent", col = "blue", lty = 1, bty = "n", cex = 1.5)
+mds_beetle_ab_CC_nonvasc$stress
+mds_beetle_ab_CC_nonvasc$iters #142
+length(unique(beetle_nonvasc_abundance_df[["Plot"]]))
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.11",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "3",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
 
 
 
@@ -1784,12 +1887,66 @@ beetlevasc_plot_viereck <- recordPlot()
 beetlevasc_plot_viereck
 
 
+#axis2 scores
+axis2_scores <- scores(mds_beetle_ab, display = "sites")[, 2]
+species_cor <- apply(beetle_vasc_abundance_matrix, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+
+#axis1 scores 
+axis1_scores <- scores(mds_beetle_ab, display = "sites")[, 1]
+species_cor <- apply(beetle_vasc_abundance_matrix, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+
+
+
+
+
+
+
 
 #lichen
 mds_beetle_lichen_ab <- metaMDS(beetle_lichen_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(beetle_lichen_abundance_df[["Plot"]])) #25 
+length(unique(beetle_lichen_abundance_df[["Plot"]])) #14
 mds_beetle_lichen_ab$stress 
-mds_beetle_lichen_ab$iters #131
+mds_beetle_lichen_ab$iters #117
 veg_colors <- c("blue4", "seagreen3")
 names(veg_colors) <- unique(beetle_lichen_abundance_df$Viereck.3)
 dev.off()
@@ -1834,13 +1991,36 @@ text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$Plot
 beetle_lichen_plot_viereck <- recordPlot()
 beetle_lichen_plot_viereck
 
+#axis2 scores
+axis2_scores <- scores(mds_beetle_lichen_ab, display = "sites")[, 2]
+species_cor <- apply(beetle_lichen_abundance_matrix, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
 
 
 #nonvasc
 mds_beetle_nonvasc_ab <- metaMDS(beetle_nonvasc_abundance_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(beetle_nonvasc_abundance_df[["Plot"]])) #25 
+length(unique(beetle_nonvasc_abundance_df[["Plot"]])) #14
 mds_beetle_nonvasc_ab$stress 
-mds_beetle_nonvasc_ab$iters #170
+mds_beetle_nonvasc_ab$iters #173
 veg_colors <- c("blue4", "seagreen3")
 names(veg_colors) <- unique(beetle_nonvasc_abundance_df$Viereck.3)
 dev.off()
@@ -1886,7 +2066,28 @@ beetle_nonvasc_plot_viereck <- recordPlot()
 beetle_nonvasc_plot_viereck
 
 
+#axis2 scores
+axis2_scores <- scores(mds_beetle_nonvasc_ab, display = "sites")[, 2]
+species_cor <- apply(beetle_nonvasc_abundance_matrix, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
 
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
 
 
 

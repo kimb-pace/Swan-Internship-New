@@ -929,6 +929,18 @@ beetle_CC_result_last <- adonis2(beetle_composition ~ Park + Plot + Visit + Perc
                                     by = "terms")
 beetle_CC_result_first 
 beetle_CC_result_last 
+length(unique(beetle_env[["Plot"]]))
+
+
+#viereck classes within 
+beetle_vascular_perm <- adonis2(beetle_composition ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                data = beetle_env, method = "bray", 
+                                permutations = perm_design_beetle_time, 
+                                by = "terms")
+print(beetle_vascular_perm)
+
+
+
 
 
 ### Beta Diversity 
@@ -943,6 +955,12 @@ beetle_dispersion_result2 <- betadisper(vegdist(beetle_composition,
                                                 method = "bray"), beetle_env$Visit)
 beetle_dispersion_result2 
 permutest(beetle_dispersion_result2, permutations = 999)
+
+#based on park 
+beetle_dispersion_result3 <- betadisper(vegdist(beetle_composition, 
+                                                method = "bray"), beetle_env$Park)
+beetle_dispersion_result3 
+permutest(beetle_dispersion_result3, permutations = 999)
 ```
 
 ## Lichens 
@@ -1104,6 +1122,14 @@ beetle_CC_result_last_lichen <- adonis2(beetle_lichen_composition ~ Park + Plot 
                                     by = "terms")
 beetle_CC_result_first_lichen 
 beetle_CC_result_last_lichen 
+
+#viereck classes within 
+beetle_lichen_perm <- adonis2(beetle_lichen_composition ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                data = lichens_env_beetle, method = "bray", 
+                                permutations = perm_design_beetle_lichen_time, 
+                                by = "terms")
+print(beetle_lichen_perm)
+
 
 #based on visit 
 beetle_dispersion_result3 <- betadisper(vegdist(beetle_lichen_composition, 
@@ -1272,7 +1298,17 @@ beetle_CC_result_last_nonvasc <- adonis2(beetle_nonvasc_composition ~ Park + Plo
 beetle_CC_result_first_nonvasc 
 beetle_CC_result_last_nonvasc 
 
+#viereck classes within 
+beetle_nonvasc_perm <- adonis2(beetle_nonvasc_composition ~ Viereck.3 + Park + Plot + Visit + Viereck.3*Visit, 
+                                data = nonvasc_env_beetle, method = "bray", 
+                                permutations = perm_design_beetle_nonvasc_time, 
+                                by = "terms")
+print(beetle_nonvasc_perm)
 
+
+
+length(unique(nonvasc_env_beetle[["Plot"]]))
+length(unique(lichens_env_beetle[["Plot"]]))
 
 
 #based on visit 
@@ -1281,6 +1317,9 @@ beetle_dispersion_result4 <- betadisper(vegdist(beetle_nonvasc_composition,
                                                 method = "bray"), nonvasc_env_beetle$Visit)
 beetle_dispersion_result4
 permutest(beetle_dispersion_result4, permutations = 999)
+
+
+
 ```
 
 
