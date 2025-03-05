@@ -53,21 +53,21 @@ alpine_lichen_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/
 alpine_nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine_nonvasc_df.xlsx")
 fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat_Frequency.csv")
 
-summary <- alpine_lichen_df %>%
-  select(13:179) %>%
+summary <- dwarfscrub_df_lichen %>%
+  select(13:178) %>%
   summarise(
     nonzero_cols = sum(colSums(. != 0) > 0),
     all_zero_cols = sum(colSums(. != 0) == 0)
   )
 
-summary <- alpine_nonvasc_df %>%
-  select(13:219) %>%
+summary <- dwarfscrub_df_nonvasc %>%
+  select(13:218) %>%
   summarise(
     nonzero_cols = sum(colSums(. != 0) > 0),
     all_zero_cols = sum(colSums(. != 0) == 0)
   )
 
-summary <- alpine_df %>%
+summary <- dwarfscrub_df %>%
   select(7:280) %>%
   summarise(
     nonzero_cols = sum(colSums(. != 0) > 0),
@@ -897,79 +897,46 @@ dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc)
 
 
 #vascular, but colored by viereck 3
-mds_dwarfscrub <- metaMDS(dwarfscrub_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(dwarfscrub_df[["Plot"]]))
-mds_dwarfscrub$stress
-mds_dwarfscrub$iters #163
-veg_colors <- c("blue4", "seagreen3")
+mds_dwarfscrub <- metaMDS(dwarfscrub_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200) #repeated 5 times 
+length(unique(dwarfscrub_df[["Plot"]])) #19
+mds_dwarfscrub$stress #0.08
+mds_dwarfscrub$iters #190
+veg_colors <- c("darkorange", "seagreen3")
 names(veg_colors) <- unique(dwarfscrub_df$Viereck.3)
 dev.off()
-ordiplot(mds_dwarfscrub, type = "n")
+xlim <- c(-1.5, 1)
+ylim <- c(-1.5, 1)
+ordiplot(mds_dwarfscrub, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+         xlab = "NMDS1", ylab = "NMDS2")
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
-     labels = "Stress = 0.10",
+     labels = "Stress = 0.08",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
-     col = "black")
-text(x = par("usr")[2],
-     y = par("usr")[4] - 0.1,
-     labels = "1",
-     pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
-     col = "black")
-points(scores(mds_dwarfscrub, display = "sites"),
-       col = veg_colors[dwarfscrub_df$Viereck.3],
-       pch = 19)
-legend("bottomleft", title = "Site Classification",
-       legend=names(veg_colors),
-       ncol=1,
-       col = veg_colors, pch = 19)
-ordiarrows(mds_dwarfscrub, 
-           groups = dwarfscrub_df$PlotID, 
-           levels = dwarfscrub_df$Sample_Year, col = 'blue')
-ordihull(mds_dwarfscrub, groups = dwarfscrub_df$Park, draw ="polygon", label = TRUE)
-title("Vascular Species")
-dwarfscrubvasc_plot_viereck <- recordPlot()
-dwarfscrubvasc_plot_viereck
-
-#lichen, but colored by viereck 3
-mds_dwarfscrub_lichen <- metaMDS(dwarfscrub_composition_lichens, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(dwarfscrub_df_lichens[["Plot"]]))
-mds_dwarfscrub_lichen$stress
-mds_dwarfscrub_lichen$iters #129 
-veg_colors <- c("blue4", "seagreen3", "firebrick")
-names(veg_colors) <- unique(dwarfscrub_df_lichens$Viereck.3)
-dev.off()
-ordiplot(mds_dwarfscrub_lichen, type = "n")
-text(x = par("usr")[1],
-     y = par("usr")[4] - 0.1,
-     labels = "Stress = 0.10",
-     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
      labels = "2",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
-points(scores(mds_dwarfscrub_lichen, display = "sites"),
-       col = veg_colors[dwarfscrub_df_lichens$Viereck.3],
-       pch = 19)
+points(scores(mds_dwarfscrub, display = "sites"),
+       col = veg_colors[dwarfscrub_df$Viereck.3],
+       pch = 19, cex = 1.5)
 legend("bottomleft", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
-       col = veg_colors, pch = 19)
-ordiarrows(mds_dwarfscrub_lichen, 
-           groups = dwarfscrub_df_lichens$PlotID, 
-           levels = dwarfscrub_df_lichens$Sample_Year, col = 'blue')
-ordihull(mds_dwarfscrub_lichen, groups = dwarfscrub_df_lichens$Park, draw ="polygon", label = TRUE)
-title("Lichen Species")
-dwarfscrublichen_plot_viereck <- recordPlot()
+       col = veg_colors, pch = 19, cex = 1.4)
+ordiarrows(mds_dwarfscrub, 
+           groups = dwarfscrub_df$Plot, 
+           levels = dwarfscrub_df$Sample_Year, col = 'blue')
+ordihull(mds_dwarfscrub, groups = dwarfscrub_df$Park, draw ="polygon", label = TRUE)
 
-#axis2 scores
-axis2_scores <- scores(mds_dwarfscrub_lichen, display = "sites")[, 2]
-species_cor <- apply(dwarfscrub_composition_lichens, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+dwarfscrubvasc_plot_viereck <- recordPlot()
+
+#axis1 scores 
+axis1_scores <- scores(mds_dwarfscrub, display = "sites")[, 1]
+species_cor <- apply(dwarfscrub_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
 species_cor_sorted <- sort(species_cor, decreasing = TRUE)
 head(species_cor_sorted, 10)
 tail(species_cor_sorted, 10)
@@ -989,6 +956,70 @@ species_cor_sorted <-species_cor_sorted %>% distinct()
 summary_df <- species_cor_sorted %>%
   arrange(Loadings) %>%
   slice(c(1:10, (n()-9):n()))
+
+#axis2 scores
+axis2_scores <- scores(mds_dwarfscrub, display = "sites")[, 2]
+species_cor <- apply(dwarfscrub_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+
+
+
+#lichen, but colored by viereck 3
+mds_dwarfscrub_lichen <- metaMDS(dwarfscrub_composition_lichens, distance = "bray", k = 3, autotransform = TRUE, trymax = 200) #repeated 2 times 
+length(unique(dwarfscrub_df_lichens[["Plot"]])) #16
+mds_dwarfscrub_lichen$stress
+mds_dwarfscrub_lichen$iters #144
+veg_colors <- c("darkorange", "seagreen3", "blue4")
+names(veg_colors) <- unique(dwarfscrub_df_lichens$Viereck.3)
+dev.off()
+xlim <- c(-1.5, 1)
+ylim <- c(-1.5, 1)
+ordiplot(mds_dwarfscrub_lichen, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+         xlab = "NMDS1", ylab = "NMDS2")
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.08",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+points(scores(mds_dwarfscrub_lichen, display = "sites"),
+       col = veg_colors[dwarfscrub_df_lichens$Viereck.3],
+       pch = 19, cex = 1.5)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=1,
+       col = veg_colors, pch = 19, cex = 1.4)
+ordiarrows(mds_dwarfscrub_lichen, 
+           groups = dwarfscrub_df_lichens$PlotID, 
+           levels = dwarfscrub_df_lichens$Sample_Year, col = 'blue')
+ordihull(mds_dwarfscrub_lichen, groups = dwarfscrub_df_lichens$Park, draw ="polygon", label = TRUE)
+
+dwarfscrublichen_plot_viereck <- recordPlot()
 
 #axis1 scores 
 axis1_scores <- scores(mds_dwarfscrub_lichen, display = "sites")[, 1]
@@ -1013,42 +1044,93 @@ summary_df <- species_cor_sorted %>%
   arrange(Loadings) %>%
   slice(c(1:10, (n()-9):n()))
 
+#axis2 scores
+axis2_scores <- scores(mds_dwarfscrub_lichen, display = "sites")[, 2]
+species_cor <- apply(dwarfscrub_composition_lichens, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+
+
 
 
 #nonvascular, but colored by viereck 3
-mds_dwarfscrub_nonvasc <- metaMDS(dwarfscrub_composition_nonvasc, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(dwarfscrub_df_nonvasc[["Plot"]]))
-mds_dwarfscrub_nonvasc$stress
-mds_dwarfscrub_nonvasc$iters #72 
-veg_colors <- c("blue4", "seagreen3", "firebrick")
+mds_dwarfscrub_nonvasc <- metaMDS(dwarfscrub_composition_nonvasc, distance = "bray", k = 3, autotransform = TRUE, trymax = 200) #solution repeated 1 time
+length(unique(dwarfscrub_df_nonvasc[["Plot"]])) #16 plots 
+mds_dwarfscrub_nonvasc$stress #0.14
+mds_dwarfscrub_nonvasc$iters #200
+veg_colors <- c("darkorange", "seagreen3", "blue4")
 names(veg_colors) <- unique(dwarfscrub_df_nonvasc$Viereck.3)
 dev.off()
-ordiplot(mds_dwarfscrub_nonvasc, type = "n")
+xlim <- c(-1.5, 1)
+ylim <- c(-1.5, 1)
+ordiplot(mds_dwarfscrub_nonvasc, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+         xlab = "NMDS1", ylab = "NMDS2")
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
      labels = "Stress = 0.13",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
-     labels = "3",
+     labels = "2",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 points(scores(mds_dwarfscrub_nonvasc, display = "sites"),
        col = veg_colors[dwarfscrub_df_nonvasc$Viereck.3],
-       pch = 19)
+       pch = 19, cex = 1.5)
 legend("bottomleft", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
-       col = veg_colors, pch = 19)
+       col = veg_colors, pch = 19, cex = 1.4)
 ordiarrows(mds_dwarfscrub_nonvasc, 
            groups = dwarfscrub_df_nonvasc$PlotID, 
            levels = dwarfscrub_df_nonvasc$Sample_Year, col = 'blue')
 ordihull(mds_dwarfscrub_nonvasc, groups = dwarfscrub_df_nonvasc$Park, draw ="polygon", label = TRUE)
-title("Nonvascular Species")
+
 dwarfscrubnonvasc_plot_viereck <- recordPlot()
+
+#axis1 scores 
+axis1_scores <- scores(mds_dwarfscrub_nonvasc, display = "sites")[, 1]
+species_cor <- apply(dwarfscrub_composition_nonvasc, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
 
 #axis2 scores
 axis2_scores <- scores(mds_dwarfscrub_nonvasc, display = "sites")[, 2]
@@ -1073,28 +1155,7 @@ summary_df <- species_cor_sorted %>%
   arrange(Loadings) %>%
   slice(c(1:10, (n()-9):n()))
 
-#axis1 scores 
-axis1_scores <- scores(mds_dwarfscrub_nonvasc, display = "sites")[, 1]
-species_cor <- apply(dwarfscrub_composition_nonvasc, 2, function(species) cor (species, axis1_scores, method = "spearman"))
-species_cor_sorted <- sort(species_cor, decreasing = TRUE)
-head(species_cor_sorted, 10)
-tail(species_cor_sorted, 10)
 
-species_cor_sorted <- as.data.frame(species_cor_sorted)
-species_cor_sorted <- species_cor_sorted %>%
-  rownames_to_column(var = "Species_Code")
-species_cor_sorted <- species_cor_sorted %>%
-  rename(Loadings = species_cor_sorted)
-str(species_cor_sorted)
-species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-fulldata$Species_Code <- factor(fulldata$Species_Code)
-species_cor_sorted <- species_cor_sorted %>%
-  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
-species_cor_sorted <-species_cor_sorted %>% distinct()
-
-summary_df <- species_cor_sorted %>%
-  arrange(Loadings) %>%
-  slice(c(1:10, (n()-9):n()))
 
 
 
@@ -2110,42 +2171,52 @@ openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 openlow_composition <- openlow_df[,c(7:280)]
 openlow_composition <- as.matrix(openlow_composition) 
 
+#openlow_vasc_abundance_df <- lichen_abundance_df %>%
+#  filter(Plot_Year %in% openlow_df$Plot_Year)
+
 openlow_lichen_composition <- openlow_df_lichen[,c(13:179)]
 openlow_lichen_composition <- as.matrix(openlow_lichen_composition) 
+
+#openlow_lichen_abundance_df <- lichen_abundance_df %>%
+#  filter(Plot_Year %in% openlow_df_lichen$Plot_Year)
 
 openlow_nonvasc_composition <- openlow_df_nonvasc[,c(13:219)]
 openlow_nonvasc_composition <- as.matrix(openlow_nonvasc_composition) 
 
+#openlow_lichen_abundance_df <- lichen_abundance_df %>%
+#  filter(Plot_Year %in% openlow_df_lichen$Plot_Year)
+
 
 #vascualar
 mds_openlow <- metaMDS(openlow_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(openlow_df[["Plot"]])) #25 
-mds_openlow$stress 
-mds_openlow$iters #92
-veg_colors <- c("seagreen3", "blue4")
+length(unique(openlow_df[["Plot"]])) #36
+mds_openlow$stress #0.11 
+mds_openlow$iters #81
+veg_colors <- c("orchid3")
 names(veg_colors) <- unique(openlow_df$Viereck.3)
 dev.off()
-ordiplot(mds_openlow, type = "n")
+xlim <- c(-1, 1.5)
+ylim <- c(-1, 1.5)
+ordiplot(mds_openlow, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Low Shrub", cex.main = 2)
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
-     labels = "Stress = 0.14",
+     labels = "Stress = 0.11",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
      labels = "1",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 points(scores(mds_openlow, display = "sites"),
        col = veg_colors[openlow_df$Viereck.3],
-       pch = 19)
+       pch = 19, cex = 1.5)
 ordiarrows(mds_openlow, 
            groups = openlow_df$Plot, 
            levels = openlow_df$Sample_Year, col = 'blue')
 ordihull(mds_openlow, groups = openlow_df$Park, draw ="polygon", label = TRUE)
-title("Vascular Species")
 
 #plotID labels
 text(mds_openlow, display = "sites", labels = openlow_df$PlotID, col = "black", cex = 0.7, pos = 4)
@@ -2159,7 +2230,6 @@ text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$Plot
 
 openlowvasc_plot_viereck <- recordPlot()
 openlowvasc_plot_viereck
-
 
 #axis1 scores 
 axis1_scores <- scores(mds_openlow, display = "sites")[, 1]
@@ -2183,83 +2253,9 @@ summary_df <- species_cor_sorted %>%
   arrange(Loadings) %>%
   slice(c(1:10, (n()-9):n()))
 
-
-
-
-
-
-#lichen
-mds_openlow_lichen <- metaMDS(openlow_lichen_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(openlow_df_lichen[["Plot"]])) #25 
-mds_openlow_lichen$stress 
-mds_openlow_lichen$iters #92
-veg_colors <- c("seagreen3", "blue4")
-names(veg_colors) <- unique(openlow_df_lichen$Viereck.3)
-dev.off()
-
-xlim <- c(-1, 1)
-ylim <- c(-0.5, 1)
-ordiplot(mds_openlow_lichen, type = "n", xlim = xlim, ylim = ylim)
-text(x = par("usr")[1],
-     y = par("usr")[4] - 0.1,
-     labels = "Stress = 0.15",
-     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
-     col = "black")
-text(x = par("usr")[2],
-     y = par("usr")[4] - 0.1,
-     labels = "1",
-     pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
-     col = "black")
-points(scores(mds_openlow_lichen, display = "sites"),
-       col = veg_colors[openlow_df_lichen$Viereck.3],
-       pch = 19)
-#legend("bottomleft", title = "Site Classification",
-#       legend=names(veg_colors),
-#       ncol=1,
-#       col = veg_colors, pch = 19)
-ordiarrows(mds_openlow_lichen, 
-           groups = openlow_df_lichen$Plot, 
-           levels = openlow_df_lichen$Sample_Year, col = 'blue')
-ordihull(mds_openlow_lichen, groups = openlow_df_lichen$Park, draw ="polygon", label = TRUE)
-title("Lichen Species")
-
-#plotID labels
-text(mds_openlow_lichen, display = "sites", labels = openlow_df_lichen$PlotID, col = "black", cex = 0.7, pos = 4)
-#adding only select labels 
-selected_plots <- c("116", "S980")
-nmds_scores <- as.data.frame(scores(mds_openlow_lichen, display = "sites"))
-nmds_scores$PlotID <- openlow_df_lichen$PlotID
-selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
-text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
-     col = "black", cex = 0.7, pos = 4)
-
-openlow_lichen_plot_viereck <- recordPlot()
-openlow_lichen_plot_viereck
-
-
-
-species_fit <- envfit(mds_openlow_lichen, openlow_lichen_composition, perm = 999)
-species_scores <- as.data.frame(species_fit$vectors$arrows)
-species_scores$Species_Code <- rownames(species_scores)
-
-arrows(0,0,species_scores$NMDS1, species_scores$NMDS2, length = 0.1, col = "red")
-text(species_scores$NMDS1, species_scores$NMDS2, labels = species_scores$Species_Code, 
-     col = "red", pos = c(3, 1, 4), offset = 0.5)
-
-selected_species <- c("PEBR21", "NEBE60", "PEME60", "PENE12", "CLAR6", "MELO60", "LOHA60")
-filtered_scores <- species_scores %>% filter(Species_Code %in% selected_species)
-arrows(0, 0, filtered_scores$NMDS1, filtered_scores$NMDS2, length = 0.1, col = "red")
-text(filtered_scores$NMDS1, filtered_scores$NMDS2, labels = filtered_scores$Species_Code, 
-     col = "red", pos = c(3), offset = 0.5)
-
-
-
-
 #axis2 scores
-axis2_scores <- scores(mds_openlow_lichen, display = "sites")[, 2]
-species_cor <- apply(openlow_lichen_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+axis2_scores <- scores(mds_openlow, display = "sites")[, 2]
+species_cor <- apply(openlow_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
 species_cor_sorted <- sort(species_cor, decreasing = TRUE)
 head(species_cor_sorted, 10)
 tail(species_cor_sorted, 10)
@@ -2281,9 +2277,96 @@ summary_df <- species_cor_sorted %>%
   slice(c(1:10, (n()-9):n()))
 
 
+
+
+#lichen
+mds_openlow_lichen <- metaMDS(openlow_composition_lichen, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(openlow_df_lichen[["Plot"]])) #28
+mds_openlow_lichen$stress #0.13
+mds_openlow_lichen$iters #152
+veg_colors <- c("orchid3")
+names(veg_colors) <- unique(openlow_df_lichen$Viereck.3)
+dev.off()
+
+xlim <- c(-1, 1.5)
+ylim <- c(-1, 1.5)
+ordiplot(mds_openlow_lichen, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Low Shrub", cex.main = 2)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.1,
+     labels = "Stress = 0.15",
+     pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.1,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 1.3, #size 
+     col = "black")
+points(scores(mds_openlow_lichen, display = "sites"),
+       col = veg_colors[openlow_df_lichen$Viereck.3],
+       pch = 19, cex = 1.5)
+#legend("bottomleft", title = "Site Classification",
+#       legend=names(veg_colors),
+#       ncol=1,
+#       col = veg_colors, pch = 19)
+ordiarrows(mds_openlow_lichen, 
+           groups = openlow_df_lichen$Plot, 
+           levels = openlow_df_lichen$Sample_Year, col = 'blue')
+ordihull(mds_openlow_lichen, groups = openlow_df_lichen$Park, draw ="polygon", label = TRUE)
+
+#plotID labels
+text(mds_openlow_lichen, display = "sites", labels = openlow_df_lichen$PlotID, col = "black", cex = 0.7, pos = 4)
+#adding only select labels 
+selected_plots <- c("116", "S980")
+nmds_scores <- as.data.frame(scores(mds_openlow_lichen, display = "sites"))
+nmds_scores$PlotID <- openlow_df_lichen$PlotID
+selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+     col = "black", cex = 0.7, pos = 4)
+
+openlow_lichen_plot_viereck <- recordPlot()
+openlow_lichen_plot_viereck
+species_fit <- envfit(mds_openlow_lichen, openlow_lichen_composition, perm = 999)
+species_scores <- as.data.frame(species_fit$vectors$arrows)
+species_scores$Species_Code <- rownames(species_scores)
+
+arrows(0,0,species_scores$NMDS1, species_scores$NMDS2, length = 0.1, col = "red")
+text(species_scores$NMDS1, species_scores$NMDS2, labels = species_scores$Species_Code, 
+     col = "red", pos = c(3, 1, 4), offset = 0.5)
+
+selected_species <- c("PEBR21", "NEBE60", "PEME60", "PENE12", "CLAR6", "MELO60", "LOHA60")
+filtered_scores <- species_scores %>% filter(Species_Code %in% selected_species)
+arrows(0, 0, filtered_scores$NMDS1, filtered_scores$NMDS2, length = 0.1, col = "red")
+text(filtered_scores$NMDS1, filtered_scores$NMDS2, labels = filtered_scores$Species_Code, 
+     col = "red", pos = c(3), offset = 0.5)
+
 #axis1 scores 
 axis1_scores <- scores(mds_openlow_lichen, display = "sites")[, 1]
-species_cor <- apply(openlow_lichen_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+species_cor <- apply(openlow_composition_lichen, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+#axis2 scores
+axis2_scores <- scores(mds_openlow_lichen, display = "sites")[, 2]
+species_cor <- apply(openlow_composition_lichen, 2, function(species) cor (species, axis2_scores, method = "spearman"))
 species_cor_sorted <- sort(species_cor, decreasing = TRUE)
 head(species_cor_sorted, 10)
 tail(species_cor_sorted, 10)
@@ -2306,29 +2389,32 @@ summary_df <- species_cor_sorted %>%
 
 
 #nonvasc
-mds_openlow_nonvasc <- metaMDS(openlow_nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
-length(unique(openlow_df_nonvasc[["Plot"]])) #25 
-mds_openlow_nonvasc$stress 
-mds_openlow_nonvasc$iters #92
-veg_colors <- c("blue4", "seagreen3")
+mds_openlow_nonvasc <- metaMDS(openlow_composition_nonvasc, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(openlow_df_nonvasc[["Plot"]])) #28
+mds_openlow_nonvasc$stress #0.13
+mds_openlow_nonvasc$iters #125
+veg_colors <- c("orchid3")
 names(veg_colors) <- unique(openlow_df_nonvasc$Viereck.3)
 dev.off()
-ordiplot(mds_openlow_nonvasc, type = "n")
+xlim <- c(-1, 1.5)
+ylim <- c(-1, 1.5)
+ordiplot(mds_openlow_nonvasc, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Low Shrub", cex.main = 2,
+         xlab = "NMDS1", ylab = "NMDS2")
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
-     labels = "Stress = 0.14",
+     labels = "Stress = 0.13",
      pos = 4.1, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
      labels = "1",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
-     cex = 1.2, #size 
+     cex = 1.3, #size 
      col = "black")
 points(scores(mds_openlow_nonvasc, display = "sites"),
        col = veg_colors[openlow_df_nonvasc$Viereck.3],
-       pch = 19)
+       pch = 19, cex = 1.5)
 #legend("bottomleft", title = "Site Classification",
 #       legend=names(veg_colors),
 #       ncol=1,
@@ -2348,6 +2434,64 @@ selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
 text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
      col = "black", cex = 0.7, pos = 4)
 
-title("Nonvascular Species")
 beetle_nonvasc_plot_viereck <- recordPlot()
-beetle_nonvasc_plot_viereck
+
+#axis1 scores 
+axis1_scores <- scores(mds_openlow_nonvasc, display = "sites")[, 1]
+species_cor <- apply(openlow_composition_nonvasc, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+
+#axis2 scores
+axis2_scores <- scores(mds_openlow_nonvasc, display = "sites")[, 2]
+species_cor <- apply(openlow_composition_nonvasc, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+head(species_cor_sorted, 10)
+tail(species_cor_sorted, 10)
+
+species_cor_sorted <- as.data.frame(species_cor_sorted)
+species_cor_sorted <- species_cor_sorted %>%
+  rownames_to_column(var = "Species_Code")
+species_cor_sorted <- species_cor_sorted %>%
+  rename(Loadings = species_cor_sorted)
+str(species_cor_sorted)
+species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+fulldata$Species_Code <- factor(fulldata$Species_Code)
+species_cor_sorted <- species_cor_sorted %>%
+  left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+species_cor_sorted <-species_cor_sorted %>% distinct()
+
+summary_df <- species_cor_sorted %>%
+  arrange(Loadings) %>%
+  slice(c(1:10, (n()-9):n()))
+
+
+
+
+
+
+
+
+
+
+
+
+
