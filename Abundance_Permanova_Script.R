@@ -153,14 +153,14 @@ write_xlsx(vasc_abundance_df, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/
           
           dwarfscrub_lichen_abundance_balanced <- lichen_abundance_df %>%
             filter(Plot_Year %in% dwarfscrub_df_lichen$Plot_Year)
-          dwarfscrub_df_lichens <- dwarfscrub_lichen_abundance_balanced 
+          dwarfscrub_df_lichen <- dwarfscrub_lichen_abundance_balanced 
           
-                  dwarfscrub_composition_lichens <- dwarfscrub_df_lichens[,c(12:178)]
+                  dwarfscrub_composition_lichens <- dwarfscrub_df_lichen[,c(12:178)]
                   dwarfscrub_composition_lichens <- as.matrix(dwarfscrub_composition_lichens) 
                   
-                  dwarfscrub_env_lichens <- dwarfscrub_df_lichens[,c(1:11)]
+                  dwarfscrub_env_lichens <- dwarfscrub_df_lichen[,c(1:11)]
                   
-                  dwarfscrub_env_lichens <- dwarfscrub_env_lichens %>%
+                  dwarfscrub_env_lichen <- dwarfscrub_env_lichen %>%
                     arrange(Plot, Sample_Year) %>%
                     group_by(Plot) %>%
                     mutate(Visit = paste0("visit_", row_number())) %>%

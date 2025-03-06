@@ -11,7 +11,7 @@ library(tibble)
 
 
 
-
+load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_metadata.rdata")
 
 load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_fire.rdata")
 loaded_objects <- ls()
@@ -24,12 +24,18 @@ library(mapview)
 library(sf)
 library(dplyr)
 
-plot_elevation_data <- out$plot_loc_summary[c(1,2,3)]
-plot_elevation_data
+plot_elevation_data <- out$plot_loc_summary[c(1,3)]
+plot_elevation_data <- as.data.frame(plot_elevation_data)
+names(plot_elevation_data)[names(plot_elevation_data) == "ID"] <- "Plot"
+
+
 
 data <- as.data.frame(out$plot_loc_summary)
 data2 <- as.data.frame(out$plot_sample)
 join <- inner_join(data, data2, by = c("ID" = "Plot"))
+
+
+
 
 join <- alpine_df %>%
   left_join(data %>% select(Plot, Elevation), by = "Plot")
@@ -889,11 +895,25 @@ dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modi
 dwarfscrub_composition <- dwarfscrub_df[,c(7:280)]
 dwarfscrub_composition <- as.matrix(dwarfscrub_composition) 
 
-dwarfscrub_composition_lichens <- dwarfscrub_df_lichens[,c(13:179)]
+dwarfscrub_composition_lichens <- dwarfscrub_df_lichen[,c(13:179)]
 dwarfscrub_composition_lichens <- as.matrix(dwarfscrub_composition_lichens) 
 
 dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(13:219)]
 dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc) 
+
+dwarfscrub_df <- dwarfscrub_df %>%
+  left_join(plot_elevation_data %>% select(Plot, Elevation), by = "Plot")
+dwarfscrub_df_lichen <- dwarfscrub_df_lichen %>%
+  left_join(plot_elevation_data %>% select(Plot, Elevation), by = "Plot")
+dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
+  left_join(plot_elevation_data %>% select(Plot, Elevation), by = "Plot")
+
+write_xlsx(plot_elevation_data, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/plot_elevation_data.xlsx")
+plot_elevation_data <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/plot_elevation_data.xlsx")
+
+dwarfscrub_df <- dwarfscrub_df[,c(1:281)]
+dwarfscrub_df_lichen <- dwarfscrub_df_lichen[,c(1:178)]
+dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc[,c(1:218)]
 
 
 #vascular, but colored by viereck 3
@@ -906,7 +926,7 @@ names(veg_colors) <- unique(dwarfscrub_df$Viereck.3)
 dev.off()
 xlim <- c(-1.5, 1)
 ylim <- c(-1.5, 1)
-ordiplot(mds_dwarfscrub, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+ordiplot(mds_dwarfscrub, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub (Vascular Species)", cex.main = 2,
          xlab = "NMDS1", ylab = "NMDS2")
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
@@ -931,6 +951,8 @@ ordiarrows(mds_dwarfscrub,
            groups = dwarfscrub_df$Plot, 
            levels = dwarfscrub_df$Sample_Year, col = 'blue')
 ordihull(mds_dwarfscrub, groups = dwarfscrub_df$Park, draw ="polygon", label = TRUE)
+ordisurf(mds_dwarfscrub, dwarfscrub_df$Elevation, method = "REML", add = TRUE, col = "blue")
+legend("topright", legend = "Elevation (Meters)", col = "blue", lty = 1, bty = "n", cex = 1.5)
 
 dwarfscrubvasc_plot_viereck <- recordPlot()
 
@@ -985,15 +1007,15 @@ summary_df <- species_cor_sorted %>%
 
 #lichen, but colored by viereck 3
 mds_dwarfscrub_lichen <- metaMDS(dwarfscrub_composition_lichens, distance = "bray", k = 3, autotransform = TRUE, trymax = 200) #repeated 2 times 
-length(unique(dwarfscrub_df_lichens[["Plot"]])) #16
+length(unique(dwarfscrub_df_lichen[["Plot"]])) #16
 mds_dwarfscrub_lichen$stress
 mds_dwarfscrub_lichen$iters #144
 veg_colors <- c("darkorange", "seagreen3", "blue4")
-names(veg_colors) <- unique(dwarfscrub_df_lichens$Viereck.3)
+names(veg_colors) <- unique(dwarfscrub_df_lichen$Viereck.3)
 dev.off()
 xlim <- c(-1.5, 1)
 ylim <- c(-1.5, 1)
-ordiplot(mds_dwarfscrub_lichen, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+ordiplot(mds_dwarfscrub_lichen, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub (Lichen Species)", cex.main = 2,
          xlab = "NMDS1", ylab = "NMDS2")
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
@@ -1008,16 +1030,19 @@ text(x = par("usr")[2],
      cex = 1.3, #size 
      col = "black")
 points(scores(mds_dwarfscrub_lichen, display = "sites"),
-       col = veg_colors[dwarfscrub_df_lichens$Viereck.3],
+       col = veg_colors[dwarfscrub_df_lichen$Viereck.3],
        pch = 19, cex = 1.5)
 legend("bottomleft", title = "Site Classification",
        legend=names(veg_colors),
        ncol=1,
        col = veg_colors, pch = 19, cex = 1.4)
 ordiarrows(mds_dwarfscrub_lichen, 
-           groups = dwarfscrub_df_lichens$PlotID, 
-           levels = dwarfscrub_df_lichens$Sample_Year, col = 'blue')
-ordihull(mds_dwarfscrub_lichen, groups = dwarfscrub_df_lichens$Park, draw ="polygon", label = TRUE)
+           groups = dwarfscrub_df_lichen$PlotID, 
+           levels = dwarfscrub_df_lichen$Sample_Year, col = 'blue')
+ordihull(mds_dwarfscrub_lichen, groups = dwarfscrub_df_lichen$Park, draw ="polygon", label = TRUE)
+ordihull(mds_dwarfscrub_lichen, groups = dwarfscrub_df_lichen$Elevation_Band, draw ="polygon", label = TRUE)
+ordisurf(mds_dwarfscrub_lichen, dwarfscrub_df_lichen$Elevation, method = "REML", add = TRUE, col = "blue")
+legend("topright", legend = "Elevation (Meters)", col = "blue", lty = 1, bty = "n", cex = 1.5)
 
 dwarfscrublichen_plot_viereck <- recordPlot()
 
@@ -1081,7 +1106,7 @@ names(veg_colors) <- unique(dwarfscrub_df_nonvasc$Viereck.3)
 dev.off()
 xlim <- c(-1.5, 1)
 ylim <- c(-1.5, 1)
-ordiplot(mds_dwarfscrub_nonvasc, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+ordiplot(mds_dwarfscrub_nonvasc, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub (Nonvascular Species)", cex.main = 2,
          xlab = "NMDS1", ylab = "NMDS2")
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
@@ -1106,6 +1131,8 @@ ordiarrows(mds_dwarfscrub_nonvasc,
            groups = dwarfscrub_df_nonvasc$PlotID, 
            levels = dwarfscrub_df_nonvasc$Sample_Year, col = 'blue')
 ordihull(mds_dwarfscrub_nonvasc, groups = dwarfscrub_df_nonvasc$Park, draw ="polygon", label = TRUE)
+ordisurf(mds_dwarfscrub_nonvasc, dwarfscrub_df_nonvasc$Elevation, method = "REML", add = TRUE, col = "blue")
+legend("topright", legend = "Elevation (Meters)", col = "blue", lty = 1, bty = "n", cex = 1.5)
 
 dwarfscrubnonvasc_plot_viereck <- recordPlot()
 
