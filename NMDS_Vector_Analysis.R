@@ -59,27 +59,27 @@ alpine_lichen_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/
 alpine_nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine_nonvasc_df.xlsx")
 fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat_Frequency.csv")
 
-summary <- dwarfscrub_df_lichen %>%
+summary <- forest_df_lichen %>%
   select(13:178) %>%
   summarise(
     nonzero_cols = sum(colSums(. != 0) > 0),
     all_zero_cols = sum(colSums(. != 0) == 0)
   )
 
-summary <- dwarfscrub_df_nonvasc %>%
+summary <- forest_df_nonvasc %>%
   select(13:218) %>%
   summarise(
     nonzero_cols = sum(colSums(. != 0) > 0),
     all_zero_cols = sum(colSums(. != 0) == 0)
   )
 
-summary <- dwarfscrub_df %>%
+summary <- alpine_nonvasc_df %>%
   select(7:280) %>%
   summarise(
     nonzero_cols = sum(colSums(. != 0) > 0),
     all_zero_cols = sum(colSums(. != 0) == 0)
   )
-
+print(summary)
 
 alpine_lichen_matrix <- alpine_lichen_df[,c(13:179)]
 alpine_lichen_matrix <- as.matrix(alpine_lichen_matrix)
@@ -1307,8 +1307,8 @@ veg_colors <- c("orange", "blue3")
 names(veg_colors) <- unique(forest_df$Viereck.3)
 dev.off()
 
-xlim <- c(-1.5, 1)
-ylim <- c(-1.5, 1)
+xlim <- c(-1.5, 1.5)
+ylim <- c(-1.5, 1.5)
 
 ordiplot(mds_forest, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Vascular Species", cex.main = 2,
          xlab = "NMDS1", ylab = "NMDS2")
@@ -1748,8 +1748,8 @@ mds_needle$iters #164
 veg_colors <- c("seagreen3")
 names(veg_colors) <- unique(needle_df$Viereck.3)
 dev.off()
-xlim <- c(-1.5, 1.5)
-ylim <- c(-1.5, 1.5)
+xlim <- c(0, 2)
+ylim <- c(-1, 1.5)
 ordiplot(mds_needle, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Vascular Species", cex.main = 2,
          xlab = "NMDS1", ylab = "NMDS2")
 text(x = par("usr")[1],
@@ -1804,7 +1804,7 @@ needle_df <- read_xlsx("C:/Users/kmpace/Desktop/needle_df.xlsx")
 
 
 #plotID labels
-text(mds_needle, display = "sites", labels = needle_df$PlotID, col = "black", cex = 0.7, pos = 4)
+text(mds_needle, display = "sites", labels = needle_df$Plot, col = "black", cex = 0.7, pos = 4)
 #adding only select labels 
 selected_plots <- c("116", "S980")
 nmds_scores <- as.data.frame(scores(mds_needle, display = "sites"))
@@ -2007,8 +2007,8 @@ names(veg_colors) <- unique(needle_df_nonvasc$Viereck.3)
 dev.off()
 ordiplot(mds_needle_nonvasc, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Nonvascular Species", cex.main = 2,
          xlab = "NMDS1", ylab = "NMDS2")
-xlim <- c(-1, 1)
-ylim <- c(-1, 1.5)
+xlim <- c(-0.5, 0.75)
+ylim <- c(-0.5, 1)
 text(x = par("usr")[1],
      y = par("usr")[4] - 0.1,
      labels = "Stress = 0.12",
@@ -2017,7 +2017,7 @@ text(x = par("usr")[1],
      col = "black")
 text(x = par("usr")[2],
      y = par("usr")[4] - 0.1,
-     labels = "3",
+     labels = "2",
      pos = 2, #1: below, 2 left, 3 above, 4 right 
      cex = 2, #size 
      col = "black")
@@ -2029,13 +2029,14 @@ legend("bottomleft", title = "Site Classification",
        ncol=1,
        col = veg_colors, pch = 19, cex = 1.4)
 ordiarrows(mds_needle_nonvasc, 
-           groups = needle_df_nonvasc$PlotID, 
+           groups = needle_df_nonvasc$Plot, 
            levels = needle_df_nonvasc$Sample_Year, col = 'blue')
 ordihull(mds_needle_nonvasc, groups = needle_df_nonvasc$Park, draw ="polygon", label = TRUE, cex = 1.8)
 
 needlelichen_plot_viereck <- recordPlot()
 
-
+#plotID labels
+text(mds_needle_nonvasc, display = "sites", labels = needle_df_nonvasc$PlotID, col = "black", cex = 0.7, pos = 4)
 
 #coloring by gradient - elevation 
 nmds_scores <- scores(scores(mds_needle_nonvasc, display = "sites"))
