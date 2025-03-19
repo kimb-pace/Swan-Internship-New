@@ -9,7 +9,7 @@ library(dplyr)
 library(tibble)
 
 
-
+openlow_df_nonvasc <- openlow_df_nonvasc %>% rename(Sample_Year = Sample_Year.x)
 
 load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_metadata.rdata")
 
@@ -59,27 +59,345 @@ alpine_lichen_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/
 alpine_nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/alpine_nonvasc_df.xlsx")
 fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat_Frequency.csv")
 
-summary <- forest_df_lichen %>%
-  select(13:178) %>%
-  summarise(
-    nonzero_cols = sum(colSums(. != 0) > 0),
-    all_zero_cols = sum(colSums(. != 0) == 0)
-  )
 
-summary <- forest_df_nonvasc %>%
-  select(13:218) %>%
-  summarise(
-    nonzero_cols = sum(colSums(. != 0) > 0),
-    all_zero_cols = sum(colSums(. != 0) == 0)
-  )
 
-summary <- alpine_nonvasc_df %>%
+
+
+#calculating total species richness values 
+summary <- LACL_alpine_vasc %>%
   select(7:280) %>%
   summarise(
     nonzero_cols = sum(colSums(. != 0) > 0),
     all_zero_cols = sum(colSums(. != 0) == 0)
   )
 print(summary)
+summary <- LACL_alpine_lichen %>%
+  select(13:179) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+summary <- LACL_alpine_nonvasc %>%
+  select(13:219) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+
+#calculating species richness by park for each veg class 
+KATM_alpine_vasc <- alpine_df %>%
+  filter(Park == "KATM")
+LACL_alpine_vasc <- alpine_df %>%
+  filter(Park == "LACL")
+
+KATM_alpine_lichen <- alpine_lichen_df %>%
+  filter(Park == "KATM")
+LACL_alpine_lichen <- alpine_lichen_df %>%
+  filter(Park == "LACL")
+
+KATM_alpine_nonvasc <- alpine_nonvasc_df %>%
+  filter(Park == "KATM")
+LACL_alpine_nonvasc <- alpine_nonvasc_df %>%
+  filter(Park == "LACL")
+
+
+
+
+#whole park NMDS with vectors 
+lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
+nonvasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_nonvasc.xlsx")
+vasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_vascular.xlsx")
+
+#vascular 
+vasc_abundance_df_group <- vasc_abundance_df %>%
+  filter(!is.na(Group))
+KATM_vasc_group <- vasc_abundance_df_group %>%
+  filter(Park == "KATM")
+LACL_vasc_group <- vasc_abundance_df_group %>%
+  filter(Park == "LACL")
+
+LACL_vasc_group_matrix <- LACL_vasc_group[,c(9:282)]
+LACL_vasc_group_matrix <- as.matrix(LACL_vasc_group_matrix)
+
+KATM_vasc_group_matrix <- KATM_vasc_group[,c(9:282)]
+KATM_vasc_group_matrix <- as.matrix(KATM_vasc_group_matrix)
+
+#nonvascular 
+nonvasc_abundance_df_group <- nonvasc_abundance_df %>%
+  filter(!is.na(Group))
+KATM_nonvasc_group <- nonvasc_abundance_df_group %>%
+  filter(Park == "KATM")
+LACL_nonvasc_group <- nonvasc_abundance_df_group %>%
+  filter(Park == "LACL")
+
+LACL_nonvasc_group_matrix <- LACL_nonvasc_group[,c(13:219)]
+LACL_nonvasc_group_matrix <- as.matrix(LACL_nonvasc_group_matrix)
+
+KATM_nonvasc_group_matrix <- KATM_nonvasc_group[,c(13:219)]
+KATM_nonvasc_group_matrix <- as.matrix(KATM_nonvasc_group_matrix)
+
+#lichen 
+lichen_abundance_df_group <- lichen_abundance_df %>%
+  filter(!is.na(Group))
+KATM_lichen_group <- lichen_abundance_df_group %>%
+  filter(Park == "KATM")
+LACL_lichen_group <- lichen_abundance_df_group %>%
+  filter(Park == "LACL")
+
+LACL_lichen_group_matrix <- LACL_lichen_group[,c(13:179)]
+LACL_lichen_group_matrix <- as.matrix(LACL_lichen_group_matrix)
+
+KATM_lichen_group_matrix <- KATM_lichen_group[,c(13:179)]
+KATM_lichen_group_matrix <- as.matrix(KATM_lichen_group_matrix)
+
+
+
+
+
+
+
+mds_katm_vasc <- metaMDS(KATM_vasc_group_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(KATM_vasc_group[["Plot"]]))
+length(unique(KATM_vasc_group[["Group"]]))
+mds_katm_vasc$stress
+mds_katm_vasc$iters
+mds_katm_vasc$converged
+
+veg_colors <- c("lightpink","orange", "blue3", "firebrick1", "cyan", "lightgray")
+names(veg_colors) <- unique(KATM_vasc_group$Group)
+
+dev.off()
+xlim <- c(-2, 2)
+ylim <- c(-2, 2)
+plot(mds_katm_vasc, type = "n", xlim = xlim, ylim = ylim,cex.axis = 1.5, cex.lab = 1.4, main = "Katmai Vascular Species", cex.main = 2)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.2,
+     labels = "Stress = 0.08",
+     pos = 4, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.2,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+points(scores(mds_katm_vasc, display = "sites"),
+       col = veg_colors[KATM_vasc_group$Group],
+       pch = 19, cex = 1.5)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19, cex = 1.3)
+
+mds_lacl_vasc <- metaMDS(LACL_vasc_group_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(LACL_vasc_group[["Plot"]]))
+length(unique(LACL_vasc_group[["Group"]]))
+mds_lacl_vasc$stress
+mds_lacl_vasc$iters
+mds_lacl_vasc$converged
+
+veg_colors <- c("orange", "blue3", "firebrick1", "cyan", "lightgray")
+names(veg_colors) <- unique(LACL_vasc_group$Group)
+
+dev.off()
+xlim <- c(-2, 2)
+ylim <- c(-2, 2)
+plot(mds_lacl_vasc, type = "n", xlim = xlim, ylim = ylim,cex.axis = 1.5, cex.lab = 1.4, main = "Lake Clark Vascular Species", cex.main = 2)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.2,
+     labels = "Stress = 0.08",
+     pos = 4, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.2,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+points(scores(mds_lacl_vasc, display = "sites"),
+       col = veg_colors[LACL_vasc_group$Group],
+       pch = 19, cex = 1.5)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19, cex = 1.3)
+
+
+
+#lichen 
+mds_katm_lichen <- metaMDS(KATM_lichen_group_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(KATM_lichen_group[["Plot"]]))
+length(unique(KATM_lichen_group[["Group"]]))
+mds_katm_lichen$stress
+mds_katm_lichen$iters
+mds_katm_lichen$converged
+
+veg_colors <- c("lightpink","orange", "blue3", "firebrick1", "cyan", "lightgray")
+names(veg_colors) <- unique(KATM_lichen_group$Group)
+
+dev.off()
+xlim <- c(-2, 2)
+ylim <- c(-2, 2)
+plot(mds_katm_lichen, type = "n", xlim = xlim, ylim = ylim,cex.axis = 1.5, cex.lab = 1.4, main = "Katmai Lichen Species", cex.main = 2)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.2,
+     labels = "Stress = 0.11",
+     pos = 4, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.2,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+points(scores(mds_katm_lichen, display = "sites"),
+       col = veg_colors[KATM_lichen_group$Group],
+       pch = 19, cex = 1.5)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19, cex = 1.3)
+
+mds_lacl_lichen <- metaMDS(LACL_lichen_group_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(LACL_lichen_group[["Plot"]]))
+length(unique(LACL_lichen_group[["Group"]]))
+mds_lacl_lichen$stress
+mds_lacl_lichen$iters
+mds_lacl_lichen$converged
+
+veg_colors <- c("lightpink", "orange", "blue3", "firebrick1", "cyan", "lightgray")
+names(veg_colors) <- unique(LACL_lichen_group$Group)
+
+dev.off()
+xlim <- c(-2, 2)
+ylim <- c(-2, 2)
+plot(mds_lacl_lichen, type = "n", xlim = xlim, ylim = ylim,cex.axis = 1.5, cex.lab = 1.4, main = "Lake Clark Lichen Species", cex.main = 2)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.2,
+     labels = "Stress = 0.08",
+     pos = 4, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.2,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+points(scores(mds_lacl_lichen, display = "sites"),
+       col = veg_colors[LACL_lichen_group$Group],
+       pch = 19, cex = 1.5)
+legend("bottomright", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19, cex = 1.3)
+
+
+#nonvascular 
+mds_katm_nonvasc <- metaMDS(KATM_nonvasc_group_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(KATM_nonvasc_group[["Plot"]]))
+length(unique(KATM_nonvasc_group[["Group"]]))
+mds_katm_nonvasc$stress
+mds_katm_nonvasc$iters
+mds_katm_nonvasc$converged
+
+veg_colors <- c("lightpink","orange", "blue3", "firebrick1", "cyan", "lightgray")
+names(veg_colors) <- unique(KATM_nonvasc_group$Group)
+
+dev.off()
+xlim <- c(-2, 2)
+ylim <- c(-2, 2)
+plot(mds_katm_nonvasc, type = "n", xlim = xlim, ylim = ylim,cex.axis = 1.5, cex.lab = 1.4, main = "Katmai Nonvascular Species", cex.main = 2)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.2,
+     labels = "Stress = 0.08",
+     pos = 4, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.2,
+     labels = "1",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+points(scores(mds_katm_nonvasc, display = "sites"),
+       col = veg_colors[KATM_nonvasc_group$Group],
+       pch = 19, cex = 1.5)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19, cex = 1.3)
+
+mds_lacl_nonvasc <- metaMDS(LACL_nonvasc_group_matrix, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+length(unique(LACL_nonvasc_group[["Plot"]]))
+length(unique(LACL_nonvasc_group[["Group"]]))
+mds_lacl_nonvasc$stress
+mds_lacl_nonvasc$iters
+mds_lacl_nonvasc$converged
+
+veg_colors <- c("lightpink", "orange", "blue3", "firebrick1", "cyan", "lightgray")
+names(veg_colors) <- unique(LACL_nonvasc_group$Group)
+
+dev.off()
+xlim <- c(-2, 2)
+ylim <- c(-2, 2)
+plot(mds_lacl_nonvasc, type = "n", xlim = xlim, ylim = ylim,cex.axis = 1.5, cex.lab = 1.4, main = "Lake Clark Nonvascular Species", cex.main = 2)
+text(x = par("usr")[1],
+     y = par("usr")[4] - 0.2,
+     labels = "Stress = 0.08",
+     pos = 4, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+text(x = par("usr")[2],
+     y = par("usr")[4] - 0.2,
+     labels = "2",
+     pos = 2, #1: below, 2 left, 3 above, 4 right 
+     cex = 2, #size 
+     col = "black")
+points(scores(mds_lacl_nonvasc, display = "sites"),
+       col = veg_colors[LACL_nonvasc_group$Group],
+       pch = 19, cex = 1.5)
+legend("bottomleft", title = "Site Classification",
+       legend=names(veg_colors),
+       ncol=2,
+       col = veg_colors, pch = 19, cex = 1.3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 alpine_lichen_matrix <- alpine_lichen_df[,c(13:179)]
 alpine_lichen_matrix <- as.matrix(alpine_lichen_matrix)
@@ -1267,13 +1585,13 @@ forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified
 
 
 #turn into matrices for NMDS 
-forest_composition <- forest_df[,c(7:280)]
+forest_composition <- forest_df[,c(8:281)]
 forest_composition <- as.matrix(forest_composition) 
 
-forest_composition_lichens <- forest_df_lichens[,c(13:179)]
+forest_composition_lichens <- forest_df_lichens[,c(12:178)]
 forest_composition_lichens <- as.matrix(forest_composition_lichens) 
 
-forest_composition_nonvasc <- forest_df_nonvasc[,c(13:219)]
+forest_composition_nonvasc <- forest_nonvasc_df[,c(12:218)]
 forest_composition_nonvasc <- as.matrix(forest_composition_nonvasc) 
 
 
@@ -1285,10 +1603,84 @@ forest_df_lichens <- forest_df_lichens %>%
   left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
 forest_df_lichens <- forest_df_lichens %>% distinct()
 
-forest_df_nonvasc <- forest_df_nonvasc %>%
+forest_nonvasc_df <- forest_nonvasc_df %>%
   left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
-forest_df_nonvasc <- forest_df_nonvasc %>% distinct()
+forest_nonvasc_df <- forest_nonvasc_df %>% distinct()
 
+write_xlsx(forest_nonvasc_df, "C:/Users/kmpace/Desktop/forest_nonvasc_df.xlsx")
+
+
+forest_nonvasc_df <- read_xlsx("C:/Users/kmpace/Desktop/forest_nonvasc_df.xlsx")
+forest_df <- read_xlsx("C:/Users/kmpace/Desktop/forest_df.xlsx")
+forest_df_lichens <- read_xlsx("C:/Users/kmpace/Desktop/forest_df_lichens.xlsx")
+
+
+#env 
+forest_env <- forest_df[,c(1:7, 282:283)]
+forest_env <- forest_env %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+#design permutation structure 
+perm_design_forest_time = how(
+  plots = Plots(strata = forest_env$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+#canopy cover effects on frequency 
+forest_CC_result_first <- adonis2(forest_composition ~ Percent_Cover + Park + Plot + Visit, 
+                                  data = forest_env, method = "bray", 
+                                  permutations = perm_design_forest_time, 
+                                  by = "terms")
+print(forest_CC_result_first)
+
+
+#lichen 
+#env 
+forest_env_lichens <- forest_df_lichens[,c(1:11, 179:180)]
+forest_env_lichens <- forest_env_lichens %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+#design permutation structure 
+perm_design_forest_time_lichens = how(
+  plots = Plots(strata = forest_env_lichens$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+#canopy cover effects on frequency 
+forest_CC_result_first_lichens <- adonis2(forest_composition_lichens ~ Percent_Cover + Park + Plot + Visit, 
+                                  data = forest_env_lichens, method = "bray", 
+                                  permutations = perm_design_forest_time_lichens, 
+                                  by = "terms")
+print(forest_CC_result_first_lichens)
+
+
+#nonvasc 
+#env 
+forest_env_nonvasc <- forest_nonvasc_df[,c(1:11, 219)]
+forest_env_nonvasc <- forest_env_nonvasc %>%
+  arrange(Plot, Sample_Year) %>%
+  group_by(Plot) %>%
+  mutate(Visit = paste0("visit_", row_number())) %>%
+  ungroup()
+
+#design permutation structure 
+perm_design_forest_time_nonvasc = how(
+  plots = Plots(strata = forest_env_nonvasc$Plot, type = c("free")),
+  within = Within(type = "series", mirror = FALSE),
+  nperm = 999)
+
+#canopy cover effects on frequency 
+forest_CC_result_first_nonvasc <- adonis2(forest_composition_nonvasc ~ Percent_Cover + Park + Plot + Visit, 
+                                          data = forest_env_nonvasc, method = "bray", 
+                                          permutations = perm_design_forest_time_nonvasc, 
+                                          by = "terms")
+print(forest_CC_result_first_nonvasc)
 
 
 forest_df <- forest_df %>%
@@ -2943,7 +3335,7 @@ summary_df <- species_cor_sorted %>%
 
 
 #nonvasc
-mds_openlow_nonvasc <- metaMDS(openlow_composition_nonvasc, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+mds_openlow_nonvasc <- metaMDS(openlow_nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
 length(unique(openlow_df_nonvasc[["Plot"]])) #28
 mds_openlow_nonvasc$stress #0.13
 mds_openlow_nonvasc$iters #125
@@ -3004,8 +3396,8 @@ text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$Plot
 beetle_nonvasc_plot_viereck <- recordPlot()
 
 #axis1 scores 
-axis1_scores <- scores(mds_openlow_nonvasc, display = "sites")[, 1]
-species_cor <- apply(openlow_composition_nonvasc, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+axis1_scores <- scores(openlow_nonvasc_composition, display = "sites")[, 1]
+species_cor <- apply(openlow_nonvasc_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
 species_cor_sorted <- sort(species_cor, decreasing = TRUE)
 head(species_cor_sorted, 10)
 tail(species_cor_sorted, 10)
@@ -3029,7 +3421,7 @@ summary_df <- species_cor_sorted %>%
 
 #axis2 scores
 axis2_scores <- scores(mds_openlow_nonvasc, display = "sites")[, 2]
-species_cor <- apply(openlow_composition_nonvasc, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+species_cor <- apply(openlow_nonvasc_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
 species_cor_sorted <- sort(species_cor, decreasing = TRUE)
 head(species_cor_sorted, 10)
 tail(species_cor_sorted, 10)
