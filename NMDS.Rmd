@@ -35,14 +35,14 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
     beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc.xlsx")
 
 #Create species matrices 
-    beetle_composition <- beetle_df[,c(7:280)]
-    beetle_composition <- as.matrix(beetle_composition) 
+beetle_composition <- beetle_df[,c(9:282)]
+beetle_composition <- as.matrix(beetle_composition) 
     
-    beetle_lichen_composition <- beetle_df_lichen[,c(13:179)]
-    beetle_lichen_composition <- as.matrix(beetle_lichen_composition) 
+beetle_lichen_composition <- beetle_df_lichen[,c(13:179)]
+beetle_lichen_composition <- as.matrix(beetle_lichen_composition) 
     
-    beetle_nonvasc_composition <- beetle_nonvasc_df[,c(13:219)]
-    beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition) 
+beetle_nonvasc_composition <- beetle_df_nonvasc[,c(13:219)]
+beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition) 
 
 #add canopy cover info to dataframes 
     beetle_df <- beetle_df %>%
@@ -465,14 +465,14 @@ forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/
 forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_nonvasc.xlsx") 
 
 #create species matrix for NMDS 
-forest_composition <- forest_df[,c(8:281)]
-forest_composition <- as.matrix(forest_composition) 
+          forest_composition <- forest_df[,c(9:282)]
+          forest_composition <- as.matrix(forest_composition) 
 
-forest_composition_lichen <- forest_df_lichen[,c(12:178)]
-forest_composition_lichen <- as.matrix(forest_composition_lichen) 
+          forest_composition_lichen <- forest_df_lichen[,c(13:179)]
+          forest_composition_lichen <- as.matrix(forest_composition_lichen) 
 
-forest_composition_nonvasc <- forest_nonvasc_df[,c(12:218)]
-forest_composition_nonvasc <- as.matrix(forest_composition_nonvasc) 
+          forest_composition_nonvasc <- forest_df_nonvasc[,c(13:219)]
+          forest_composition_nonvasc <- as.matrix(forest_composition_nonvasc)
 
 #add canopy cover info to dataframes 
 forest_df <- forest_df %>%
@@ -974,22 +974,22 @@ needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/
 needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_nonvasc.xlsx")
 
 #create NMDS species matrix 
-needle_composition <- needle_df[,c(7:280)]
-needle_composition <- as.matrix(needle_composition) 
+          needle_composition <- needle_df[,c(8:281)]
+          needle_composition <- as.matrix(needle_composition) 
 
-needle_composition_lichens <- needle_df_lichens[,c(12:178)]
-needle_composition_lichens <- as.matrix(needle_composition_lichens) 
+          needle_composition_lichen <- needle_df_lichen[,c(13:179)]
+          needle_composition_lichen <- as.matrix(needle_composition_lichen)
 
-needle_composition_nonvasc <- needle_df_nonvasc[,c(12:218)]
-needle_composition_nonvasc <- as.matrix(needle_composition_nonvasc) 
+          needle_composition_nonvasc <- needle_df_nonvasc[,c(13:219)]
+          needle_composition_nonvasc <- as.matrix(needle_composition_nonvasc) 
 
 #Add canopy cover info for overlay 
 needle_df <- needle_df %>%
   left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
 needle_df <- needle_df %>% distinct()
-needle_df_lichens <- needle_df_lichens %>%
+needle_df_lichen <- needle_df_lichen %>%
   left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
-needle_df_lichens <- needle_df_lichens %>% distinct()
+needle_df_lichen <- needle_df_lichen %>% distinct()
 needle_df_nonvasc <- needle_df_nonvasc %>%
   left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
 needle_df_nonvasc <- needle_df_nonvasc %>% distinct()
@@ -1165,23 +1165,23 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
 ## Lichen 
 ```{r}
 #Run NMDS 
-    mds_needle_lichens <- metaMDS(needle_composition_lichens, distance = "bray", k = 3, autotransform = TRUE, trymax = 200) 
+    mds_needle_lichen <- metaMDS(needle_composition_lichen, distance = "bray", k = 3, autotransform = TRUE, trymax = 200) 
 
 #Descriptive info for caption 
-    length(unique(needle_df_lichens[["Plot"]])) #number of plots 
-    mds_needle_lichens$stress #stress value 
-    mds_needle_lichens$iters #number of iterations 
+    length(unique(needle_df_lichen[["Plot"]])) #number of plots 
+    mds_needle_lichen$stress #stress value 
+    mds_needle_lichen$iters #number of iterations 
 
 #Define colors 
     veg_colors <- c("seagreen3")
-    names(veg_colors) <- unique(needle_df_lichens$Viereck.3)
+    names(veg_colors) <- unique(needle_df_lichen$Viereck.3)
     dev.off()
 #define axis 
     xlim <- c(-1.5, 1.5)
     ylim <- c(-1.5, 1.5)
 
 #plot with base overlay options
-      ordiplot(mds_needle_lichens, type = "n", xlim = xlim, ylim = ylim, 
+      ordiplot(mds_needle_lichen, type = "n", xlim = xlim, ylim = ylim, 
                cex.axis = 1.5, cex.lab = 1.4, main = "Lichen Species", cex.main = 2,
                xlab = "NMDS1", ylab = "NMDS2")
       text(x = par("usr")[1],
@@ -1196,30 +1196,30 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
            pos = 2, #1: below, 2 left, 3 above, 4 right 
            cex = 2, #size 
            col = "black")
-      points(scores(mds_needle_lichens, display = "sites"),
-             col = veg_colors[needle_df_lichens$Viereck.3],
+      points(scores(mds_needle_lichen, display = "sites"),
+             col = veg_colors[needle_df_lichen$Viereck.3],
              pch = 19, cex = 1.5)
       legend("bottomleft", title = "Site Classification",
              legend=names(veg_colors),
              ncol=1,
              col = veg_colors, pch = 19, cex = 1.4)
-      ordiarrows(mds_needle_lichens, 
-                 groups = needle_df_lichens$Plot, 
-                 levels = needle_df_lichens$Sample_Year, col = 'blue')
-      ordihull(mds_needle_lichens, groups = needle_df_lichens$Park, draw ="polygon", label = TRUE, cex = 1.8)
-      ordihull(mds_needle_lichens, groups = needle_df_lichens$Elevation_Band, draw ="polygon", label = TRUE)
+      ordiarrows(mds_needle_lichen, 
+                 groups = needle_df_lichen$Plot, 
+                 levels = needle_df_lichen$Sample_Year, col = 'blue')
+      ordihull(mds_needle_lichen, groups = needle_df_lichen$Park, draw ="polygon", label = TRUE, cex = 1.8)
+      ordihull(mds_needle_lichen, groups = needle_df_lichen$Elevation_Band, draw ="polygon", label = TRUE)
       legend("bottomright", title = "Elevation Band",
              legend=c("01 (<450 m)", "02 (450-900 m)"),
              ncol=1)
 
 #coloring by gradient - elevation 
-      nmds_scores <- scores(scores(mds_needle_lichens, display = "sites"))
+      nmds_scores <- scores(scores(mds_needle_lichen, display = "sites"))
       nmds_scores <- as.data.frame(nmds_scores)
-      nmds_scores$Plot_Year <- needle_df_lichens$Plot_Year
-      nmds_scores$Elevation <- needle_df_lichens$Elevation
+      nmds_scores$Plot_Year <- needle_df_lichen$Plot_Year
+      nmds_scores$Elevation <- needle_df_lichen$Elevation
       color_gradient <- colorRampPalette(c("blue", "red"))(100)
       point_colors <- color_gradient[cut(nmds_scores$Elevation, breaks = 100)]
-      ordiplot(mds_needle_lichens, type = "n", xlim = xlim, ylim = ylim, 
+      ordiplot(mds_needle_lichen, type = "n", xlim = xlim, ylim = ylim, 
                      cex.axis = 1.5, cex.lab = 1.4, main = "Lichen Species", cex.main = 2,
                      xlab = "NMDS1", ylab = "NMDS2")
       text(x = par("usr")[1],
@@ -1239,13 +1239,13 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
       points(nmds_scores$NMDS1, nmds_scores$NMDS2, col = point_colors, pch = 19, cex = 1.7)
 
 #coloring by gradient - Percent cover 
-      nmds_scores <- scores(scores(mds_needle_lichens, display = "sites"))
+      nmds_scores <- scores(scores(mds_needle_lichen, display = "sites"))
       nmds_scores <- as.data.frame(nmds_scores)
-      nmds_scores$Plot_Year <- needle_df_lichens$Plot_Year
+      nmds_scores$Plot_Year <- needle_df_lichen$Plot_Year
       nmds_scores$Percent_Cover <- needle_df_lichens$Percent_Cover
       color_gradient <- colorRampPalette(c("orange", "blue3"))(100)
       point_colors <- color_gradient[cut(nmds_scores$Percent_Cover, breaks = 100)]
-      ordiplot(mds_needle_lichens, type = "n", xlim = xlim, ylim = ylim, 
+      ordiplot(mds_needle_lichen, type = "n", xlim = xlim, ylim = ylim, 
                      cex.axis = 1.5, cex.lab = 1.4, main = "Lichen Species", cex.main = 2,
                      xlab = "NMDS1", ylab = "NMDS2")
       text(x = par("usr")[1],
@@ -1266,19 +1266,19 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
 
 
 #plot labels if desired 
-      text(mds_needle_lichens, display = "sites", labels = needle_df_lichens$PlotID, col = "black", cex = 0.7, pos = 4)
+      text(mds_needle_lichen, display = "sites", labels = needle_df_lichen$PlotID, col = "black", cex = 0.7, pos = 4)
       #adding only select labels 
       selected_plots <- c("116", "S980")
-      nmds_scores <- as.data.frame(scores(mds_needle_lichens, display = "sites"))
-      nmds_scores$PlotID <- needle_df_lichens$PlotID
+      nmds_scores <- as.data.frame(scores(mds_needle_lichen, display = "sites"))
+      nmds_scores$PlotID <- needle_df_lichen$PlotID
       selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
       text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
            col = "black", cex = 0.7, pos = 4)
 
 #Species loading values 
   #axis1 scores 
-      axis1_scores <- scores(mds_needle_lichens, display = "sites")[, 1]
-      species_cor <- apply(needle_composition_lichens, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+      axis1_scores <- scores(mds_needle_lichen, display = "sites")[, 1]
+      species_cor <- apply(needle_composition_lichen, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
@@ -1300,8 +1300,8 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
-      axis2_scores <- scores(mds_needle_lichens, display = "sites")[, 2]
-      species_cor <- apply(needle_composition_lichens, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+      axis2_scores <- scores(mds_needle_lichen, display = "sites")[, 2]
+      species_cor <- apply(needle_composition_lichen, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
@@ -1486,14 +1486,14 @@ openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified
 openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc.xlsx")
 
 #turn species data into matrix 
-openlow_composition <- openlow_df[,c(7:280)]
-openlow_composition <- as.matrix(openlow_composition)
+      openlow_composition <- openlow_df[,c(9:282)]
+      openlow_composition <- as.matrix(openlow_composition) 
 
-openlow_lichen_composition <- openlow_df_lichen[,c(13:179)]
-openlow_lichen_composition <- as.matrix(openlow_lichen_composition) 
+      openlow_composition_lichen <- openlow_df_lichen[,c(13:179)]
+      openlow_composition_lichen <- as.matrix(openlow_composition_lichen)
 
-openlow_nonvasc_composition <- openlow_df_nonvasc[,c(13:219)]
-openlow_nonvasc_composition <- as.matrix(openlow_nonvasc_composition)
+      openlow_composition_nonvasc <- openlow_df_nonvasc[,c(13:219)]
+      openlow_composition_nonvasc <- as.matrix(openlow_composition_nonvasc)
 
 #add elevation data to dataframes for overlay 
 openlow_df <- openlow_df %>%
@@ -1920,15 +1920,15 @@ dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modif
 dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc.xlsx") 
 
 #Convert to species matrix
-dwarfscrub_composition <- dwarfscrub_df[,c(7:280)]
-dwarfscrub_composition <- as.matrix(dwarfscrub_composition) 
+          dwarfscrub_composition <- dwarfscrub_df[,c(9:282)]
+          dwarfscrub_composition <- as.matrix(dwarfscrub_composition) 
 
-dwarfscrub_composition_lichens <- dwarfscrub_df_lichen[,c(13:179)]
-dwarfscrub_composition_lichens <- as.matrix(dwarfscrub_composition_lichens) 
+          dwarfscrub_composition_lichen <- dwarfscrub_df_lichen[,c(13:179)]
+          dwarfscrub_composition_lichen <- as.matrix(dwarfscrub_composition_lichen) 
 
-dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(13:219)]
-dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc) 
-
+          dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(13:219)]
+          dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc)
+ 
 #add elevation data for gradient overlay 
 dwarfscrub_df <- dwarfscrub_df %>%
   left_join(plot_elevation_data %>% select(Plot, Elevation), by = "Plot")
@@ -2065,7 +2065,7 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
 ## Lichen 
 ```{r}
 #Run NMDS 
-    mds_dwarfscrub_lichen <- metaMDS(dwarfscrub_composition_lichens, distance = "bray", k = 3, autotransform = TRUE, trymax = 200) 
+    mds_dwarfscrub_lichen <- metaMDS(dwarfscrub_composition_lichen, distance = "bray", k = 3, autotransform = TRUE, trymax = 200) 
 
 #Get descriptive info 
     length(unique(dwarfscrub_df_lichen[["Plot"]])) #number of plots 
