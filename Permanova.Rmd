@@ -1,5 +1,5 @@
 ---
-title: "Permanova Cleaned and Organized"
+title: "Quadrat Frequency PERMANOVA Script, All Classes"
 output: html_document
 date: "2025-02-04"
 ---
@@ -11,43 +11,89 @@ library(permute)
 library(lattice)
 library(dplyr)
 library(readxl)
-library(writexl)
 library(readr)
 
-#Optional, if interested in how I balanced the subsets 
-summary_table_vasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_vasc.xlsx")
-summary_table_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_nonvasc.xlsx")
-summary_table_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_lichens.xlsx")
+#Required: 
+    #Canopy Cover 
+      #Load this file: 
+      canopy_cover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/canopy_cover.xlsx")
+      
+      #How I calculated the percent cover column: 
+      canopy_cover <- read_csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Canopy_Cover_PtInt.csv")
+      canopy_cover <- canopy_cover %>%
+        mutate(Plot_Year = paste(Plot, Sample_Year, sep = "_")) %>%
+        group_by(Plot_Year) %>%
+        mutate(Percent_Cover = (sum(hits) / 177) * 100) %>% 
+        ungroup()
 
-#For building subsets 
-lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
-nonvasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_nonvasc.xlsx")
-vasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_vascular.xlsx")
-
-#For building ENV files 
-lichen_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Lichen_Species_Richness.xlsx")
-nonvasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Nonvascular_Species_Richness.xlsx")
-vasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Vascular_Species_Richness.xlsx")
-
-#Canopy Cover 
-canopy_cover <- read_csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Canopy_Cover_PtInt.csv")
-canopy_cover <- canopy_cover %>%
-  mutate(Plot_Year = paste(Plot, Sample_Year, sep = "_")) %>%
-  group_by(Plot_Year) %>%
-  mutate(Percent_Cover = (sum(hits) / 177) * 100) %>% 
-  ungroup()
-canopy_cover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/canopy_cover.xlsx")
-
-#For Reference 
-viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_env.xlsx")
+#Optional (Can avoid if using quickload within subsets)
+      
+    #If interested in how I balanced the subsets and built the .env files
+      summary_table_vasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_vasc.xlsx")
+      summary_table_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_nonvasc.xlsx")
+      summary_table_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_lichens.xlsx")
+      
+      lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
+      nonvasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_nonvasc.xlsx")
+      vasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_vascular.xlsx")
+      
+      lichen_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Lichen_Species_Richness.xlsx")
+      nonvasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Nonvascular_Species_Richness.xlsx")
+      vasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Vascular_Species_Richness.xlsx")
 ```
+
+# Creation of Summary Tables, Code for Reference (not required to run if using quick load)
+```{r}
+#Vascular 
+summary_table_vasc <- vasc_abundance_df  %>%
+  group_by(Plot) %>%
+  summarise(
+    Number_Visits = n_distinct(Sample_Year), 
+    Visit_Years = paste(sort(unique(Sample_Year)), collapse = ", "),
+    Vegetation_Class = unique(Vegetation_Class))
+summary_table_vasc <- summary_table_vasc %>% 
+  arrange(Vegetation_Class, Number_Visits)
+summary_table_vasc <- summary_table_vasc %>%
+  left_join(vasc_abundance_df %>% select(Plot, Viereck.2, Viereck.3),
+            by = "Plot")
+summary_table_vasc <- summary_table_vasc %>% distinct()
+
+#Lichens 
+summary_table_lichens <- lichen_abundance_df  %>%
+  group_by(Plot) %>%
+  summarise(
+    Number_Visits = n_distinct(Sample_Year), 
+    Visit_Years = paste(sort(unique(Sample_Year)), collapse = ", "),
+    Vegetation_Class = unique(Vegetation_Class))
+summary_table_lichens <- summary_table_lichens %>% 
+  arrange(Vegetation_Class, Number_Visits)
+summary_table_lichens <- summary_table_lichens %>%
+  left_join(lichen_abundance_df %>% select(Plot, Viereck.1, Viereck.2, Viereck.3),
+            by = "Plot")
+summary_table_lichens <- summary_table_lichens %>% distinct()
+
+#Nonvascular 
+summary_table_nonvasc <- nonvasc_abundance_df  %>%
+  group_by(Plot) %>%
+  summarise(
+    Number_Visits = n_distinct(Sample_Year), 
+    Visit_Years = paste(sort(unique(Sample_Year)), collapse = ", "),
+    Vegetation_Class = unique(Vegetation_Class))
+summary_table_nonvasc <- summary_table_lichens %>% 
+  arrange(Vegetation_Class, Number_Visits)
+summary_table_nonvasc <- summary_table_nonvasc %>%
+  left_join(nonvasc_abundance_df %>% select(Plot, Viereck.1, Viereck.2, Viereck.3),
+            by = "Plot")
+summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
+```
+
 
 # Beetle Kill Spruce 
 
-## Building the dataframes to be balanced - code for reference 
+## Building the dataframes to be balanced - code for reference (not required to run if using quick load)
 ```{r}
 #Vascular 
-#balancing everything 
+    #hand select the years for plots with more than the decided number of visits 
       filter_criteria_beetle <- list(
         KATM_2009_01_S996 = c(2012, 2014, 2019),
         KATM_2009_01_S999 = c(2013, 2014, 2019),
@@ -55,7 +101,7 @@ viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_e
         LACL_2010_01_S995	= c(2012, 2014, 2019))
       
       #next identify plots with three plot visits 
-      beetle_plots <- summary_table %>%
+      beetle_plots <- summary_table_vasc %>%
         filter(Vegetation_Class == "Beetle kill spruce", Number_Visits == 3) %>%
         pull(Plot)
       
@@ -64,7 +110,7 @@ viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_e
       
       #subset main presence absence dataframe based on both conditions 
       #verify that the hand selected plots were correctly pulled 
-      subset_hand_selected <- presence_absence_df %>%
+      subset_hand_selected <- vascpresence_absence_df %>%
         filter(
           Plot %in% names(filter_criteria_beetle) & 
             Sample_Year %in% unlist(filter_criteria_beetle[Plot]))
@@ -74,10 +120,14 @@ viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_e
           (Plot %in% beetle_plots) | 
             (Plot %in% names(filter_criteria_beetle) &
                Sample_Year %in% unlist(filter_criteria_beetle[Plot])))
+    
+      #convert to frequency from PA 
       beetle_vasc_abundance_balanced <- vasc_abundance_df %>%
         filter(Plot_Year %in% beetle_df$Plot_Year)
       beetle_df <- beetle_vasc_abundance_balanced 
+
 #Lichen 
+  #hand select the years for plots with more than the decided number of visits
           filter_criteria_beetle_lichen <- list(
             KATM_2009_01_S996 = c(2012, 2014, 2019),
             KATM_2009_01_S999 = c(2013, 2014, 2019),
@@ -108,11 +158,14 @@ viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_e
           
           #verify everything has two sample visits 
           table(beetle_df_lichen$Park, beetle_df_lichen$Plot)
+          
+          #convert to frequency from PA 
           beetle_lichen_abundance_balanced <- lichen_abundance_df %>%
             filter(Plot_Year %in% beetle_lichen_df$Plot_Year)
           beetle_lichen_df <- beetle_lichen_abundance_balanced 
 
 #Nonvascular 
+  #hand select the years for plots with more than the decided number of visits
  filter_criteria_beetle_nonvasc <- list(
             KATM_2009_01_S996 = c(2012, 2014, 2019),
             KATM_2009_01_S999 = c(2013, 2014, 2019),
@@ -142,13 +195,15 @@ viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_e
                    Sample_Year %in% unlist(filter_criteria_beetle_nonvasc[Plot])))
           
           #verify everything has two sample visits 
-          table(beetle_df_nonvasc$Park, beetle_df_nonvasc$Plot)  
+          table(beetle_df_nonvasc$Park, beetle_df_nonvasc$Plot)
+          
+          #convert to frequency from PA
           beetle_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
             filter(Plot_Year %in% beetle_df_nonvasc$Plot_Year)
           beetle_df_nonvasc <- beetle_nonvasc_abundance_balanced
 ```
 
-## Creating the env files, code for reference 
+## Creating the env files, code for reference (not required to run if using quick load) 
 ```{r}
 #Vascular
       beetle_env <- beetle_df[,c(1:8)]
@@ -202,7 +257,7 @@ viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_e
             left_join(nonvasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
 ```
 
-## Load Data Frames 
+## Load Data Frames (Required)
 ```{r}
 #quick pull from T Drive 
 #dataframes
@@ -216,7 +271,7 @@ beetle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified
 beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc.xlsx")
 ```
 
-## Calculate Species Richness Averages and Standard Error 
+## Calculate Species Richness Averages and Standard Error (Optional)
 ```{r}
 #beetle kill
         beetle_env %>%
@@ -257,7 +312,7 @@ beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 ```
 
 
-## Create composition matrices, and restrict permutations for PERMANOVA 
+## Create composition matrices, and restrict permutations for PERMANOVA (Requried)
 ```{r}
 #Vascular 
 beetle_composition <- beetle_df[,c(9:282)]
@@ -328,7 +383,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       perms1 <- rbind(1:nrow(beetle_env),
                       shuffleSet(n = nrow(beetle_env), control = perm_design_beetle, nset = 999))
       
-      #create object for Ss to be stored 
+      #create object for SS to be stored 
       results1 <- matrix(nrow = nrow(perms1), ncol = 4)
       colnames(results1) <- c("Park", "Plot", "Residual", "Total")
       
@@ -347,8 +402,10 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       results1 <- results1 |>
         data.frame() |>
         mutate(F.Park = (Park/1)/(Plot/13))
-      head(results1)
-    #calculate P value 
+      head1 <- head(results1)
+      print.data.frame(head1)
+    
+      #calculate P value 
       with(results1, sum(F.Park >= F.Park[1]) / length(F.Park))
     #rest of table 
       print(beetle_univariate_vasc)
@@ -382,7 +439,8 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       results2 <- results2 |>
         data.frame() |>
         mutate(F.Park = (Park/1)/(Plot/13))
-      head(results2)
+      head2 <- head(results2)
+      print.data.frame(head2)
       
       #calculate P value 
       with(results2, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -512,7 +570,8 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           results3 <- results3 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/12))
-          head(results3)
+          head3 <- head(results3)
+          print.data.frame(head3)
           
           #calculate P value 
           with(results3, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -548,7 +607,8 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           results4 <- results4 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/12))
-          head(results4)
+          head4 <- head(results4)
+          print.data.frame(head4)
           
           #calculate P value 
           with(results4, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -626,7 +686,8 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           results5 <- results5 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/12))
-          head(results5)
+          head5 <- head(results5)
+          print.data.frame(head5)
           
           #calculate P value 
           with(results5, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -662,7 +723,8 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           results6 <- results6 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/12))
-          head(results6)
+          head6 <- head(results6)
+          print.data.frame(head6)
           
           #calculate P value 
           with(results6, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -714,9 +776,10 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
 
 # Spruce Woodland 
 
-## Building the Dataframes to be balanced - Code for reference 
+## Building the Dataframes to be balanced - Code for reference (not required to run if using quick load)
 ```{r}
 #Vascular 
+    #hand select the years for plots with more than the decided number of visits
   filter_criteria_needle <- list(
             KATM_2009_01_S002 = c(2014, 2021),
             KATM_2009_01_S012 = c(2015, 2021),
@@ -740,7 +803,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             LACL_2008_02_014 = c(2015, 2021)
           )
           
-          #next identify plots with three plot visits 
+          #next identify plots with two plot visits 
           needle_plots <- summary_table_vasc %>%
             filter(Viereck.3 == "Woodland Needleleaf Forest", Number_Visits == 2) %>%
             pull(Plot)
@@ -768,11 +831,13 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           #verify everything has two sample visits 
           table(needle_df$Park, needle_df$Plot)
           
+          #convert to frequency from PA
           needle_vasc_abundance_balanced <- vasc_abundance_df %>%
             filter(Plot_Year %in% needle_df$Plot_Year)
           needle_df <- needle_vasc_abundance_balanced 
 
 #lichen 
+    #hand select the years for plots with more than the decided number of visits
           filter_criteria_needle_lichen <- list(
             KATM_2009_01_S002	= c(2014, 2021),
             KATM_2009_01_S012	= c(2015, 2021),
@@ -793,7 +858,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             LACL_2010_01_024	= c(2015, 2021),
             LACL_2010_01_S994	= c(2015, 2021))
           
-          #next identify plots with three plot visits 
+          #next identify plots with two plot visits 
           needle_plots_lichen <- summary_table_lichens %>%
             filter(Viereck.3 == "Woodland Needleleaf Forest", Number_Visits == 2) %>%
             pull(Plot)
@@ -822,11 +887,13 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           needle_df_lichen <- needle_df_lichen[-18, ]
           needle_df_lichen <- needle_df_lichen[-39, ]
           
+          #convert to frequency from PA
           needle_lichen_abundance_balanced <- lichen_abundance_df %>%
             filter(Plot_Year %in% needle_df_lichen$Plot_Year)
           needle_lichen_df <- needle_lichen_abundance_balanced 
           
 #nonvascular 
+      #hand select the years for plots with more than the decided number of visits
           filter_criteria_needle_nonvasc <- list(
             KATM_2009_01_S002	= c(2014, 2021),
             KATM_2009_01_S012	= c(2015, 2021),
@@ -847,7 +914,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             LACL_2010_01_024	= c(2015, 2021),
             LACL_2010_01_S994	= c(2015, 2021))
           
-          #next identify plots with three plot visits 
+          #next identify plots with two plot visits 
           needle_plots_nonvasc <- summary_table_nonvasc %>%
             filter(Viereck.3 == "Woodland Needleleaf Forest", Number_Visits == 2) %>%
             pull(Plot)
@@ -879,13 +946,13 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           needle_df_nonvasc <- needle_df_nonvasc[-18, ]
           needle_df_nonvasc <- needle_df_nonvasc[-15, ]
           
-          
+          #convert to frequency from PA
           needle_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
             filter(Plot_Year %in% needle_df_nonvasc$Plot_Year)
           needle_nonvasc_df <- needle_nonvasc_abundance_balanced
 ```
 
-## Creating the env files, code for reference 
+## Creating the env files, code for reference (not required to run if using quick load)
 ```{r}
 #Vascular
           needle_env <- needle_df[,c(1:7)]
@@ -931,7 +998,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
 
 ```
 
-## Load data frames 
+## Load data frames (Required)
 ```{r}
 #Quick load of dataframes from T drive
 needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_vasc.xlsx")
@@ -943,7 +1010,7 @@ needle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified
 needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_env_nonvasc.xlsx")
 ```
 
-## Calculate Species Richness Averages and Standard Error 
+## Calculate Species Richness Averages and Standard Error (Optional)
 ```{r}
 #Spruce Woodlands 
         needle_env %>%
@@ -984,7 +1051,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 
 ```
 
-## Create composition matrices, and restrict permutations for PERMANOVA 
+## Create composition matrices, and restrict permutations for PERMANOVA (Required)
 ```{r}
 #Vascular 
           needle_composition <- needle_df[,c(8:281)]
@@ -1067,7 +1134,8 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results7 <- results7 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/28))
-          head(results7)
+          head7 <- head(results7)
+          print.data.frame(head7)
           
           #calculate P value 
           with(results7, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1105,7 +1173,8 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results8 <- results8 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/28))
-          head(results8)
+          head8 <- head(results8)
+          print.data.frame(head8)
           
           #calculate P value 
           with(results8, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1178,7 +1247,8 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results9 <- results9 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/30))
-          head(results9)
+          head9 <- head(results9)
+          print.data.frame(head9)
           
           #calculate P value 
           with(results9, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1216,7 +1286,8 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results10 <- results10 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/30))
-          head(results10)
+          head10 <- head(results10)
+          print.data.frame(head10)
           
           #calculate P value 
           with(results10, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1288,7 +1359,8 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results11 <- results11 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/30))
-          head(results11)
+          head11 <- head(results11)
+          print.data.frame(head11)
           
           #calculate P value 
           with(results11, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1326,7 +1398,8 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results12 <- results12 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/30))
-          head(results12)
+          head12 <- head(results12)
+          print.data.frame(head12)
           
           #calculate P value 
           with(results12, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1371,158 +1444,164 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 
 # Open Low Shrub
 
-## Building the Dataframes to be balanced - Code for reference 
+## Building the Dataframes to be balanced - Code for reference (not required to run if using quick load)
 ```{r}
 #vascular 
-filter_criteria_openlow <- list(
-  KATM_2009_01_078 = c(2015, 2021),
-  KATM_2009_01_S008 = c(2015, 2021),
-  KATM_2009_02_S004 = c(2016, 2023),
-  KATM_2009_02_S008 = c(2016, 2023),
-  LACL_2008_02_042 = c(2017, 2022),
-  LACL_2010_01_014 = c(2015, 2021), 
-  LACL_2010_01_026 = c(2015, 2021),
-  LACL_2010_01_027 = c(2015, 2021),
-  LACL_2010_01_051 = c(2015, 2022),
-  LACL_2010_01_105 = c(2015, 2022),
-  LACL_2010_02_016 = c(2016, 2022),
-  LACL_2010_02_042 = c(2017, 2022),  
-  LACL_2011_02_S997 = c(2016, 2022),
-  LACL_2011_02_S999 = c(2016, 2022),
-  LACL_2007_02_002 = c(2017, 2022),
-  LACL_2007_02_017 = c(2015, 2021),
-  LACL_2008_02_006 = c(2015, 2021),
-  LACL_2008_02_049 = c(2017, 2022),  
-  LACL_2010_02_999 = c(2016, 2022),
-  LACL_2011_01_033 = c(2015, 2021),
-  LACL_2007_02_006 = c(2015, 2022))
+          #hand select the years for plots with more than the decided number of visits
+      filter_criteria_openlow <- list(
+        KATM_2009_01_078 = c(2015, 2021),
+        KATM_2009_01_S008 = c(2015, 2021),
+        KATM_2009_02_S004 = c(2016, 2023),
+        KATM_2009_02_S008 = c(2016, 2023),
+        LACL_2008_02_042 = c(2017, 2022),
+        LACL_2010_01_014 = c(2015, 2021), 
+        LACL_2010_01_026 = c(2015, 2021),
+        LACL_2010_01_027 = c(2015, 2021),
+        LACL_2010_01_051 = c(2015, 2022),
+        LACL_2010_01_105 = c(2015, 2022),
+        LACL_2010_02_016 = c(2016, 2022),
+        LACL_2010_02_042 = c(2017, 2022),  
+        LACL_2011_02_S997 = c(2016, 2022),
+        LACL_2011_02_S999 = c(2016, 2022),
+        LACL_2007_02_002 = c(2017, 2022),
+        LACL_2007_02_017 = c(2015, 2021),
+        LACL_2008_02_006 = c(2015, 2021),
+        LACL_2008_02_049 = c(2017, 2022),  
+        LACL_2010_02_999 = c(2016, 2022),
+        LACL_2011_01_033 = c(2015, 2021),
+        LACL_2007_02_006 = c(2015, 2022))
+      
+      #next identify plots with two plot visits 
+      openlow_plots <- summary_table_vasc %>%
+        filter(Viereck.3 == "Open Low Scrub", Number_Visits == 2) %>%
+        pull(Plot)
+      
+      #combine plots with hand selected plots from filter criteria 
+      selected_plots <- union(openlow_plots, names(filter_criteria_openlow))
+      
+      #subset main presence absence dataframe based on both conditions 
+      #first verify that the hand selected plots were correctly pulled 
+      subset_hand_selected <- vascpresence_absence_df %>%
+        filter(
+          Plot %in% names(filter_criteria_openlow) & 
+            Sample_Year %in% unlist(filter_criteria_openlow[Plot]))
+      table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+      
+      openlow_df <- vascpresence_absence_df %>%
+        filter(
+          (Plot %in% openlow_plots) | 
+            (Plot %in% names(filter_criteria_openlow) &
+               Sample_Year %in% unlist(filter_criteria_openlow[Plot])))
+      
+      table(openlow_df$Park, openlow_df$Plot) 
+      openlow_df <- openlow_df[-38, ]
+      openlow_df <- openlow_df[-37, ]
+      openlow_df <- openlow_df[-36, ]
+      openlow_df <- openlow_df[-35, ]
+      
+      #convert to frequency from PA
+      openlow_vasc_abundance_balanced <- vasc_abundance_df %>%
+        filter(Plot_Year %in% openlow_df$Plot_Year)
+      openlow_df <- openlow_vasc_abundance_balanced 
 
-#next identify plots with two plot visits 
-openlow_plots <- summary_table_vasc %>%
-  filter(Viereck.3 == "Open Low Scrub", Number_Visits == 2) %>%
-  pull(Plot)
 
-#combine plots with hand selected plots from filter criteria 
-selected_plots <- union(openlow_plots, names(filter_criteria_openlow))
-
-#subset main presence absence dataframe based on both conditions 
-#first verify that the hand selected plots were correctly pulled 
-subset_hand_selected <- vascpresence_absence_df %>%
-  filter(
-    Plot %in% names(filter_criteria_openlow) & 
-      Sample_Year %in% unlist(filter_criteria_openlow[Plot]))
-table(subset_hand_selected$Park, subset_hand_selected$Plot) 
-
-openlow_df <- vascpresence_absence_df %>%
-  filter(
-    (Plot %in% openlow_plots) | 
-      (Plot %in% names(filter_criteria_openlow) &
-         Sample_Year %in% unlist(filter_criteria_openlow[Plot])))
-
-table(openlow_df$Park, openlow_df$Plot) 
-openlow_df <- openlow_df[-38, ]
-openlow_df <- openlow_df[-37, ]
-openlow_df <- openlow_df[-36, ]
-openlow_df <- openlow_df[-35, ]
-
-openlow_vasc_abundance_balanced <- vasc_abundance_df %>%
-  filter(Plot_Year %in% openlow_df$Plot_Year)
-openlow_df <- openlow_vasc_abundance_balanced 
-
-
-#lichen 
-filter_criteria_openlow_lichen <- list(
-  KATM_2009_01_078	= c(2015, 2021),
-  KATM_2009_01_S008	= c(2015, 2021),
-  LACL_2010_01_014	= c(2015, 2021),
-  LACL_2010_01_026	= c(2015, 2021),
-  LACL_2010_01_027	= c(2015, 2021),
-  LACL_2010_01_051	= c(2015, 2022),
-  LACL_2011_02_S997	= c(2016, 2022),
-  LACL_2007_02_006	= c(2012, 2022),
-  LACL_2011_01_033	= c(2015, 2021))
-
-#next identify plots with two plot visits 
-openlow_plots_lichen <- summary_table_lichens %>%
-  filter(Viereck.3 == "Open Low Scrub", Number_Visits == 2) %>%
-  pull(Plot)
-
-#combine plots with hand selected plots from filter criteria 
-selected_plots <- union(openlow_plots_lichen, names(filter_criteria_openlow_lichen))
-
-#subset main presence absence dataframe based on both conditions 
-#first verify that the hand selected plots were correctly pulled 
-subset_hand_selected <- lichenspresence_absence_df %>%
-  filter(
-    Plot %in% names(filter_criteria_openlow_lichen) & 
-      Sample_Year %in% unlist(filter_criteria_openlow_lichen[Plot]))
-table(subset_hand_selected$Park, subset_hand_selected$Plot) 
-
-openlow_df_lichen <- lichenspresence_absence_df %>%
-  filter(
-    (Plot %in% openlow_plots_lichen) | 
-      (Plot %in% names(filter_criteria_openlow_lichen) &
-         Sample_Year %in% unlist(filter_criteria_openlow_lichen[Plot])))
-
-table(openlow_df_lichen$Park, openlow_df_lichen$Plot) 
-
-openlow_df_lichen <- openlow_df_lichen[-54, ]
-openlow_df_lichen <- openlow_df_lichen[-33, ]
-openlow_df_lichen <- openlow_df_lichen[-32, ]
-openlow_df_lichen <- openlow_df_lichen[-31, ]
-
-openlow_lichen_abundance_balanced <- lichen_abundance_df %>%
-  filter(Plot_Year %in% openlow_df_lichen$Plot_Year)
-openlow_df_lichen <- openlow_lichen_abundance_balanced 
+#lichen
+      #hand select the years for plots with more than the decided number of visits
+      filter_criteria_openlow_lichen <- list(
+        KATM_2009_01_078	= c(2015, 2021),
+        KATM_2009_01_S008	= c(2015, 2021),
+        LACL_2010_01_014	= c(2015, 2021),
+        LACL_2010_01_026	= c(2015, 2021),
+        LACL_2010_01_027	= c(2015, 2021),
+        LACL_2010_01_051	= c(2015, 2022),
+        LACL_2011_02_S997	= c(2016, 2022),
+        LACL_2007_02_006	= c(2012, 2022),
+        LACL_2011_01_033	= c(2015, 2021))
+      
+      #next identify plots with two plot visits 
+      openlow_plots_lichen <- summary_table_lichens %>%
+        filter(Viereck.3 == "Open Low Scrub", Number_Visits == 2) %>%
+        pull(Plot)
+      
+      #combine plots with hand selected plots from filter criteria 
+      selected_plots <- union(openlow_plots_lichen, names(filter_criteria_openlow_lichen))
+      
+      #subset main presence absence dataframe based on both conditions 
+      #first verify that the hand selected plots were correctly pulled 
+      subset_hand_selected <- lichenspresence_absence_df %>%
+        filter(
+          Plot %in% names(filter_criteria_openlow_lichen) & 
+            Sample_Year %in% unlist(filter_criteria_openlow_lichen[Plot]))
+      table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+      
+      openlow_df_lichen <- lichenspresence_absence_df %>%
+        filter(
+          (Plot %in% openlow_plots_lichen) | 
+            (Plot %in% names(filter_criteria_openlow_lichen) &
+               Sample_Year %in% unlist(filter_criteria_openlow_lichen[Plot])))
+      
+      table(openlow_df_lichen$Park, openlow_df_lichen$Plot) 
+      
+      openlow_df_lichen <- openlow_df_lichen[-54, ]
+      openlow_df_lichen <- openlow_df_lichen[-33, ]
+      openlow_df_lichen <- openlow_df_lichen[-32, ]
+      openlow_df_lichen <- openlow_df_lichen[-31, ]
+      
+      #convert to frequency from PA
+      openlow_lichen_abundance_balanced <- lichen_abundance_df %>%
+        filter(Plot_Year %in% openlow_df_lichen$Plot_Year)
+      openlow_df_lichen <- openlow_lichen_abundance_balanced 
 
 #nonvascular 
-filter_criteria_openlow_nonvasc <- list(
-  KATM_2009_01_078	= c(2015, 2021),
-  KATM_2009_01_S008	= c(2015, 2021),
-  LACL_2010_01_014	= c(2015, 2021),
-  LACL_2010_01_026	= c(2015, 2021),
-  LACL_2010_01_027	= c(2015, 2021),
-  LACL_2010_01_051	= c(2015, 2022),
-  LACL_2011_02_S997	= c(2016, 2022),
-  LACL_2007_02_006	= c(2012, 2022),
-  LACL_2011_01_033	= c(2015, 2021))
-
-#next identify plots with three plot visits 
-openlow_plots_nonvasc <- summary_table_nonvasc %>%
-  filter(Viereck.3 == "Open Low Scrub", Number_Visits == 2) %>%
-  pull(Plot)
-
-#combine plots with hand selected plots from filter criteria 
-selected_plots <- union(openlow_plots_nonvasc, names(filter_criteria_openlow_nonvasc))
-
-#subset main presence absence dataframe based on both conditions 
-#first verify that the hand selected plots were correctly pulled 
-subset_hand_selected <- nonvascpresence_absence_df %>%
-  filter(
-    Plot %in% names(filter_criteria_openlow_nonvasc) & 
-      Sample_Year %in% unlist(filter_criteria_openlow_nonvasc[Plot]))
-table(subset_hand_selected$Park, subset_hand_selected$Plot) 
-
-openlow_df_nonvasc <- nonvascpresence_absence_df %>%
-  filter(
-    (Plot %in% openlow_plots_nonvasc) | 
-      (Plot %in% names(filter_criteria_openlow_nonvasc) &
-         Sample_Year %in% unlist(filter_criteria_openlow_nonvasc[Plot])))
-
-table(openlow_df_nonvasc$Park, openlow_df_nonvasc$Plot) 
-
-openlow_df_nonvasc <- openlow_df_nonvasc[-54, ]
-openlow_df_nonvasc <- openlow_df_nonvasc[-33, ]
-openlow_df_nonvasc <- openlow_df_nonvasc[-32, ]
-openlow_df_nonvasc <- openlow_df_nonvasc[-31, ]
-
-openlow_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
-  filter(Plot_Year %in% openlow_df_nonvasc$Plot_Year)
-openlow_df_nonvasc <- openlow_nonvasc_abundance_balanced
+          #hand select the years for plots with more than the decided number of visits
+      filter_criteria_openlow_nonvasc <- list(
+        KATM_2009_01_078	= c(2015, 2021),
+        KATM_2009_01_S008	= c(2015, 2021),
+        LACL_2010_01_014	= c(2015, 2021),
+        LACL_2010_01_026	= c(2015, 2021),
+        LACL_2010_01_027	= c(2015, 2021),
+        LACL_2010_01_051	= c(2015, 2022),
+        LACL_2011_02_S997	= c(2016, 2022),
+        LACL_2007_02_006	= c(2012, 2022),
+        LACL_2011_01_033	= c(2015, 2021))
+      
+      #next identify plots with two plot visits 
+      openlow_plots_nonvasc <- summary_table_nonvasc %>%
+        filter(Viereck.3 == "Open Low Scrub", Number_Visits == 2) %>%
+        pull(Plot)
+      
+      #combine plots with hand selected plots from filter criteria 
+      selected_plots <- union(openlow_plots_nonvasc, names(filter_criteria_openlow_nonvasc))
+      
+      #subset main presence absence dataframe based on both conditions 
+      #first verify that the hand selected plots were correctly pulled 
+      subset_hand_selected <- nonvascpresence_absence_df %>%
+        filter(
+          Plot %in% names(filter_criteria_openlow_nonvasc) & 
+            Sample_Year %in% unlist(filter_criteria_openlow_nonvasc[Plot]))
+      table(subset_hand_selected$Park, subset_hand_selected$Plot) 
+      
+      openlow_df_nonvasc <- nonvascpresence_absence_df %>%
+        filter(
+          (Plot %in% openlow_plots_nonvasc) | 
+            (Plot %in% names(filter_criteria_openlow_nonvasc) &
+               Sample_Year %in% unlist(filter_criteria_openlow_nonvasc[Plot])))
+      
+      table(openlow_df_nonvasc$Park, openlow_df_nonvasc$Plot) 
+      
+      openlow_df_nonvasc <- openlow_df_nonvasc[-54, ]
+      openlow_df_nonvasc <- openlow_df_nonvasc[-33, ]
+      openlow_df_nonvasc <- openlow_df_nonvasc[-32, ]
+      openlow_df_nonvasc <- openlow_df_nonvasc[-31, ]
+      
+      #convert to frequency from PA
+      openlow_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
+        filter(Plot_Year %in% openlow_df_nonvasc$Plot_Year)
+      openlow_df_nonvasc <- openlow_nonvasc_abundance_balanced
 
 ```
 
-## Creating the env files - Code for reference 
+## Creating the env files - Code for reference (not required to run if using quick load)
 ```{r}
 #Vascular 
       openlow_env <- openlow_df[,c(1:8)]
@@ -1565,7 +1644,7 @@ openlow_df_nonvasc <- openlow_nonvasc_abundance_balanced
       
 ```
 
-## Load data frames 
+## Load data frames (Required)
 ```{r}
 #quick pull from T drive 
 openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_vasc.xlsx")
@@ -1577,7 +1656,7 @@ openlow_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_env_nonvasc.xlsx")
 ```
 
-## Calculate Species Richness Averages and Standard Error 
+## Calculate Species Richness Averages and Standard Error (Optional)
 ```{r}
 #open low shrub 
         openlow_env %>%
@@ -1618,7 +1697,7 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
 
 ```
 
-## Create composition matrices, and restrict permutations for PERMANOVA 
+## Create composition matrices, and restrict permutations for PERMANOVA (Required)
 ```{r}
 #Vascular 
       openlow_composition <- openlow_df[,c(9:282)]
@@ -1671,7 +1750,7 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
 #Species richness (Univariate)
       check(openlow_env, control = perm_design_openlow) #check how many possible permutations - to catch obvious error in structure 
      
-       #initial model for most of table
+      #base model 
       openlow_univariate_vasc <- adonis2(openlow_env$Species_Richness ~ Park + Plot,
                                     data = openlow_env, 
                                     method = "euclidian",
@@ -1700,7 +1779,8 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
       results13 <- results13 |>
         data.frame() |>
         mutate(F.Park = (Park/1)/(Plot/34))
-      head(results13)
+      head13 <- head(results13)
+      print.data.frame(head13)
       
       #calculate P value 
       with(results13, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1736,7 +1816,8 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
       results14 <- results14 |>
         data.frame() |>
         mutate(F.Park = (Park/1)/(Plot/34))
-      head(results14)
+      head14 <- head(results14)
+      print.data.frame(head14)
       
       #calculate P value 
       with(results14, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1812,7 +1893,8 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
       results15 <- results15 |>
         data.frame() |>
         mutate(F.Park = (Park/1)/(Plot/26))
-      head(results15)
+      head15 <- head(results15)
+      print.data.frame(head15)
       
       #calculate P value 
       with(results15, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1848,7 +1930,8 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
       results16 <- results16 |>
         data.frame() |>
         mutate(F.Park = (Park/1)/(Plot/26))
-      head(results16)
+      head16 <- head(results16)
+      print.data.frame(head16)
       
       #calculate P value 
       with(results16, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1926,7 +2009,8 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
           results17 <- results17 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/26))
-          head(results17)
+          head17 <- head(results17)
+          print.data.frame(head17)
       
       #calculate P value 
           with(results17, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -1964,7 +2048,8 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
           results18 <- results18 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/26))
-          head(results18)
+          head18 <- head(results18)
+          print.data.frame(head18)
       
       #calculate P value 
           with(results18, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -2013,10 +2098,10 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
 
 # Dwarf Scrub 
 
-## Building the dataframes to be balanced, code for reference 
+## Building the dataframes to be balanced, code for reference (not required to run if using quick load)
 ```{r}
 #vascular 
-          #the most common sample visit number was 3 so that is what i used 
+    #hand select the years for plots with more than the decided number of visits
           filter_criteria_dwarfscrub <- list(
             LACL_2010_03_001	= c(2011, 2016, 2023),
             KATM_2009_02_048	= c(2011, 2016, 2023),
@@ -2047,19 +2132,21 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
           #verify everything has two sample visits 
           table(dwarfscrub_df$Park, dwarfscrub_df$Plot)
           
+          #convert to frequency from PA
           dwarfscrub_vasc_abundance_balanced <- vasc_abundance_df %>%
             filter(Plot_Year %in% dwarfscrub_df$Plot_Year)
           dwarfscrub_df <- dwarfscrub_vasc_abundance_balanced 
           
           
 #lichen 
+     #hand select the years for plots with more than the decided number of visits
           filter_criteria_dwarfscrub_lichens <- list(
             LACL_2010_03_998	= c(2011, 2016),
             KATM_2009_02_048	= c(2011, 2016),
             KATM_2010_03_049	= c(2011, 2016))
           
           
-          #next identify plots with three plot visits 
+          #next identify plots with two plot visits 
           dwarfscrub_plots_lichens <- summary_table_lichens %>%
             filter(Viereck.2 == "Dwarf Scrub", Number_Visits == 2) %>%
             pull(Plot)
@@ -2083,19 +2170,22 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
           
           #verify everything has two sample visits 
           table(dwarfscrub_df_lichens$Park, dwarfscrub_df_lichens$Plot)
+          
+          #convert to frequency from PA
           dwarfscrub_lichen_abundance_balanced <- lichen_abundance_df %>%
             filter(Plot_Year %in% dwarfscrub_df_lichen$Plot_Year)
           dwarfscrub_df_lichen <- dwarfscrub_lichen_abundance_balanced
           
           
 #nonvascular 
+        #hand select the years for plots with more than the decided number of visits
           filter_criteria_dwarfscrub_nonvasc <- list(
             LACL_2010_03_998	= c(2011, 2016),
             KATM_2009_02_048	= c(2011, 2016),
             KATM_2010_03_049	= c(2011, 2016))
           
           
-          #next identify plots with three plot visits 
+          #next identify plots with two plot visits 
           dwarfscrub_plots_nonvasc <- summary_table_nonvasc %>%
             filter(Viereck.2 == "Dwarf Scrub", Number_Visits == 2) %>%
             pull(Plot)
@@ -2119,13 +2209,15 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
           
           #verify everything has two sample visits 
           table(dwarfscrub_df_nonvasc$Park, dwarfscrub_df_nonvasc$Plot)
+          
+          #convert to frequency from PA
           dwarfscrub_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
             filter(Plot_Year %in% dwarfscrub_df_nonvasc$Plot_Year)
           dwarfscrub_df_nonvasc <- dwarfscrub_nonvasc_abundance_balanced
 ```
 
 
-## Creating the env files, code for reference 
+## Creating the env files, code for reference (not required to run if using quick load)
 ```{r}
 #vascular 
           dwarfscrub_env <- dwarfscrub_df[,c(1:8)]
@@ -2167,7 +2259,7 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
             left_join(nonvasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
 ```
 
-## Load Data Frames 
+## Load Data Frames (Required)
 ```{r}
 #quick Load from T drive 
 dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc.xlsx")
@@ -2179,7 +2271,7 @@ dwarfscrub_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modi
 dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_env_nonvasc.xlsx") 
 ```
 
-## Calculate Species Richness Averages and Standard Error 
+## Calculate Species Richness Averages and Standard Error (Optional)
 ```{r}
 #dwarf shrub 
         dwarfscrub_env %>%
@@ -2220,7 +2312,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
 
 ```
 
-## Create composition matrices, and restrict permutations for PERMANOVA 
+## Create composition matrices, and restrict permutations for PERMANOVA (Required)
 ```{r}
 #Vascular 
           dwarfscrub_composition <- dwarfscrub_df[,c(9:282)]
@@ -2312,7 +2404,8 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           results19 <- results19 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/17))
-          head(results19)
+          head19 <- head(results19)
+          print.data.frame(head19)
           
           #calculate P value 
           with(results19, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -2350,7 +2443,9 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           results20 <- results20 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/17))
-          head(results20)
+          head20 <- head(results20)
+          print.data.frame(head20)
+          
           #calculate P value 
           with(results20, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -2449,7 +2544,8 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           results21 <- results21 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/14))
-          head(results21)
+          head21 <- head(results21)
+          print.data.frame(head21)
           
           #calculate P value 
           with(results21, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -2489,7 +2585,9 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           results22 <- results22 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/14))
-          head(results22)
+          head22 <- head(results22)
+          print.data.frame(head22)
+          
           #calculate P value 
           with(results22, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -2592,7 +2690,8 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           results23 <- results23 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/14))
-          head(results23)
+          head23 <- head(results23)
+          print.data.frame(head23)
           
           #calculate P value 
           with(results23, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -2630,7 +2729,9 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           results24 <- results24 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/14))
-          head(results24)
+          head24 <- head(results24)
+          print.data.frame(head24)
+                          
           #calculate P value 
           with(results24, sum(F.Park >= F.Park[1]) / length(F.Park))
           #rest of table 
@@ -2697,9 +2798,10 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
 
 # Spruce Forest 
 
-## Building the dataframes to be balanced, code for reference 
+## Building the dataframes to be balanced, code for reference (not required to run if using quick load)
 ```{r}
 #vascular 
+    #hand select the years for plots with more than the decided number of visits
           filter_criteria_forest <- list(
             LACL_2013_01_S988	= c(2014, 2019),
             LACL_2013_01_S989	= c(2014, 2019),
@@ -2709,7 +2811,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
             LACL_2010_01_S998	= c(2014, 2019),
             LACL_2010_01_S999	= c(2014, 2019))
           
-          #next identify plots with three plot visits 
+          #next identify plots with two plot visits 
           forest_plots <- summary_table_vasc %>%
             filter(Viereck.2 == "Needleleaf Forest", Number_Visits == 2) %>%
             pull(Plot)
@@ -2742,12 +2844,14 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           
           forest_df <- forest_df[-7, ]
           
+          #convert to frequency from PA
           forest_vasc_abundance_balanced <- vasc_abundance_df %>%
             filter(Plot_Year %in% forest_df$Plot_Year)
           forest_df <- forest_vasc_abundance_balanced
           
           
 #Lichen 
+        #hand select the years for plots with more than the decided number of visits
           filter_criteria_forest_lichens <- list(
             LACL_2013_01_S988	= c(2014, 2019),
             LACL_2013_01_S989	= c(2014, 2019),
@@ -2757,7 +2861,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
             LACL_2010_01_S998	= c(2014, 2019),
             LACL_2010_01_S999	= c(2014, 2019))
           
-          #next identify plots with three plot visits 
+          #next identify plots with two plot visits 
           forest_plots_lichens <- summary_table_lichens %>%
             filter(Viereck.2 == "Needleleaf Forest", Number_Visits == 2) %>%
             pull(Plot)
@@ -2787,6 +2891,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           
           forest_df_lichens <- forest_df_lichens[-7, ]
           
+          #convert to frequency from PA
           forest_lichen_abundance_balanced <- lichen_abundance_df %>%
             filter(Plot_Year %in% forest_df_lichen$Plot_Year)
           forest_df_lichens <- forest_lichen_abundance_balanced 
@@ -2794,7 +2899,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           
           
 #nonvascular 
-          
+    #hand select the years for plots with more than the decided number of visits
           filter_criteria_forest_nonvasc <- list(
             LACL_2013_01_S988	= c(2014, 2019),
             LACL_2013_01_S989	= c(2014, 2019),
@@ -2804,7 +2909,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
             LACL_2010_01_S998	= c(2014, 2019),
             LACL_2010_01_S999	= c(2014, 2019))
           
-          #next identify plots with three plot visits 
+          #next identify plots with two plot visits 
           forest_plots_nonvasc <- summary_table_nonvasc %>%
             filter(Viereck.2 == "Needleleaf Forest", Number_Visits == 2) %>%
             pull(Plot)
@@ -2834,12 +2939,13 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           
           forest_df_nonvasc <- forest_df_nonvasc[-7, ]
           
+          #convert to frequency from PA
           forest_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
             filter(Plot_Year %in% forest_df_nonvasc$Plot_Year)
           forest_nonvasc_df <- forest_nonvasc_abundance_balanced
 ```
 
-## Creating the env files, code for reference 
+## Creating the env files, code for reference (not required to run if using quick load)
 ```{r}
 #Vascular 
           forest_env <- forest_df[,c(1:8)]
@@ -2894,7 +3000,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
 ```
 
 
-## Load Data Frames 
+## Load Data Frames (Required)
 ```{r}
 #quick load from T Drive 
 forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_vasc.xlsx")
@@ -2906,7 +3012,7 @@ forest_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified
 forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_env_nonvasc.xlsx") 
 ```
 
-## Calculate Species Richness Averages and Standard Error 
+## Calculate Species Richness Averages and Standard Error (Optional)
 ```{r}
 #Spruce Forest 
         forest_env %>%
@@ -2947,7 +3053,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 
 ```
 
-## Create composition matrices, and restrict permutations for PERMANOVA 
+## Create composition matrices, and restrict permutations for PERMANOVA (Required)
 ```{r}
 #Vascular 
           forest_composition <- forest_df[,c(9:282)]
@@ -3029,7 +3135,8 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results25 <- results25 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/23))
-          head(results25)
+          head25 <- head(results25)
+          print.data.frame(head25)
           
           #calculate P value 
           with(results25, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -3067,7 +3174,8 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results26 <- results26 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/23))
-          head(results26)
+          head26 <- head(results26)
+          print.data.frame(head26)
           
           #calculate P value 
           with(results26, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -3184,7 +3292,8 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results27 <- results27 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/22))
-          head(results27)
+          head27 <- head(results27)
+          print.data.frame(head27)
           
           #calculate P value 
           with(results27, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -3222,7 +3331,8 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results28 <- results28 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/22))
-          head(results28)
+          head28 <- head(results28)
+          print.data.frame(head28)
           
           #calculate P value 
           with(results28, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -3281,11 +3391,6 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                             by = "terms")
           print(forest_lichen_CC_multivariate)          
           
-          
-          
-          
-          
-          
   #beta diversity 
           
           #based on park 
@@ -3305,10 +3410,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                                                   method = "bray"), forest_env_lichen$Viereck.3)
           forest_dispersion_result3_lichen 
           permutest(forest_dispersion_result3_lichen, permutations = 999)
-          
-          
-          
-          
+
 #nonvascular 
   #differences between parks 
           #species richness (univariate)
@@ -3343,7 +3445,8 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results29 <- results29 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/22))
-          head(results29)
+          head29 <- head(results29)
+          print.data.frame(head29)
           
           #calculate P value 
           with(results29, sum(F.Park >= F.Park[1]) / length(F.Park))
@@ -3381,7 +3484,8 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           results30 <- results30 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/22))
-          head(results30)
+          head30 <- head(results30)
+          print.data.frame(head30)
           
           #calculate P value 
           with(results30, sum(F.Park >= F.Park[1]) / length(F.Park))
