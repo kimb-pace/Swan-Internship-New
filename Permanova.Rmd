@@ -12,6 +12,7 @@ library(lattice)
 library(dplyr)
 library(readxl)
 library(readr)
+library(writexl)
 
 #Required: 
     #Canopy Cover 
