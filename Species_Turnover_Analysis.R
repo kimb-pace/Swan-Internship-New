@@ -9,12 +9,6 @@ lichenspresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified
 nonvascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/nonvascpresence_absence_df_full.xlsx")
 viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship/Verified_Spreadsheets/Viereck_env.xlsx")
 
-
-#dwarfvasc_turn <- dwarfscrub_df[ ,c(7:280)]
-#dwarflichens_turn <- dwarfscrub_df_lichens[ ,c(13:179)]
-#dwarfnonvasc_turn <- dwarfscrub_df_nonvasc[ ,c(13:219)]
-
-
 #get the first and most recent sample year for each plot (excluding plots visited only once)
 first_last_years <- nonvascpresence_absence_df %>%
   distinct(Plot, Sample_Year) %>%
@@ -156,3 +150,159 @@ turnover_all <- turnover_all %>%
             by = "Plot")
 
 write_xlsx(turnover_all, "C:/Users/kmpace/Desktop/Plot_Turnover_All.xlsx")
+
+
+
+
+
+
+
+
+turnover <- read_xlsx("T:/Users/Kpace/Plot_Turnover_All.xlsx")
+
+
+
+
+openlow_vasc_turnover <- semi_join(turnover, openlow_env, by = "Plot")
+library(dplyr)
+
+openlow_vasc_turnover %>%
+  summarise(
+    total = mean(Total_Vasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Vasc_Prop, na.rm = TRUE), 
+    app = mean(App_Vasc_Prop, na.rm = TRUE))
+
+
+
+openlow_lichen_turnover <- semi_join(turnover, openlow_env_lichen, by = "Plot")
+
+openlow_lichen_turnover %>%
+  summarise(
+    total = mean(Total_Lichen_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Lichen_Prop, na.rm = TRUE), 
+    app = mean(App_Lichen_Prop, na.rm = TRUE))
+
+
+
+openlow_nonvasc_turnover <- semi_join(turnover, openlow_env_nonvasc, by = "Plot")
+
+openlow_nonvasc_turnover %>%
+  summarise(
+    total = mean(Total_Nonvasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Nonvasc_Prop, na.rm = TRUE), 
+    app = mean(App_Nonvasc_Prop, na.rm = TRUE))
+
+
+
+
+
+
+needle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_env_vasc.xlsx")
+needle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_env_lichen.xlsx")
+needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_env_nonvasc.xlsx")
+
+
+needle_vasc_turnover <- semi_join(turnover, needle_env, by = "Plot")
+needle_vasc_turnover %>%
+  summarise(
+    total = mean(Total_Vasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Vasc_Prop, na.rm = TRUE), 
+    app = mean(App_Vasc_Prop, na.rm = TRUE))
+
+needle_lichen_turnover <- semi_join(turnover, needle_env_lichen, by = "Plot")
+needle_lichen_turnover %>%
+  summarise(
+    total = mean(Total_Lichen_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Lichen_Prop, na.rm = TRUE), 
+    app = mean(App_Lichen_Prop, na.rm = TRUE))
+
+needle_nonvasc_turnover <- semi_join(turnover, needle_env_nonvasc, by = "Plot")
+needle_nonvasc_turnover %>%
+  summarise(
+    total = mean(Total_Nonvasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Nonvasc_Prop, na.rm = TRUE), 
+    app = mean(App_Nonvasc_Prop, na.rm = TRUE))
+
+
+
+
+beetle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_env_vasc.xlsx")
+beetle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_env_lichen.xlsx")
+beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc.xlsx")
+
+beetle_vasc_turnover <- semi_join(turnover, beetle_env, by = "Plot")
+beetle_vasc_turnover %>%
+  summarise(
+    total = mean(Total_Vasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Vasc_Prop, na.rm = TRUE), 
+    app = mean(App_Vasc_Prop, na.rm = TRUE))
+
+beetle_lichen_turnover <- semi_join(turnover, beetle_env_lichen, by = "Plot")
+beetle_lichen_turnover %>%
+  summarise(
+    total = mean(Total_Lichen_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Lichen_Prop, na.rm = TRUE), 
+    app = mean(App_Lichen_Prop, na.rm = TRUE))
+
+beetle_nonvasc_turnover <- semi_join(turnover, beetle_env_nonvasc, by = "Plot")
+beetle_nonvasc_turnover %>%
+  summarise(
+    total = mean(Total_Nonvasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Nonvasc_Prop, na.rm = TRUE), 
+    app = mean(App_Nonvasc_Prop, na.rm = TRUE))
+
+
+
+
+dwarfscrub_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_env_vasc.xlsx")
+dwarfscrub_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_env_lichen.xlsx")
+dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_env_nonvasc.xlsx") 
+
+dwarfscrub_vasc_turnover <- semi_join(turnover, dwarfscrub_env, by = "Plot")
+dwarfscrub_vasc_turnover %>%
+  summarise(
+    total = mean(Total_Vasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Vasc_Prop, na.rm = TRUE), 
+    app = mean(App_Vasc_Prop, na.rm = TRUE))
+
+dwarfscrub_lichen_turnover <- semi_join(turnover, dwarfscrub_env_lichen, by = "Plot")
+dwarfscrub_lichen_turnover %>%
+  summarise(
+    total = mean(Total_Lichen_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Lichen_Prop, na.rm = TRUE), 
+    app = mean(App_Lichen_Prop, na.rm = TRUE))
+
+dwarfscrub_nonvasc_turnover <- semi_join(turnover, dwarfscrub_env_nonvasc, by = "Plot")
+dwarfscrub_nonvasc_turnover %>%
+  summarise(
+    total = mean(Total_Nonvasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Nonvasc_Prop, na.rm = TRUE), 
+    app = mean(App_Nonvasc_Prop, na.rm = TRUE))
+
+
+
+forest_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_env_vasc.xlsx")
+forest_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_env_lichen.xlsx")
+forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_env_nonvasc.xlsx") 
+
+
+forest_vasc_turnover <- semi_join(turnover, forest_env, by = "Plot")
+forest_vasc_turnover %>%
+  summarise(
+    total = mean(Total_Vasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Vasc_Prop, na.rm = TRUE), 
+    app = mean(App_Vasc_Prop, na.rm = TRUE))
+
+forest_lichen_turnover <- semi_join(turnover, forest_env_lichen, by = "Plot")
+forest_lichen_turnover %>%
+  summarise(
+    total = mean(Total_Lichen_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Lichen_Prop, na.rm = TRUE), 
+    app = mean(App_Lichen_Prop, na.rm = TRUE))
+
+forest_nonvasc_turnover <- semi_join(turnover, forest_env_nonvasc, by = "Plot")
+forest_nonvasc_turnover %>%
+  summarise(
+    total = mean(Total_Nonvasc_Prop, na.rm = TRUE),
+    disapp = mean(Disapp_Nonvasc_Prop, na.rm = TRUE), 
+    app = mean(App_Nonvasc_Prop, na.rm = TRUE))
