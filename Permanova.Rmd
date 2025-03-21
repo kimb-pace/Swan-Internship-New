@@ -4297,7 +4297,7 @@ permutest(alpine_nonvasc_dispersion_result3, permutations = 999)
 
 
 
-# Paired PERMANOVA For Vegetation Classes 
+ # Paired PERMANOVA For Vegetation Classes 
 
 ```{r}
 library(readxl)
