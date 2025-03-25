@@ -446,7 +446,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
     #create F value column 
       results01 <- results01 |>
         data.frame() |>
-        mutate(F.Park = (Park/1)/(Plot/13))
+        mutate(F.Park = (Park/1)/(Plot/12))
       head1 <- head(results01)
       print.data.frame(head01)
     
@@ -526,7 +526,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       #calculate F statistics for each permutation using correct equation 
       results02 <- results02 |>
         data.frame() |>
-        mutate(F.Park = (Park/1)/(Plot/13))
+        mutate(F.Park = (Park/1)/(Plot/12))
       head02 <- head(results02)
       print.data.frame(head02)
       
@@ -708,7 +708,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           #create F value column 
           results3 <- results3 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/12))
+            mutate(F.Park = (Park/1)/(Plot/11))
           head3 <- head(results3)
           print.data.frame(head3)
           
@@ -804,7 +804,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           #calculate F statistics for each permutation using correct equation 
           results4 <- results4 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/12))
+            mutate(F.Park = (Park/1)/(Plot/11))
           head4 <- head(results4)
           print.data.frame(head4)
           
@@ -937,7 +937,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           #create F value column 
           results05 <- results05 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/12))
+            mutate(F.Park = (Park/1)/(Plot/11))
           head5 <- head(results05)
           print.data.frame(head05)
           
@@ -1031,7 +1031,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           #calculate F statistics for each permutation using correct equation 
           results06 <- results06 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/12))
+            mutate(F.Park = (Park/1)/(Plot/11))
           head6 <- head(results06)
           print.data.frame(head06)
           
@@ -1505,24 +1505,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           
           #rest of table
           print(needle_univariate_vascular_time)   
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
+
           
   ### Multivariate - species composition 
       #differences between parks 
@@ -1691,13 +1674,13 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           needle_univariate_lichen_time <- adonis2(needle_env_lichen$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
                                               data = needle_env_lichen, 
                                               method = "euclidian",
-                                              permutations = perm_design_needle_lichen_time,
+                                              permutations = perm_design_needle_time_lichen,
                                               by = "terms")
           print(needle_univariate_lichen_time)
           
           #create permutation object 
           perms09 <- rbind(1:nrow(needle_env_lichen),
-                           shuffleSet(n = nrow(needle_env_lichen), control = perm_design_needle_lichen_time, nset = 999))
+                           shuffleSet(n = nrow(needle_env_lichen), control = perm_design_needle_time_lichen, nset = 999))
           
           #create object for Ss to be stored 
           results09 <- matrix(nrow = nrow(perms09), ncol = 6)
@@ -1774,13 +1757,13 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           #base model 
           needle_multivariate_lichen_time <- adonis2(needle_composition_lichen ~ Park + Plot + Sample_Year + Park*Sample_Year, 
                                           data = needle_env_lichen, method = "bray", 
-                                          permutations = perm_design_needle_lichen_time, 
+                                          permutations = perm_design_needle_time_lichen, 
                                           by = "terms")
           print(needle_multivariate_lichen_time)
           
           #create permutation structure and results object 
           perms010 <- rbind(1:nrow(needle_composition_lichen),
-                           shuffleSet(n = nrow(needle_composition_lichen), control = perm_design_needle_lichen_time, nset = 999))
+                           shuffleSet(n = nrow(needle_composition_lichen), control = perm_design_needle_time_lichen, nset = 999))
           results010 <- matrix(nrow = nrow(perms010), ncol = 6)
           colnames(results010) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
           
@@ -1901,13 +1884,13 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                                       Plot + Sample_Year + Park*Sample_Year,
                                                data = needle_env_nonvasc, 
                                                method = "euclidian",
-                                               permutations = perm_design_needle_nonvasc_time,
+                                               permutations = perm_design_needle_time_nonvasc,
                                                by = "terms")
           print(needle_univariate_nonvasc_time)
           
           #create permutation object 
           perms011 <- rbind(1:nrow(needle_env_nonvasc),
-                           shuffleSet(n = nrow(needle_env_nonvasc), control = perm_design_needle_nonvasc_time, nset = 999))
+                           shuffleSet(n = nrow(needle_env_nonvasc), control = perm_design_needle_time_nonvasc, nset = 999))
           
           #create object for Ss to be stored 
           results011 <- matrix(nrow = nrow(perms011), ncol = 6)
@@ -1985,13 +1968,13 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           #base model 
           needle_multivariate_nonvasc_time <- adonis2(needle_composition_nonvasc ~ Park + Plot + Sample_Year + Park*Sample_Year, 
                                            data = needle_env_nonvasc, method = "bray", 
-                                           permutations = perm_design_needle_nonvasc_time, 
+                                           permutations = perm_design_needle_time_nonvasc, 
                                            by = "terms")
           print(needle_multivariate_nonvasc_time)
           
           #create permutation structure and results object 
           perms012 <- rbind(1:nrow(needle_composition_nonvasc),
-                           shuffleSet(n = nrow(needle_composition_nonvasc), control = perm_design_needle_nonvasc_time, nset = 999))
+                           shuffleSet(n = nrow(needle_composition_nonvasc), control = perm_design_needle_time_nonvasc, nset = 999))
           results012 <- matrix(nrow = nrow(perms012), ncol = 6)
           colnames(results012) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
           
@@ -2617,14 +2600,14 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
       openlow_univariate_lichen_time <- adonis2(openlow_env_lichen$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
                                     data = openlow_env_lichen, 
                                     method = "euclidian",
-                                    permutations = perm_design_openlow_lichen_time,
+                                    permutations = perm_design_openlow_time_lichen,
                                     by = "terms")
       print(openlow_univariate_lichen_time)
       
       
       #create permutation object 
       perms015 <- rbind(1:nrow(openlow_env_lichen),
-                       shuffleSet(n = nrow(openlow_env_lichen), control = perm_design_openlow_lichen_time, nset = 999))
+                       shuffleSet(n = nrow(openlow_env_lichen), control = perm_design_openlow_time_lichen, nset = 999))
       
       #create object for Ss to be stored 
       results015 <- matrix(nrow = nrow(perms015), ncol = 6)
@@ -2704,13 +2687,13 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
       #base model 
       openlow_multivariate_lichen_time <- adonis2(openlow_composition_lichen ~ Park + Plot + Sample_Year + Park*Sample_Year, 
                                 data = openlow_env_lichen, method = "bray", 
-                                permutations = perm_design_openlow_lichen_time, 
+                                permutations = perm_design_openlow_time_lichen, 
                                 by = "terms")
       print(openlow_multivariate_lichen_time)
       
       #create permutation structure and results object 
       perms016 <- rbind(1:nrow(openlow_composition_lichen),
-                       shuffleSet(n = nrow(openlow_composition_lichen), control = perm_design_openlow_lichen_time, nset = 999))
+                       shuffleSet(n = nrow(openlow_composition_lichen), control = perm_design_openlow_time_lichen, nset = 999))
       results016 <- matrix(nrow = nrow(perms016), ncol = 6)
       colnames(results016) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
       
@@ -2828,14 +2811,14 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
       openlow_univariate_nonvasc_time <- adonis2(openlow_env_nonvasc$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
                                            data = openlow_env_nonvasc, 
                                            method = "euclidian",
-                                           permutations = perm_design_openlow_nonvasc_time,
+                                           permutations = perm_design_openlow_time_nonvasc,
                                            by = "terms")
       print(openlow_univariate_nonvasc_time)
       
       
       #create permutation object 
           perms017 <- rbind(1:nrow(openlow_env_nonvasc),
-                       shuffleSet(n = nrow(openlow_env_nonvasc), control = perm_design_openlow_nonvasc_time, nset = 999))
+                       shuffleSet(n = nrow(openlow_env_nonvasc), control = perm_design_openlow_time_nonvasc, nset = 999))
       
       #create object for Ss to be stored 
           results017 <- matrix(nrow = nrow(perms017), ncol = 6)
@@ -2917,13 +2900,13 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
       #base model 
       openlow_multivariate_nonvasc_time <- adonis2(openlow_composition_nonvasc ~ Park + Plot + Sample_Year + Park*Sample_Year, 
                                        data = openlow_env_nonvasc, method = "bray", 
-                                       permutations = perm_design_openlow_nonvasc_time, 
+                                       permutations = perm_design_openlow_time_nonvasc, 
                                        by = "terms")
       print(openlow_multivariate_nonvasc_time)
       
       #create permutation structure and results object 
           perms018 <- rbind(1:nrow(openlow_composition_nonvasc),
-                           shuffleSet(n = nrow(openlow_composition_nonvasc), control = perm_design_openlow_nonvasc_time, nset = 999))
+                           shuffleSet(n = nrow(openlow_composition_nonvasc), control = perm_design_openlow_time_nonvasc, nset = 999))
           results018 <- matrix(nrow = nrow(perms018), ncol = 6)
           colnames(results018) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
       
@@ -3345,7 +3328,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           #create F value column 
           results019 <- results019 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/17))
+            mutate(F.Park = (Park/1)/(Plot/16))
           head019 <- head(results019)
           print.data.frame(head019)
           
@@ -3355,25 +3338,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           #rest of table 
           print(dwarfscrub_univariate_vasc_subclass)         
           
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
+
   ### Multivariate (species frequency)
       #differences between parks 
           #base model 
@@ -3445,7 +3410,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           #calculate F statistics for each permutation using correct equation 
           results020 <- results020 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/17))
+            mutate(F.Park = (Park/1)/(Plot/16))
           head020 <- head(results020)
           print.data.frame(head020)
           
@@ -3572,13 +3537,13 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
                                                              Plot + Sample_Year + Viereck.3*Sample_Year,
                                                    data = dwarfscrub_env_lichen, 
                                                    method = "euclidian",
-                                                   permutations = perm_design_dwarfscrub_lichen_time,
+                                                   permutations = perm_design_dwarfscrub_time_lichen,
                                                    by = "terms")
           print(dwarfscrub_univariate_lichen_subclass)
           
           #create permutation object 
           perms021 <- rbind(1:nrow(dwarfscrub_env_lichen),
-                           shuffleSet(n = nrow(dwarfscrub_env_lichen), control = perm_design_dwarfscrub_lichen_time, nset = 999))
+                           shuffleSet(n = nrow(dwarfscrub_env_lichen), control = perm_design_dwarfscrub_time_lichen, nset = 999))
           
           #create object for Ss to be stored 
           results021 <- matrix(nrow = nrow(perms021), ncol = 7)
@@ -3599,7 +3564,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           #create F value column 
           results021 <- results021 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/14))
+            mutate(F.Park = (Park/1)/(Plot/13))
           head021 <- head(results021)
           print.data.frame(head021)
           
@@ -3608,21 +3573,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           
           #rest of table 
           print(dwarfscrub_univariate_lichen_subclass)             
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
+        
           
   ### Multivariate (species frequency)
       #differences between parks 
@@ -3671,14 +3622,14 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           dwarfscrub_multivariate_lichen_subclass <- adonis2(dwarfscrub_composition_lichen ~ Viereck.3 + Park + 
                                                                Plot + Sample_Year + Viereck.3*Sample_Year, 
                                                data = dwarfscrub_env_lichen, method = "bray", 
-                                               permutations = perm_design_dwarfscrub_lichen_time, 
+                                               permutations = perm_design_dwarfscrub_time_lichen, 
                                                by = "terms")
           print(dwarfscrub_multivariate_lichen_subclass)
           
           #create permutation structure and results object 
           perms022 <- rbind(1:nrow(dwarfscrub_composition_lichen),
                            shuffleSet(n = nrow(dwarfscrub_composition_lichen), 
-                                      control = perm_design_dwarfscrub_lichen_time, nset = 999))
+                                      control = perm_design_dwarfscrub_time_lichen, nset = 999))
           #head(perms18)
           results022 <- matrix(nrow = nrow(perms022), ncol = 7)
           colnames(results022) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
@@ -3699,7 +3650,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           #calculate F statistics for each permutation using correct equation 
           results022 <- results022 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/14))
+            mutate(F.Park = (Park/1)/(Plot/13))
           head022 <- head(results022)
           print.data.frame(head022)
           
@@ -3824,14 +3775,14 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
                                                               Park + Plot + Sample_Year + Viereck.3*Sample_Year,
                                                    data = dwarfscrub_env_nonvasc, 
                                                    method = "euclidian",
-                                                   permutations = perm_design_dwarfscrub_nonvasc_time,
+                                                   permutations = perm_design_dwarfscrub_time_nonvasc,
                                                    by = "terms")
           print(dwarfscrub_univariate_nonvasc_subclass)
           
           
           #create permutation object 
           perms023 <- rbind(1:nrow(dwarfscrub_env_nonvasc),
-                           shuffleSet(n = nrow(dwarfscrub_env_nonvasc), control = perm_design_dwarfscrub_nonvasc_time, nset = 999))
+                           shuffleSet(n = nrow(dwarfscrub_env_nonvasc), control = perm_design_dwarfscrub_time_nonvasc, nset = 999))
           
           #create object for SS to be stored 
           results023 <- matrix(nrow = nrow(perms023), ncol = 7)
@@ -3852,7 +3803,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           #create F value column 
           results023 <- results023 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/14))
+            mutate(F.Park = (Park/1)/(Plot/13))
           head023 <- head(results023)
           print.data.frame(head023)
           
@@ -3862,13 +3813,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           #rest of table 
           print(dwarfscrub_univariate_nonvasc_subclass)
                     
-          
-          
-          
 
-          
-          
-          
   ### Multivariate (Species frequency)
         #differences between parks 
           #base model 
@@ -3917,14 +3862,14 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           dwarfscrub_multivariate_nonvasc_subclass <- adonis2(dwarfscrub_composition_nonvasc ~ Viereck.3 + Park + 
                                                                 Plot + Sample_Year + Viereck.3*Sample_Year, 
                                                data = dwarfscrub_env_nonvasc, method = "bray", 
-                                               permutations = perm_design_dwarfscrub_nonvasc_time, 
+                                               permutations = perm_design_dwarfscrub_time_nonvasc, 
                                                by = "terms")
           print(dwarfscrub_multivariate_nonvasc_subclass)
           
           #create permutation structure and results object 
           perms024 <- rbind(1:nrow(dwarfscrub_composition_nonvasc),
                            shuffleSet(n = nrow(dwarfscrub_composition_nonvasc), 
-                                      control = perm_design_dwarfscrub_nonvasc_time, nset = 999))
+                                      control = perm_design_dwarfscrub_time_nonvasc, nset = 999))
           #head(perms18)
           results024 <- matrix(nrow = nrow(perms024), ncol = 7)
           colnames(results024) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
@@ -3944,7 +3889,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           #calculate F statistics for each permutation using correct equation 
           results024 <- results024 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/14))
+            mutate(F.Park = (Park/1)/(Plot/13))
           head024 <- head(results024)
           print.data.frame(head024)
                           
@@ -4396,7 +4341,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           #create F value column 
           results025 <- results025 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/23))
+            mutate(F.Park = (Park/1)/(Plot/22))
           head025 <- head(results025)
           print.data.frame(head025)
           
@@ -4477,7 +4422,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           #calculate F statistics for each permutation using correct equation 
           results026 <- results026 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/23))
+            mutate(F.Park = (Park/1)/(Plot/22))
           head026 <- head(results026)
           print.data.frame(head026)
           
@@ -4613,13 +4558,13 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                                          Plot + Sample_Year + Viereck.3*Sample_Year,
                                                data = forest_env_lichen, 
                                                method = "euclidian",
-                                               permutations = perm_design_forest_lichen_time,
+                                               permutations = perm_design_forest_time_lichen,
                                                by = "terms")
           print(forest_univariate_lichen_subclass)
           
           #create permutation object 
           perms027 <- rbind(1:nrow(forest_env_lichen),
-                           shuffleSet(n = nrow(forest_env_lichen), control = perm_design_forest_lichen_time, nset = 999))
+                           shuffleSet(n = nrow(forest_env_lichen), control = perm_design_forest_time_lichen, nset = 999))
           
           #create object for Ss to be stored 
           results027 <- matrix(nrow = nrow(perms027), ncol = 7)
@@ -4640,7 +4585,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           #create F value column 
           results027 <- results027 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/22))
+            mutate(F.Park = (Park/1)/(Plot/21))
           head027 <- head(results027)
           print.data.frame(head027)
           
@@ -4697,13 +4642,13 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           forest_multivariate_lichen_subclass <- adonis2(forest_composition_lichen ~ Viereck.3 + Park + 
                                                            Plot + Sample_Year + Viereck.3*Sample_Year, 
                                            data = forest_env_lichen, method = "bray", 
-                                           permutations = perm_design_forest_lichen_time, 
+                                           permutations = perm_design_forest_time_lichen, 
                                            by = "terms")
           print(forest_multivariate_lichen_subclass)
           
           #create permutation structure and results object 
           perms028 <- rbind(1:nrow(forest_composition_lichen),
-                           shuffleSet(n = nrow(forest_composition_lichen), control = perm_design_forest_lichen_time, nset = 999))
+                           shuffleSet(n = nrow(forest_composition_lichen), control = perm_design_forest_time_lichen, nset = 999))
           results028 <- matrix(nrow = nrow(perms028), ncol = 7)
           colnames(results028) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
           
@@ -4722,7 +4667,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           #calculate F statistics for each permutation using correct equation 
           results028 <- results028 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/22))
+            mutate(F.Park = (Park/1)/(Plot/21))
           head028 <- head(results028)
           print.data.frame(head028)
           
@@ -4858,13 +4803,13 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                                           Plot + Sample_Year + Viereck.3*Sample_Year,
                                                data = forest_env_nonvasc, 
                                                method = "euclidian",
-                                               permutations = perm_design_forest_nonvasc_time,
+                                               permutations = perm_design_forest_time_nonvasc,
                                                by = "terms")
           print(forest_univariate_nonvasc_subclass)
           
           #create permutation object 
           perms029 <- rbind(1:nrow(forest_env_nonvasc),
-                           shuffleSet(n = nrow(forest_env_nonvasc), control = perm_design_forest_nonvasc_time, nset = 999))
+                           shuffleSet(n = nrow(forest_env_nonvasc), control = perm_design_forest_time_nonvasc, nset = 999))
           
           #create object for SS to be stored 
           results029 <- matrix(nrow = nrow(perms029), ncol = 7)
@@ -4885,7 +4830,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           #create F value column 
           results029 <- results029 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/22))
+            mutate(F.Park = (Park/1)/(Plot/21))
           head029 <- head(results029)
           print.data.frame(head029)
           
@@ -4938,16 +4883,16 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           
     #differences between subclasses 
           #base model
-          forest_result_nonvasc_subclass <- adonis2(forest_composition_nonvasc ~ Viereck.3 + Park + 
+          forest_multivariate_nonvasc_subclass <- adonis2(forest_composition_nonvasc ~ Viereck.3 + Park + 
                                                       Plot + Sample_Year + Viereck.3*Sample_Year, 
                                            data = forest_env_nonvasc, method = "bray", 
-                                           permutations = perm_design_forest_nonvasc_time, 
+                                           permutations = perm_design_forest_time_nonvasc, 
                                            by = "terms")
           print(forest_multivariate_nonvasc_subclass)
           
           #create permutation structure and results object 
           perms030 <- rbind(1:nrow(forest_composition_nonvasc),
-                           shuffleSet(n = nrow(forest_composition_nonvasc), control = perm_design_forest_nonvasc_time, nset = 999))
+                           shuffleSet(n = nrow(forest_composition_nonvasc), control = perm_design_forest_time_nonvasc, nset = 999))
           results030 <- matrix(nrow = nrow(perms030), ncol = 7)
           colnames(results030) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
           
@@ -4966,7 +4911,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           #calculate F statistics for each permutation using correct equation 
           results030 <- results030 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/22))
+            mutate(F.Park = (Park/1)/(Plot/21))
           head030 <- head(results030)
           print.data.frame(head030)
           
@@ -5347,7 +5292,7 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
       #create F value column 
           results31 <- results31 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/20))
+            mutate(F.Park = (Park/1)/(Plot/15))
           head(results31) #top row has term F statistic for model 
           
       #calculate P value 
@@ -5389,7 +5334,7 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
       #create F value column 
           results32 <- results32 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/20))
+            mutate(F.Park = (Park/1)/(Plot/12))
           head(results32) #top row has term F statistic for model 
           
       #calculate P value 
@@ -5453,7 +5398,7 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
     #calculate F values for permutations 
           results33 <- results33 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/17))
+            mutate(F.Park = (Park/1)/(Plot/15))
           head(results33)
           
     #calculate P value 
@@ -5492,7 +5437,7 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
       #calculate F values for permutations 
           results34 <- results34 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/17))
+            mutate(F.Park = (Park/1)/(Plot/12))
           head(results34)
           
       #calculate P value 
@@ -5624,7 +5569,7 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                 #create F value column 
                 results36 <- results36 |>
                   data.frame() |>
-                  mutate(F.Park = (Park/1)/(Plot/14))
+                  mutate(F.Park = (Park/1)/(Plot/12))
                 head(results36)
                 #first row is observed/your data, rows 2-1000 are the permuted data 
                 
@@ -5725,7 +5670,7 @@ alpine_lichen_univariate_subclasstime
                 #calculate F values for permutations 
                 results38 <- results38 |>
                   data.frame() |>
-                  mutate(F.Park = (Park/1)/(Plot/14))
+                  mutate(F.Park = (Park/1)/(Plot/12))
                 head(results38)
                 
                 #calculate P value 
@@ -5854,7 +5799,7 @@ alpine_lichen_univariate_subclasstime
           #create F value column 
           results40 <- results40 |>
             data.frame() |>
-            mutate(F.Park = (Park/1)/(Plot/14))
+            mutate(F.Park = (Park/1)/(Plot/12))
           head(results40)
           #first row is observed/your data, rows 2-1000 are the permuted data 
           
