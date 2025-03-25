@@ -25,6 +25,355 @@ plot_elevation_data <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
 fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat_Frequency.csv")
 ```
 
+
+
+
+# Alpine NMDS Analysis 
+
+## Manage Dataframes 
+```{r}
+#Load
+    alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_vasc.xlsx")
+    alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_lichen.xlsx")
+    alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc.xlsx")
+
+#Create species matrices 
+alpine_composition <- alpine_df[,c(9:282)]
+alpine_composition <- as.matrix(alpine_composition) 
+    
+alpine_lichen_composition <- alpine_df_lichen[,c(13:179)]
+alpine_lichen_composition <- as.matrix(alpine_lichen_composition) 
+    
+alpine_nonvasc_composition <- alpine_df_nonvasc[,c(13:219)]
+alpine_nonvasc_composition <- as.matrix(alpine_nonvasc_composition) 
+```
+
+
+## Vascular 
+```{r}
+#Run NMDS 
+      mds_alpine <- metaMDS(alpine_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+
+#Desriptive info for caption 
+      length(unique(alpine_df[["Plot"]])) #number of plots 
+      length(unique(alpine_df_lichen[["Viereck.3"]]))
+      mds_alpine$stress #stress value
+      mds_alpine$iters #number of iterations 
+      
+#define colors 
+veg_colors <- c("orange", "blue3", "cyan", "orchid3")
+      names(veg_colors) <- unique(alpine_df$Viereck.3)
+
+#define axis 
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
+
+#Plot with base overlay options 
+    dev.off()
+      ordiplot(mds_alpine, type = "n", xlim = xlim, ylim = ylim, 
+               cex.axis = 1.5, cex.lab = 1.4, main = "Vascular Species", cex.main = 2)
+      text(x = par("usr")[1],
+           y = par("usr")[4] - 0.1,
+           labels = "Stress = 0.07",
+           pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+           cex = 2, #size 
+           col = "black")
+      text(x = par("usr")[2],
+           y = par("usr")[4] - 0.1,
+           labels = "1",
+           pos = 2, #1: below, 2 left, 3 above, 4 right 
+           cex = 2, #size 
+           col = "black")
+      points(scores(mds_alpine, display = "sites"),
+             col = veg_colors[alpine_df$Viereck.3],
+             pch = 19, cex = 1.5)
+      legend("bottomright", title = "Site Classification",
+             legend=names(veg_colors),
+             ncol=1,
+             col = veg_colors, pch = 19,
+             cex = 1.4)
+      ordiarrows(mds_alpine, 
+                 groups = alpine_df$Plot, 
+                 levels = alpine_df$Sample_Year, col = 'blue')
+      ordihull(mds_alpine, groups = alpine_df$Park, draw ="polygon", label = TRUE, cex = 1.8)
+
+#plot labels
+    text(mds_alpine, display = "sites", labels = alpine_df$Plot, col = "black", cex = 0.7, pos = 4)
+    #adding only select labels 
+    selected_plots <- c("116", "S980")
+    nmds_scores <- as.data.frame(scores(mds_alpine, display = "sites"))
+    nmds_scores$Plot <- alpine_df$Plot
+    selected_scores <- nmds_scores[nmds_scores$Plot %in% selected_plots, ]
+    text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$Plot,
+         col = "black", cex = 0.7, pos = 4)
+
+#Species loading values 
+  #axis1 scores 
+      axis1_scores <- scores(mds_alpine, display = "sites")[, 1]
+      species_cor <- apply(alpine_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+      species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+      head(species_cor_sorted, 10)
+      tail(species_cor_sorted, 10)
+      
+      species_cor_sorted <- as.data.frame(species_cor_sorted)
+      species_cor_sorted <- species_cor_sorted %>%
+        rownames_to_column(var = "Species_Code")
+      species_cor_sorted <- species_cor_sorted %>%
+        rename(Loadings = species_cor_sorted)
+      str(species_cor_sorted)
+      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted <- species_cor_sorted %>%
+        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+      species_cor_sorted <-species_cor_sorted %>% distinct()
+      
+      summary_df <- species_cor_sorted %>%
+        arrange(Loadings) %>%
+        slice(c(1:10, (n()-9):n()))
+
+  #axis2 scores
+      axis2_scores <- scores(mds_alpine, display = "sites")[, 2]
+      species_cor <- apply(alpine_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+      species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+      head(species_cor_sorted, 10)
+      tail(species_cor_sorted, 10)
+      
+      species_cor_sorted <- as.data.frame(species_cor_sorted)
+      species_cor_sorted <- species_cor_sorted %>%
+        rownames_to_column(var = "Species_Code")
+      species_cor_sorted <- species_cor_sorted %>%
+        rename(Loadings = species_cor_sorted)
+      str(species_cor_sorted)
+      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted <- species_cor_sorted %>%
+        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+      species_cor_sorted <-species_cor_sorted %>% distinct()
+      
+      summary_df <- species_cor_sorted %>%
+        arrange(Loadings) %>%
+        slice(c(1:10, (n()-9):n()))
+```
+
+
+## Lichen 
+```{r}
+#Run NMDS 
+      mds_alpine_lichen <- metaMDS(alpine_lichen_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+
+#Descriptive info for caption 
+      length(unique(alpine_df_lichen[["Plot"]])) #number of plots 
+      mds_alpine_lichen$stress #stress value 
+      mds_alpine_lichen$iters #number of iterations 
+
+#Define colors 
+veg_colors <- c("cyan", "orchid3", "orange", "blue3", "gray")
+      names(veg_colors) <- unique(alpine_df_lichen$Viereck.3)
+
+#define axis 
+      xlim <- c(-1.5, 1.5)
+      ylim <- c(-1.5, 1.5)
+
+#plot with base overlays 
+      dev.off()
+      ordiplot(mds_alpine_lichen, type = "n", xlim = xlim, ylim = ylim, 
+               cex.axis = 1.5, cex.lab = 1.4, main = "Lichen Species", cex.main = 2)
+      text(x = par("usr")[1],
+           y = par("usr")[4] - 0.1,
+           labels = "Stress = 0.13",
+           pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+           cex = 2, #size 
+           col = "black")
+      text(x = par("usr")[2],
+           y = par("usr")[4] - 0.1,
+           labels = "2",
+           pos = 2, #1: below, 2 left, 3 above, 4 right 
+           cex = 2, #size 
+           col = "black")
+      points(scores(mds_alpine_lichen, display = "sites"),
+             col = veg_colors[alpine_df_lichen$Viereck.3],
+             pch = 19, cex = 1.5)
+      legend("bottomright", title = "Site Classification",
+             legend=names(veg_colors),
+             ncol=1,
+             col = veg_colors, pch = 19, 
+             cex = 1.4)
+      ordiarrows(mds_alpine_lichen, 
+                 groups = alpine_df_lichen$Plot, 
+                 levels = alpine_df_lichen$Sample_Year, col = 'blue')
+      ordihull(mds_alpine_lichen, groups = alpine_df_lichen$Park, draw ="polygon", label = TRUE, cex = 1.8)
+
+#Plot labels if desired 
+      text(mds_alpine_lichen, display = "sites", labels = alpine_df_lichen$PlotID, col = "black", cex = 0.7, pos = 4)
+      #adding only select labels 
+      selected_plots <- c("116", "S980")
+      nmds_scores <- as.data.frame(scores(mds_alpine_lichen, display = "sites"))
+      nmds_scores$PlotID <- alpine_df_lichen$PlotID
+      selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+      text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+           col = "black", cex = 0.7, pos = 4)
+
+#Species loading values 
+  #axis1 scores 
+      axis1_scores <- scores(mds_alpine_lichen, display = "sites")[, 1]
+      species_cor <- apply(alpine_lichen_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+      species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+      head(species_cor_sorted, 10)
+      tail(species_cor_sorted, 10)
+      
+      species_cor_sorted <- as.data.frame(species_cor_sorted)
+      species_cor_sorted <- species_cor_sorted %>%
+        rownames_to_column(var = "Species_Code")
+      species_cor_sorted <- species_cor_sorted %>%
+        rename(Loadings = species_cor_sorted)
+      str(species_cor_sorted)
+      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted <- species_cor_sorted %>%
+        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+      species_cor_sorted <-species_cor_sorted %>% distinct()
+      
+      summary_df <- species_cor_sorted %>%
+        arrange(Loadings) %>%
+        slice(c(1:10, (n()-9):n()))
+
+  #axis2 scores
+      axis2_scores <- scores(mds_alpine_lichen, display = "sites")[, 2]
+      species_cor <- apply(alpine_lichen_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+      species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+      head(species_cor_sorted, 10)
+      tail(species_cor_sorted, 10)
+      
+      species_cor_sorted <- as.data.frame(species_cor_sorted)
+      species_cor_sorted <- species_cor_sorted %>%
+        rownames_to_column(var = "Species_Code")
+      species_cor_sorted <- species_cor_sorted %>%
+        rename(Loadings = species_cor_sorted)
+      str(species_cor_sorted)
+      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted <- species_cor_sorted %>%
+        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+      species_cor_sorted <-species_cor_sorted %>% distinct()
+      
+      summary_df <- species_cor_sorted %>%
+        arrange(Loadings) %>%
+        slice(c(1:10, (n()-9):n()))
+
+
+```
+
+
+## Nonvascular 
+```{r}
+#Run NMDS
+    mds_alpine_nonvasc <- metaMDS(alpine_nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+
+#descriptive info for caption
+      length(unique(alpine_df_nonvasc[["Plot"]])) #number of plots 
+      mds_alpine_nonvasc$stress #stress value 
+      mds_alpine_nonvasc$iters #number of iterations 
+
+#define colors 
+veg_colors <- c("orange", "blue3", "cyan", "orchid3", "gray")
+      names(veg_colors) <- unique(alpine_df_nonvasc$Viereck.3)
+      dev.off()
+#define axis 
+      xlim <- c(-1, 1.5)
+      ylim <- c(-1, 1)
+
+#plot with base overlay options 
+      ordiplot(mds_alpine_nonvasc, type = "n", xlim = xlim, ylim = ylim, 
+               cex.axis = 1.5, cex.lab = 1.4, main = "Nonvascular Species", cex.main = 2)
+      text(x = par("usr")[1],
+           y = par("usr")[4] - 0.1,
+           labels = "Stress = 0.11",
+           pos = 4.1, #1: below, 2 left, 3 above, 4 right 
+           cex = 2, #size 
+           col = "black")
+      text(x = par("usr")[2],
+           y = par("usr")[4] - 0.1,
+           labels = "3",
+           pos = 2, #1: below, 2 left, 3 above, 4 right 
+           cex = 2, #size 
+           col = "black")
+      points(scores(mds_alpine_nonvasc, display = "sites"),
+             col = veg_colors[alpine_df_nonvasc$Viereck.3],
+             pch = 19, cex = 1.5)
+      legend("bottomright", title = "Site Classification",
+             legend=names(veg_colors),
+             ncol=1,
+             col = veg_colors, pch = 19,
+             cex = 1.4)
+      ordiarrows(mds_alpine_nonvasc, 
+                 groups = alpine_df_nonvasc$Plot, 
+                 levels = alpine_df_nonvasc$Sample_Year, col = 'blue')
+      ordihull(mds_alpine_nonvasc, groups = alpine_df_nonvasc$Park, draw ="polygon", label = TRUE, cex = 1.8)
+
+#plotID labels
+      text(mds_alpine_nonvasc, display = "sites", labels = alpine_df_nonvasc$PlotID, col = "black", cex = 0.7, pos = 4)
+      #adding only select labels 
+      selected_plots <- c("116", "S980")
+      nmds_scores <- as.data.frame(scores(mds_alpine_nonvasc, display = "sites"))
+      nmds_scores$PlotID <- alpine_df_nonvasc$PlotID
+      selected_scores <- nmds_scores[nmds_scores$PlotID %in% selected_plots, ]
+      text(selected_scores$NMDS1, selected_scores$NMDS2, labels = selected_scores$PlotID,
+           col = "black", cex = 0.7, pos = 4)
+
+beetle_nonvasc_plot_viereck <- recordPlot()
+
+#Species loading values 
+  #axis1 scores 
+      axis1_scores <- scores(mds_alpine_nonvasc, display = "sites")[, 1]
+      species_cor <- apply(alpine_nonvasc_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+      species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+      head(species_cor_sorted, 10)
+      tail(species_cor_sorted, 10)
+      
+      species_cor_sorted <- as.data.frame(species_cor_sorted)
+      species_cor_sorted <- species_cor_sorted %>%
+        rownames_to_column(var = "Species_Code")
+      species_cor_sorted <- species_cor_sorted %>%
+        rename(Loadings = species_cor_sorted)
+      str(species_cor_sorted)
+      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted <- species_cor_sorted %>%
+        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+      species_cor_sorted <-species_cor_sorted %>% distinct()
+      
+      summary_df <- species_cor_sorted %>%
+        arrange(Loadings) %>%
+        slice(c(1:10, (n()-9):n()))
+
+  #axis2 scores
+      axis2_scores <- scores(mds_alpine_nonvasc, display = "sites")[, 2]
+      species_cor <- apply(alpine_nonvasc_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+      species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+      head(species_cor_sorted, 10)
+      tail(species_cor_sorted, 10)
+      
+      species_cor_sorted <- as.data.frame(species_cor_sorted)
+      species_cor_sorted <- species_cor_sorted %>%
+        rownames_to_column(var = "Species_Code")
+      species_cor_sorted <- species_cor_sorted %>%
+        rename(Loadings = species_cor_sorted)
+      str(species_cor_sorted)
+      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
+      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted <- species_cor_sorted %>%
+        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+      species_cor_sorted <-species_cor_sorted %>% distinct()
+      
+      summary_df <- species_cor_sorted %>%
+        arrange(Loadings) %>%
+        slice(c(1:10, (n()-9):n()))
+
+```
+
+
+
+
 # Spruce Beetle NMDS Analysis 
 
 ## Manage Dataframes 
