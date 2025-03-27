@@ -207,7 +207,7 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
 ## Creating the env files, code for reference (not required to run if using quick load) 
 ```{r}
 #Vascular
-      beetle_env <- beetle_df[,c(1:8)]
+      beetle_env <- beetle_df[,c(1:6)]
       
       #adding visit 
       beetle_env <- beetle_env %>%
@@ -224,7 +224,7 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
         left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
       
 #Lichen
-          beetle_env_lichen <- beetle_df_lichen[,c(1:12)]
+          beetle_env_lichen <- beetle_df_lichen[,c(1:8)]
           
           #add visit column
           beetle_env_lichen <- beetle_env_lichen %>%
@@ -241,7 +241,7 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
             left_join(lichen_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
           
 #Nonvascular
-          beetle_env_nonvasc <- beetle_df_nonvasc[,c(1:12)]
+          beetle_env_nonvasc <- beetle_df_nonvasc[,c(1:8)]
           
           #adding visit column 
           beetle_env_nonvasc <- beetle_env_nonvasc %>%
@@ -1274,7 +1274,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
 ## Creating the env files, code for reference (not required to run if using quick load)
 ```{r}
 #Vascular
-          needle_env <- needle_df[,c(1:7)]
+          needle_env <- needle_df[,c(1:6)]
           
           #add visit column 
           needle_env <- needle_env %>%
@@ -1288,7 +1288,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           
 #lichen
 
-          needle_env_lichen <- needle_df_lichen[,c(1:12)]
+          needle_env_lichen <- needle_df_lichen[,c(1:8)]
           
           #add visit column
           needle_env_lichen <- needle_env_lichen %>%
@@ -1303,7 +1303,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
 
 #nonvascular 
 
-          needle_env_nonvasc <- needle_df_nonvasc[,c(1:12)]
+          needle_env_nonvasc <- needle_df_nonvasc[,c(1:8)]
           
           #add visit column
           needle_env_nonvasc <- needle_env_nonvasc %>%
@@ -2201,7 +2201,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 ## Creating the env files - Code for reference (not required to run if using quick load)
 ```{r}
 #Vascular 
-      openlow_env <- openlow_df[,c(1:8)]
+      openlow_env <- openlow_df[,c(1:6)]
       
       #create visit column 
       openlow_env <- openlow_env %>%
@@ -2214,7 +2214,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
         left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
      
 #Lichen 
-      openlow_env_lichen <- openlow_df_lichen[,c(1:12)]
+      openlow_env_lichen <- openlow_df_lichen[,c(1:8)]
      
       #create visit column 
       openlow_env_lichen <- openlow_env_lichen %>%
@@ -2227,7 +2227,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
         left_join(lichen_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
       
 #Nonvascular 
-      openlow_env_nonvasc <- openlow_df_nonvasc[,c(1:12)]
+      openlow_env_nonvasc <- openlow_df_nonvasc[,c(1:8)]
       
       #create visit column 
       openlow_env_nonvasc <- openlow_env_nonvasc %>%
@@ -3098,7 +3098,7 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
 ## Creating the env files, code for reference (not required to run if using quick load)
 ```{r}
 #vascular 
-          dwarfscrub_env <- dwarfscrub_df[,c(1:8)]
+          dwarfscrub_env <- dwarfscrub_df[,c(1:6)]
           
           #Adding visit column 
           dwarfscrub_env <- dwarfscrub_env %>%
@@ -3111,7 +3111,7 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
             left_join(vasc_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
           
 #lichen 
-          dwarfscrub_env_lichen <- dwarfscrub_df_lichen[,c(1:12)]
+          dwarfscrub_env_lichen <- dwarfscrub_df_lichen[,c(1:8)]
           
           #add visit column
           dwarfscrub_env_lichen <- dwarfscrub_env_lichen %>%
@@ -3124,7 +3124,7 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
             left_join(lichen_sp_richness %>% select(Plot_Year, Species_Richness), by = c("Plot_Year"))
           
 #nonvascular 
-          dwarfscrub_env_nonvasc <- dwarfscrub_df_nonvasc[,c(1:12)]
+          dwarfscrub_env_nonvasc <- dwarfscrub_df_nonvasc[,c(1:8)]
           
           #Add visit column
           dwarfscrub_env_nonvasc <- dwarfscrub_env_nonvasc %>%
@@ -4110,7 +4110,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
 ## Creating the env files, code for reference (not required to run if using quick load)
 ```{r}
 #Vascular 
-          forest_env <- forest_df[,c(1:8)]
+          forest_env <- forest_df[,c(1:6)]
           
           #add visit column
           forest_env <- forest_env %>%
@@ -4127,7 +4127,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           forest_env <- forest_env %>% distinct()
           
 #lichen 
-          forest_env_lichen <- forest_df_lichen[,c(1:12)]
+          forest_env_lichen <- forest_df_lichen[,c(1:8)]
           
           #add visit column
           forest_env_lichen <- forest_env_lichen %>%
@@ -4144,7 +4144,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
           forest_env_lichen <- forest_env_lichen %>% distinct()
           
 #nonvascular 
-          forest_env_nonvasc <- forest_df_nonvasc[,c(1:12)]
+          forest_env_nonvasc <- forest_df_nonvasc[,c(1:8)]
           
           #Add visit column
           forest_env_nonvasc <- forest_env_nonvasc %>%
@@ -5110,7 +5110,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 ## Creating the env files, code for reference (not required to run if using quick load)
 ```{r}
 #Vascular 
-            alpine_env <- alpine_df[,c(1:8)]
+            alpine_env <- alpine_df[,c(1:6)]
             
             #Add species richness column 
             alpine_env <- alpine_env %>%
@@ -5124,7 +5124,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
               ungroup()
             
 #Lichen 
-            alpine_env_lichen <- alpine_df_lichen[,c(1:12)]
+            alpine_env_lichen <- alpine_df_lichen[,c(1:8)]
 
             #Add species richness column 
             alpine_env_lichen <- alpine_env_lichen %>%
@@ -5140,7 +5140,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 
 #Nonvascular 
 
-            alpine_env_nonvasc <- alpine_df_nonvasc[,c(1:12)]
+            alpine_env_nonvasc <- alpine_df_nonvasc[,c(1:8)]
             
             #Add visit column for beta diversity 
             alpine_env_nonvasc <- alpine_env_nonvasc %>%

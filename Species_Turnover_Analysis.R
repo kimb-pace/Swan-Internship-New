@@ -4,17 +4,17 @@ library(dplyr)
 library(writexl)
 library(readxl)
 
-fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat_Frequency.csv")
+taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/taxa_filtered.xlsx")
 
 #official turnover code 
 
 #Vascular 
-        needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_vasc.xlsx")
-        forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_vasc.xlsx")
-        beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_vasc.xlsx")
-        dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc.xlsx")
-        openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_vasc.xlsx")
-        alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_vasc.xlsx")
+        needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx")
+        forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx")
+        beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx")
+        dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx")
+        openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx")
+        alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx")
         
         
         #get the first and most recent sample year for each plot (excluding plots visited only once)
@@ -39,14 +39,14 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
         
         str(combined_data)
         combined_data <- combined_data %>% select(Visit, everything())
-        combined_data <- subset(combined_data, select = -c(Park, PlotID, Vegetation_Class, Viereck.3, Plot_Year))
+        combined_data <- subset(combined_data, select = -c(Park, Vegetation_Class, Viereck.2, Viereck.3, Plot_Year))
         
         str(combined_data) #check that only visit, sample_year, and plot remain 
         
         #pivot to long format so it can fit into the function, use values_drop_na to get only rows with species present
         long_data <- combined_data %>%
           pivot_longer(cols = -c(Plot, Visit, Sample_Year), 
-                       names_to = "Species_Code",                 
+                       names_to = "Code1",                 
                        values_to = "Presence",              
                        values_drop_na = TRUE)                    
         
@@ -57,7 +57,7 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
         #calculate the values for total turnover, losses, and gains 
         turnover_total <- turnover(df = long_data, 
                                    time.var = "Sample_Year", 
-                                   species.var = "Species_Code", 
+                                   species.var = "Code1", 
                                    abundance.var = "Presence", 
                                    replicate.var = "Plot", 
                                    metric = "total")
@@ -66,7 +66,7 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
         turnover_disappearance <- turnover(
           df = long_data,
           time.var = "Sample_Year",    
-          species.var = "Species_Code",  
+          species.var = "Code1",  
           abundance.var = "Presence",  
           replicate.var = "Plot",      
           metric = "disappearance")
@@ -75,7 +75,7 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
         turnover_appearance <- turnover(
           df = long_data,
           time.var = "Sample_Year",    
-          species.var = "Species_Code",  
+          species.var = "Code1",  
           abundance.var = "Presence",  
           replicate.var = "Plot",      
           metric = "appearance")
@@ -111,29 +111,29 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
         
         #corrected: 
         disappeared_species_summary <- long_data %>%
-          group_by(Species_Code, Plot) %>%
+          group_by(Code1, Plot) %>%
           summarize(First = max(Presence[visit == "First"], na.rm = TRUE),
                     Last = max(Presence[visit == "Last"], na.rm = TRUE), .groups = "drop") %>%
           filter(First > 0 & Last == 0) %>%
-          group_by(Species_Code) %>%
+          group_by(Code1) %>%
           summarize(Plots_Disappeared = n(), .groups = "drop")
         
         appeared_species_summary <- long_data %>%
-          group_by(Species_Code, Plot) %>%
+          group_by(Code1, Plot) %>%
           summarize(First = max(Presence[visit == "First"], na.rm = TRUE),
                     Last = max(Presence[visit == "Last"], na.rm = TRUE), .groups = "drop") %>%
           filter(First == 0 & Last > 0) %>%
-          group_by(Species_Code) %>%
+          group_by(Code1) %>%
           summarize(Plots_Appeared = n(), .groups = "drop")
         
-        df_changes_summary <- full_join(disappeared_species_summary, appeared_species_summary, by = "Species_Code") %>%
+        df_changes_summary <- full_join(disappeared_species_summary, appeared_species_summary, by = "Code1") %>%
           replace_na(list(plots_disappeared = 0, plots_appeared = 0))
         print(df_changes_summary)
         
         df_changes_summary <- df_changes_summary %>%
-          left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+          left_join(taxa %>% select(Genus, Species, Code1), by = "Code1")
         df_changes_summary <-df_changes_summary %>% distinct()
-        df_changes_summary <- df_changes_summary %>% select(Species_Name, everything())
+        df_changes_summary <- df_changes_summary %>% select(Genus, Species, everything())
           
         df_changes_summary
         
@@ -146,12 +146,12 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
 
 #Lichen 
 
-        needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_lichen.xlsx")
-        forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_lichen.xlsx")
-        beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_lichen.xlsx")
-        dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen.xlsx")
-        openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_lichen.xlsx")
-        alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_lichen.xlsx")        
+        needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx")
+        forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx")
+        beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx")
+        dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx")
+        openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx")
+        alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx")        
         
         #get the first and most recent sample year for each plot (excluding plots visited only once)
         first_last_years <- alpine_df_lichen %>%                                                       #DF CHANGE
@@ -279,12 +279,12 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
 
 #Nonvascular 
 
-          needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_nonvasc.xlsx")
-          forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_nonvasc.xlsx")
-          beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc.xlsx")
-          dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc.xlsx")
-          openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc.xlsx")
-          alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc.xlsx")
+          needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx")
+          forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx")
+          beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx")
+          dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx")
+          openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx")
+          alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx")
           
           
           #get the first and most recent sample year for each plot (excluding plots visited only once)
