@@ -4,7 +4,7 @@ library(dplyr)
 library(writexl)
 library(readxl)
 
-taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/taxa_filtered.xlsx")
+taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/taxa_filtered.xlsx")
 
 #official turnover code 
 
@@ -18,17 +18,17 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
         
         
         #get the first and most recent sample year for each plot (excluding plots visited only once)
-        first_last_years <- alpine_df %>%                                                           #DF CHANGE
+        first_last_years <- openlow_df %>%                                                           #DF CHANGE
           distinct(Plot, Sample_Year) %>%
           group_by(Plot) %>%
           summarise(
             first_year = min(Sample_Year),
             last_year = max(Sample_Year)) %>%
           filter(first_year != last_year)
-        first_data <- alpine_df %>%                                                                #DF CHANGE
+        first_data <- openlow_df %>%                                                                #DF CHANGE
           inner_join(first_last_years %>% select(Plot, first_year), 
                      by = c("Plot" = "Plot", "Sample_Year" = "first_year"))
-        last_data <- alpine_df %>%                                                                 #DF CHANGE
+        last_data <- openlow_df %>%                                                                 #DF CHANGE
           inner_join(first_last_years %>% select(Plot, last_year), 
                      by = c("Plot" = "Plot", "Sample_Year" = "last_year"))
         
@@ -95,11 +95,6 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
         turnover_joined <- turnover_joined %>% rename(Total_Vasc_Prop = total)
         turnover_joined <- turnover_joined %>% rename(Disapp_Vasc_Prop = disappearance)
         turnover_joined <- turnover_joined %>% rename(App_Vasc_Prop = appearance)
-        
-        turnover_joined <- turnover_joined %>%
-          left_join(alpine_df %>%                                                                      #DF CHANGE
-                      select(Plot, Viereck.3), by = "Plot")
-        turnover_joined <- turnover_joined %>% distinct()
         turnover_joined
 
 #getting species list 
@@ -131,7 +126,7 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
         print(df_changes_summary)
         
         df_changes_summary <- df_changes_summary %>%
-          left_join(taxa %>% select(Genus, Species, Code1), by = "Code1")
+          left_join(taxa_filtered %>% select(Genus, Species, Code1), by = "Code1")
         df_changes_summary <-df_changes_summary %>% distinct()
         df_changes_summary <- df_changes_summary %>% select(Genus, Species, everything())
           
@@ -140,8 +135,8 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
          
                                                                                                             #DF CHANGE BELOW
         
-        write_xlsx(df_changes_summary, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/alpine_vascular_specieslist.xlsx")
-        write_xlsx(turnover_joined, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/alpine_vascular_turnover.xlsx")
+        write_xlsx(df_changes_summary, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_vascular_specieslist.xlsx")
+        write_xlsx(turnover_joined, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_vascular_turnover.xlsx")
 
 
 #Lichen 
@@ -154,17 +149,17 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
         alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx")        
         
         #get the first and most recent sample year for each plot (excluding plots visited only once)
-        first_last_years <- alpine_df_lichen %>%                                                       #DF CHANGE
+        first_last_years <- openlow_df_lichen %>%                                                       #DF CHANGE
           distinct(Plot, Sample_Year) %>%
           group_by(Plot) %>%
           summarise(
             first_year = min(Sample_Year),
             last_year = max(Sample_Year)) %>%
           filter(first_year != last_year)
-        first_data <- alpine_df_lichen %>%                                                            #DF CHANGE
+        first_data <- openlow_df_lichen %>%                                                            #DF CHANGE
           inner_join(first_last_years %>% select(Plot, first_year), 
                      by = c("Plot" = "Plot", "Sample_Year" = "first_year"))
-        last_data <- alpine_df_lichen %>%                                                             #DF CHANGE
+        last_data <- openlow_df_lichen %>%                                                             #DF CHANGE
           inner_join(first_last_years %>% select(Plot, last_year), 
                      by = c("Plot" = "Plot", "Sample_Year" = "last_year"))
         
@@ -174,15 +169,15 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
           last_data %>% mutate(Visit = "Last"))
         
         combined_data <- combined_data %>% select(Visit, everything())
-        combined_data <- subset(combined_data, select = -c(Park, Vegetation_Class, EstYear, Plot_Year, PlotID, Vegetation_Class, Viereck.1, Viereck.4,
-                                                           Viereck.2, Viereck.3, Elevation_Band))
+        combined_data <- subset(combined_data, select = -c(Park, Vegetation_Class, Plot_Year, Viereck.1, Viereck.4,
+                                                           Viereck.2, Viereck.3))
         
         str(combined_data)
         
         #pivot to long format so it can fit into the function, use values_drop_na to get only rows with species present
         long_data <- combined_data %>%
           pivot_longer(cols = -c(Plot, Visit, Sample_Year), 
-                       names_to = "Species_Code",                 
+                       names_to = "Code1",                 
                        values_to = "Presence",              
                        values_drop_na = TRUE)                    
         
@@ -193,7 +188,7 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
         #calculate the values for total turnover, losses, and gains 
         turnover_total <- turnover(df = long_data, 
                                    time.var = "Sample_Year", 
-                                   species.var = "Species_Code", 
+                                   species.var = "Code1", 
                                    abundance.var = "Presence", 
                                    replicate.var = "Plot", 
                                    metric = "total")
@@ -202,7 +197,7 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
         turnover_disappearance <- turnover(
           df = long_data,
           time.var = "Sample_Year",    
-          species.var = "Species_Code",  
+          species.var = "Code1",  
           abundance.var = "Presence",  
           replicate.var = "Plot",      
           metric = "disappearance")
@@ -211,7 +206,7 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
         turnover_appearance <- turnover(
           df = long_data,
           time.var = "Sample_Year",    
-          species.var = "Species_Code",  
+          species.var = "Code1",  
           abundance.var = "Presence",  
           replicate.var = "Plot",      
           metric = "appearance")
@@ -231,11 +226,6 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
         turnover_joined <- turnover_joined %>% rename(Total_Lichen_Prop = total)
         turnover_joined <- turnover_joined %>% rename(Disapp_Lichen_Prop = disappearance)
         turnover_joined <- turnover_joined %>% rename(App_Lichen_Prop = appearance)
-        
-        turnover_joined <- turnover_joined %>%
-          left_join(alpine_df_lichen %>%                                                                       #DF CHANGE
-                      select(Plot, Viereck.3), by = "Plot")
-        turnover_joined <- turnover_joined %>% distinct()
         turnover_joined
 
 #getting species list 
@@ -247,33 +237,33 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
         
         #corrected: 
         disappeared_species_summary <- long_data %>%
-          group_by(Species_Code, Plot) %>%
+          group_by(Code1, Plot) %>%
           summarize(First = max(Presence[visit == "First"], na.rm = TRUE),
                     Last = max(Presence[visit == "Last"], na.rm = TRUE), .groups = "drop") %>%
           filter(First > 0 & Last == 0) %>%
-          group_by(Species_Code) %>%
+          group_by(Code1) %>%
           summarize(Plots_Disappeared = n(), .groups = "drop")
         
         appeared_species_summary <- long_data %>%
-          group_by(Species_Code, Plot) %>%
+          group_by(Code1, Plot) %>%
           summarize(First = max(Presence[visit == "First"], na.rm = TRUE),
                     Last = max(Presence[visit == "Last"], na.rm = TRUE), .groups = "drop") %>%
           filter(First == 0 & Last > 0) %>%
-          group_by(Species_Code) %>%
+          group_by(Code1) %>%
           summarize(Plots_Appeared = n(), .groups = "drop")
         
-        df_changes_summary <- full_join(disappeared_species_summary, appeared_species_summary, by = "Species_Code") %>%
+        df_changes_summary <- full_join(disappeared_species_summary, appeared_species_summary, by = "Code1") %>%
           replace_na(list(plots_disappeared = 0, plots_appeared = 0))
         print(df_changes_summary)
         
         df_changes_summary <- df_changes_summary %>%
-          left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+          left_join(taxa_filtered %>% select(Genus, Species, Code1), by = "Code1")
         df_changes_summary <-df_changes_summary %>% distinct()
-        df_changes_summary <- df_changes_summary %>% select(Species_Name, everything())
+        df_changes_summary <- df_changes_summary %>% select(Genus, Species, everything())
         df_changes_summary
                                                                                                           #DF CHANGE
-        write_xlsx(df_changes_summary, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/alpine_lichen_specieslist.xlsx")
-        write_xlsx(turnover_joined, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/alpine_lichen_turnover.xlsx")
+        write_xlsx(df_changes_summary, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_lichen_specieslist.xlsx")
+        write_xlsx(turnover_joined, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_lichen_turnover.xlsx")
 
 
 
@@ -288,17 +278,17 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
           
           
           #get the first and most recent sample year for each plot (excluding plots visited only once)
-          first_last_years <- alpine_df_nonvasc %>%
+          first_last_years <- openlow_df_nonvasc %>%
             distinct(Plot, Sample_Year) %>%
             group_by(Plot) %>%
             summarise(
               first_year = min(Sample_Year),
               last_year = max(Sample_Year)) %>%
             filter(first_year != last_year)
-          first_data <- alpine_df_nonvasc %>%
+          first_data <- openlow_df_nonvasc %>%
             inner_join(first_last_years %>% select(Plot, first_year), 
                        by = c("Plot" = "Plot", "Sample_Year" = "first_year"))
-          last_data <- alpine_df_nonvasc %>%
+          last_data <- openlow_df_nonvasc %>%
             inner_join(first_last_years %>% select(Plot, last_year), 
                        by = c("Plot" = "Plot", "Sample_Year" = "last_year"))
           
@@ -310,16 +300,16 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
           combined_data <- combined_data %>% select(Visit, everything())
           
           str(combined_data)
-          combined_data <- subset(combined_data, select = -c(Park, Vegetation_Class, EstYear, Plot_Year, PlotID, Vegetation_Class, 
+          combined_data <- subset(combined_data, select = -c(Park, Plot_Year, Vegetation_Class, 
                                                              Viereck.1, Viereck.4,
-                                                             Viereck.2, Viereck.3, Elevation_Band))
+                                                             Viereck.2, Viereck.3))
           
           str(combined_data)
           
           #pivot to long format so it can fit into the function, use values_drop_na to get only rows with species present
           long_data <- combined_data %>%
             pivot_longer(cols = -c(Plot, Visit, Sample_Year), 
-                         names_to = "Species_Code",                 
+                         names_to = "Code1",                 
                          values_to = "Presence",              
                          values_drop_na = TRUE)                    
           
@@ -330,7 +320,7 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
           #calculate the values for total turnover, losses, and gains 
           turnover_total <- turnover(df = long_data, 
                                      time.var = "Sample_Year", 
-                                     species.var = "Species_Code", 
+                                     species.var = "Code1", 
                                      abundance.var = "Presence", 
                                      replicate.var = "Plot", 
                                      metric = "total")
@@ -339,7 +329,7 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
           turnover_disappearance <- turnover(
             df = long_data,
             time.var = "Sample_Year",    
-            species.var = "Species_Code",  
+            species.var = "Code1",  
             abundance.var = "Presence",  
             replicate.var = "Plot",      
             metric = "disappearance")
@@ -348,7 +338,7 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
           turnover_appearance <- turnover(
             df = long_data,
             time.var = "Sample_Year",    
-            species.var = "Species_Code",  
+            species.var = "Code1",  
             abundance.var = "Presence",  
             replicate.var = "Plot",      
             metric = "appearance")
@@ -368,11 +358,7 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
           turnover_joined <- turnover_joined %>% rename(Total_Nonvasc_Prop = total)
           turnover_joined <- turnover_joined %>% rename(Disapp_Nonvasc_Prop = disappearance)
           turnover_joined <- turnover_joined %>% rename(App_Nonvasc_Prop = appearance)
-          
-          turnover_joined <- turnover_joined %>%
-            left_join(alpine_df_nonvasc %>%
-                        select(Plot, Viereck.3), by = "Plot")
-          turnover_joined <- turnover_joined %>% distinct()
+          turnover_joined
           
   #getting species list 
           long_data <- long_data %>%
@@ -383,34 +369,34 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
           
           #corrected: 
           disappeared_species_summary <- long_data %>%
-            group_by(Species_Code, Plot) %>%
+            group_by(Code1, Plot) %>%
             summarize(First = max(Presence[visit == "First"], na.rm = TRUE),
                       Last = max(Presence[visit == "Last"], na.rm = TRUE), .groups = "drop") %>%
             filter(First > 0 & Last == 0) %>%
-            group_by(Species_Code) %>%
+            group_by(Code1) %>%
             summarize(Plots_Disappeared = n(), .groups = "drop")
           
           appeared_species_summary <- long_data %>%
-            group_by(Species_Code, Plot) %>%
+            group_by(Code1, Plot) %>%
             summarize(First = max(Presence[visit == "First"], na.rm = TRUE),
                       Last = max(Presence[visit == "Last"], na.rm = TRUE), .groups = "drop") %>%
             filter(First == 0 & Last > 0) %>%
-            group_by(Species_Code) %>%
+            group_by(Code1) %>%
             summarize(Plots_Appeared = n(), .groups = "drop")
           
-          df_changes_summary <- full_join(disappeared_species_summary, appeared_species_summary, by = "Species_Code") %>%
+          df_changes_summary <- full_join(disappeared_species_summary, appeared_species_summary, by = "Code1") %>%
             replace_na(list(plots_disappeared = 0, plots_appeared = 0))
           print(df_changes_summary)
           
           df_changes_summary <- df_changes_summary %>%
-            left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+            left_join(taxa_filtered %>% select(Genus, Species, Code1), by = "Code1")
           df_changes_summary <-df_changes_summary %>% distinct()
-          df_changes_summary <- df_changes_summary %>% select(Species_Name, everything())
+          df_changes_summary <- df_changes_summary %>% select(Genus, Species, everything())
           df_changes_summary
           
           
-          write_xlsx(df_changes_summary, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/alpine_nonvasc_specieslist.xlsx")
-          write_xlsx(turnover_joined, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/alpine_nonvasc_turnover.xlsx")
+          write_xlsx(df_changes_summary, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_nonvasc_specieslist.xlsx")
+          write_xlsx(turnover_joined, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_nonvasc_turnover.xlsx")
 
 
 
@@ -418,6 +404,8 @@ taxa <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Sp
 
           
           
+          
+
           
 #calculating average turnover and standard error for each veg class
 

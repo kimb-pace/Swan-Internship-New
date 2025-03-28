@@ -18,6 +18,7 @@ write_xlsx(duplicates_true, "T:/Users/KPace/duplicates_true.xlsx")
 library(writexl)
 write_xlsx(duplicates, "T:/Users/KPace/duplicates.xlsx")
 
+#those that are only keyed to species level 
 genus_only <- taxa_filtered %>%
   filter(Genus != "" & !is.na(Genus) & Species == "" | is.na(Species)) %>%
   select(Species_Code, Vascular_Code, Genus, Species)
@@ -25,30 +26,26 @@ genus_only
 write_xlsx(genus_only, "T:/Users/KPace/genus_only.xlsx")
 
 
-
-#order by subspecies 
-group_by(Genus, Species)
-summarise(Code= First(Code))
-might have to create a genus_speies merge like plot year 
-
-update taxa table, join with old taxa table and make a column 
-join to quad freq by original species code. add to new table the new species code as a column which use to make wide format 
-
-
 simple_taxa <- taxa %>%
   group_by(Genus, Species) %>%
   summarise(Code1 = first(Species_Code),
             Genus = first(Genus),
-            Species = first(Species))
+            Species = first(Species)) %>%
+  ungroup()
 
 #make a genus_species column on both taxa and simple_taxa 
 taxa <- taxa %>% mutate(Genus_Species = paste(Genus, Species, sep="_"))
+taxa_filtered <- taxa_filtered %>% mutate(Genus_Species = paste(Genus, Species, sep="_"))
 simple_taxa <- simple_taxa %>% mutate(Genus_Species = paste(Genus, Species, sep="_"))
 
 #add the Code1 column to taxa 
-taxa <- taxa %>%
+taxa_filtered <- taxa_filtered %>%
   left_join(simple_taxa %>% select(Genus_Species, Code1),
             by = "Genus_Species")
+
+taxa_filtered <- taxa_filtered %>% rename(new_column_name = old_column_name)
+write_xlsx(taxa_filtered, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/taxa_filtered.xlsx")
+
 
 #join code1 to quad_freq using old code 
 quad_freq <- quad_freq %>%

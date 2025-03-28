@@ -22,7 +22,7 @@ library(readxl)
 #General 
 canopy_cover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/canopy_cover.xlsx")
 plot_elevation_data <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/plot_elevation_data.xlsx")
-fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat_Frequency.csv")
+taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/taxa_filtered.xlsx")
 ```
 
 
@@ -33,18 +33,18 @@ fulldata <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat
 ## Manage Dataframes 
 ```{r}
 #Load
-    alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_vasc.xlsx")
-    alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_lichen.xlsx")
-    alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc.xlsx")
+alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx")
+alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx")
+alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx")
 
 #Create species matrices 
-alpine_composition <- alpine_df[,c(9:282)]
+alpine_composition <- alpine_df[,c(8:261)]
 alpine_composition <- as.matrix(alpine_composition) 
     
-alpine_lichen_composition <- alpine_df_lichen[,c(13:179)]
+alpine_lichen_composition <- alpine_df_lichen[,c(10:167)]
 alpine_lichen_composition <- as.matrix(alpine_lichen_composition) 
     
-alpine_nonvasc_composition <- alpine_df_nonvasc[,c(13:219)]
+alpine_nonvasc_composition <- alpine_df_nonvasc[,c(10:210)]
 alpine_nonvasc_composition <- as.matrix(alpine_nonvasc_composition) 
 ```
 
@@ -117,14 +117,14 @@ veg_colors <- c("orange", "blue3", "cyan", "orchid3")
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -140,14 +140,14 @@ veg_colors <- c("orange", "blue3", "cyan", "orchid3")
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -223,14 +223,14 @@ veg_colors <- c("cyan", "orchid3", "orange", "blue3", "gray")
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -246,14 +246,14 @@ veg_colors <- c("cyan", "orchid3", "orange", "blue3", "gray")
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -332,14 +332,14 @@ beetle_nonvasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -355,14 +355,14 @@ beetle_nonvasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -379,18 +379,18 @@ beetle_nonvasc_plot_viereck <- recordPlot()
 ## Manage Dataframes 
 ```{r}
 #Load
-    beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_vasc.xlsx")
-    beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_lichen.xlsx")
-    beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc.xlsx")
+    beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx")
+    beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx")
+    beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx")
 
 #Create species matrices 
-beetle_composition <- beetle_df[,c(9:282)]
+beetle_composition <- beetle_df[,c(8:261)]
 beetle_composition <- as.matrix(beetle_composition) 
     
-beetle_lichen_composition <- beetle_df_lichen[,c(13:179)]
+beetle_lichen_composition <- beetle_df_lichen[,c(10:167)]
 beetle_lichen_composition <- as.matrix(beetle_lichen_composition) 
     
-beetle_nonvasc_composition <- beetle_df_nonvasc[,c(13:219)]
+beetle_nonvasc_composition <- beetle_df_nonvasc[,c(10:210)]
 beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition) 
 
 #add canopy cover info to dataframes 
@@ -499,14 +499,14 @@ beetlevasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -522,14 +522,14 @@ beetlevasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -633,14 +633,14 @@ beetle_lichen_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -656,14 +656,14 @@ beetle_lichen_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -765,14 +765,14 @@ beetle_nonvasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -788,14 +788,14 @@ beetle_nonvasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -809,18 +809,18 @@ beetle_nonvasc_plot_viereck <- recordPlot()
 ## Manage Dataframes 
 ```{r}
 #Load 
-forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_vasc.xlsx")
-forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_lichen.xlsx")
-forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_nonvasc.xlsx") 
+forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx")
+forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx")
+forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx") 
 
 #create species matrix for NMDS 
-          forest_composition <- forest_df[,c(9:282)]
+          forest_composition <- forest_df[,c(8:261)]
           forest_composition <- as.matrix(forest_composition) 
 
-          forest_composition_lichen <- forest_df_lichen[,c(13:179)]
+          forest_composition_lichen <- forest_df_lichen[,c(10:167)]
           forest_composition_lichen <- as.matrix(forest_composition_lichen) 
 
-          forest_composition_nonvasc <- forest_df_nonvasc[,c(13:219)]
+          forest_composition_nonvasc <- forest_df_nonvasc[,c(10:210)]
           forest_composition_nonvasc <- as.matrix(forest_composition_nonvasc)
 
 #add canopy cover info to dataframes 
@@ -953,14 +953,14 @@ forestvasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -976,14 +976,14 @@ forestvasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1113,14 +1113,14 @@ forestlichen_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1136,14 +1136,14 @@ forestlichen_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1273,14 +1273,14 @@ forestnonvasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1296,14 +1296,14 @@ forestnonvasc_plot_viereck <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1318,18 +1318,18 @@ forestnonvasc_plot_viereck <- recordPlot()
 ## Manage Dataframes 
 ```{r}
 #Load 
-needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_vasc.xlsx")
-needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_lichen.xlsx")
-needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_nonvasc.xlsx")
+needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx")
+needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx")
+needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx")
 
 #create NMDS species matrix 
-          needle_composition <- needle_df[,c(8:281)]
+          needle_composition <- needle_df[,c(8:261)]
           needle_composition <- as.matrix(needle_composition) 
 
-          needle_composition_lichen <- needle_df_lichen[,c(13:179)]
+          needle_composition_lichen <- needle_df_lichen[,c(10:167)]
           needle_composition_lichen <- as.matrix(needle_composition_lichen)
 
-          needle_composition_nonvasc <- needle_df_nonvasc[,c(13:219)]
+          needle_composition_nonvasc <- needle_df_nonvasc[,c(10:210)]
           needle_composition_nonvasc <- as.matrix(needle_composition_nonvasc) 
 
 #Add canopy cover info for overlay 
@@ -1472,14 +1472,14 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1495,14 +1495,14 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1634,14 +1634,14 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1657,14 +1657,14 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1785,14 +1785,14 @@ plot <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1808,14 +1808,14 @@ plot <- recordPlot()
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -1830,18 +1830,18 @@ plot <- recordPlot()
 ## Manage Dataframes 
 ```{r}
 #Load 
-openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_vasc.xlsx")
-openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_lichen.xlsx")
-openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc.xlsx")
+openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx")
+openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx")
+openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx")
 
 #turn species data into matrix 
-      openlow_composition <- openlow_df[,c(9:282)]
+      openlow_composition <- openlow_df[,c(8:261)]
       openlow_composition <- as.matrix(openlow_composition) 
 
-      openlow_composition_lichen <- openlow_df_lichen[,c(13:179)]
+      openlow_composition_lichen <- openlow_df_lichen[,c(10:167)]
       openlow_composition_lichen <- as.matrix(openlow_composition_lichen)
 
-      openlow_composition_nonvasc <- openlow_df_nonvasc[,c(13:219)]
+      openlow_composition_nonvasc <- openlow_df_nonvasc[,c(10:210)]
       openlow_composition_nonvasc <- as.matrix(openlow_composition_nonvasc)
 
 #add elevation data to dataframes for overlay 
@@ -1944,14 +1944,14 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
         
         species_cor_sorted <- as.data.frame(species_cor_sorted)
         species_cor_sorted <- species_cor_sorted %>%
-          rownames_to_column(var = "Species_Code")
+          rownames_to_column(var = "Code1")
         species_cor_sorted <- species_cor_sorted %>%
           rename(Loadings = species_cor_sorted)
         str(species_cor_sorted)
-        species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-        fulldata$Species_Code <- factor(fulldata$Species_Code)
+        species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+        taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
         species_cor_sorted <- species_cor_sorted %>%
-          left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code") 
+          left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1") 
         species_cor_sorted <-species_cor_sorted %>% distinct()
         summary_df <- species_cor_sorted %>%
           arrange(Loadings) %>%
@@ -1966,14 +1966,14 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
         
         species_cor_sorted <- as.data.frame(species_cor_sorted)
         species_cor_sorted <- species_cor_sorted %>%
-          rownames_to_column(var = "Species_Code")
+          rownames_to_column(var = "Code1")
         species_cor_sorted <- species_cor_sorted %>%
           rename(Loadings = species_cor_sorted)
         str(species_cor_sorted)
-        species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-        fulldata$Species_Code <- factor(fulldata$Species_Code)
+        species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+        taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
         species_cor_sorted <- species_cor_sorted %>%
-          left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+          left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
         species_cor_sorted <-species_cor_sorted %>% distinct()
         
         summary_df <- species_cor_sorted %>%
@@ -2088,14 +2088,14 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -2111,14 +2111,14 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -2220,14 +2220,14 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -2243,14 +2243,14 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -2264,18 +2264,18 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
 ## Manage Dataframes 
 ```{r}
 #Load 
-dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc.xlsx")
-dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen.xlsx")
-dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc.xlsx") 
+dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx")
+dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx")
+dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx") 
 
 #Convert to species matrix
-          dwarfscrub_composition <- dwarfscrub_df[,c(9:282)]
+          dwarfscrub_composition <- dwarfscrub_df[,c(8:261)]
           dwarfscrub_composition <- as.matrix(dwarfscrub_composition) 
 
-          dwarfscrub_composition_lichen <- dwarfscrub_df_lichen[,c(13:179)]
+          dwarfscrub_composition_lichen <- dwarfscrub_df_lichen[,c(10:167)]
           dwarfscrub_composition_lichen <- as.matrix(dwarfscrub_composition_lichen) 
 
-          dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(13:219)]
+          dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(10:210)]
           dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc)
  
 #add elevation data for gradient overlay 
@@ -2372,14 +2372,14 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -2395,14 +2395,14 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -2508,14 +2508,14 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -2531,14 +2531,14 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -2644,14 +2644,14 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%
@@ -2667,14 +2667,14 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
       
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
-        rownames_to_column(var = "Species_Code")
+        rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
-      species_cor_sorted$Species_Code <- factor(species_cor_sorted$Species_Code)
-      fulldata$Species_Code <- factor(fulldata$Species_Code)
+      species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
+      taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
-        left_join(fulldata %>% select(Species_Name, Species_Code), by = "Species_Code")
+        left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
       
       summary_df <- species_cor_sorted %>%

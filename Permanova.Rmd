@@ -262,14 +262,14 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
 ```{r}
 #quick pull from T Drive 
 #dataframes
-beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_vasc.xlsx")
-beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_lichen.xlsx")
-beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc.xlsx")
+beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx")
+beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx")
+beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx")
 
 #built env files
-beetle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_env_vasc.xlsx")
-beetle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_env_lichen.xlsx")
-beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc.xlsx")
+beetle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_vasc_filtered.xlsx")
+beetle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_lichen_filtered.xlsx")
+beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc_filtered.xlsx")
 ```
 
 ## Calculate Species Richness Averages and Standard Error (Optional)
@@ -316,7 +316,7 @@ beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 ## Create composition matrices, and restrict permutations for PERMANOVA (Requried)
 ```{r}
 #Vascular 
-beetle_composition <- beetle_df[,c(9:282)]
+beetle_composition <- beetle_df[,c(8:261)]
 beetle_composition <- as.matrix(beetle_composition) 
 
       #design permutation structure 
@@ -333,7 +333,7 @@ beetle_composition <- as.matrix(beetle_composition)
 
 
 #Lichen 
-beetle_lichen_composition <- beetle_df_lichen[,c(13:179)]
+beetle_lichen_composition <- beetle_df_lichen[,c(10:167)]
 beetle_lichen_composition <- as.matrix(beetle_lichen_composition) 
 
       #design permutation structure 
@@ -350,7 +350,7 @@ beetle_lichen_composition <- as.matrix(beetle_lichen_composition)
 
 
 #Nonvascular 
-beetle_nonvasc_composition <- beetle_df_nonvasc[,c(13:219)]
+beetle_nonvasc_composition <- beetle_df_nonvasc[,c(10:210)]
 beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition) 
 
       #restrict permutations 
@@ -1320,13 +1320,13 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
 ## Load data frames (Required)
 ```{r}
 #Quick load of dataframes from T drive
-needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_vasc.xlsx")
-needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_lichen.xlsx")
-needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_df_nonvasc.xlsx")
+needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx")
+needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx")
+needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx")
     
-needle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_env_vasc.xlsx")
-needle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_env_lichen.xlsx")
-needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/needle_env_nonvasc.xlsx")
+needle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_vasc_filtered.xlsx")
+needle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_lichen_filtered.xlsx")
+needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_nonvasc_filtered.xlsx")
 ```
 
 ## Calculate Species Richness Averages and Standard Error (Optional)
@@ -1373,7 +1373,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 ## Create composition matrices, and restrict permutations for PERMANOVA (Required)
 ```{r}
 #Vascular 
-          needle_composition <- needle_df[,c(8:281)]
+          needle_composition <- needle_df[,c(8:261)]
           needle_composition <- as.matrix(needle_composition) 
           
           #design permutation structure 
@@ -1387,7 +1387,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
             nperm = 999)
 
 #Lichen 
-          needle_composition_lichen <- needle_df_lichen[,c(13:179)]
+          needle_composition_lichen <- needle_df_lichen[,c(10:167)]
           needle_composition_lichen <- as.matrix(needle_composition_lichen) 
           
           #design permutation structure 
@@ -1402,7 +1402,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           
 
 #Nonvascular 
-          needle_composition_nonvasc <- needle_df_nonvasc[,c(13:219)]
+          needle_composition_nonvasc <- needle_df_nonvasc[,c(10:210)]
           needle_composition_nonvasc <- as.matrix(needle_composition_nonvasc) 
           
           #design permutation structure 
@@ -2244,13 +2244,13 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 ## Load data frames (Required)
 ```{r}
 #quick pull from T drive 
-openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_vasc.xlsx")
-openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_lichen.xlsx")
-openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc.xlsx")
+openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx")
+openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx")
+openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx")
 
-openlow_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_env_vasc.xlsx")
-openlow_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_env_lichen.xlsx")
-openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_env_nonvasc.xlsx")
+openlow_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_vasc_filtered.xlsx")
+openlow_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_lichen_filtered.xlsx")
+openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_nonvasc_filtered.xlsx")
 ```
 
 ## Calculate Species Richness Averages and Standard Error (Optional)
@@ -2297,7 +2297,7 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
 ## Create composition matrices, and restrict permutations for PERMANOVA (Required)
 ```{r}
 #Vascular 
-      openlow_composition <- openlow_df[,c(9:282)]
+      openlow_composition <- openlow_df[,c(8:261)]
       openlow_composition <- as.matrix(openlow_composition) 
 
       #design permutation structure 
@@ -2311,7 +2311,7 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
         nperm = 999)
 
 #Lichen 
-      openlow_composition_lichen <- openlow_df_lichen[,c(13:179)]
+      openlow_composition_lichen <- openlow_df_lichen[,c(10:167)]
       openlow_composition_lichen <- as.matrix(openlow_composition_lichen) 
       
       #design permutation structure 
@@ -2325,7 +2325,7 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
         nperm = 999)
 
 #Nonvascular 
-      openlow_composition_nonvasc <- openlow_df_nonvasc[,c(13:219)]
+      openlow_composition_nonvasc <- openlow_df_nonvasc[,c(10:210)]
       openlow_composition_nonvasc <- as.matrix(openlow_composition_nonvasc) 
       
       #design permutation structure 
@@ -3140,13 +3140,13 @@ openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
 ## Load Data Frames (Required)
 ```{r}
 #quick Load from T drive 
-dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc.xlsx")
-dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen.xlsx")
-dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc.xlsx")  
+dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx")
+dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx")
+dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx")  
   
-dwarfscrub_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_env_vasc.xlsx")
-dwarfscrub_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_env_lichen.xlsx")
-dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/dwarfscrub_env_nonvasc.xlsx") 
+dwarfscrub_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_vasc_filtered.xlsx")
+dwarfscrub_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_lichen_filtered.xlsx")
+dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_nonvasc_filtered.xlsx") 
 ```
 
 ## Calculate Species Richness Averages and Standard Error (Optional)
@@ -3193,7 +3193,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
 ## Create composition matrices, and restrict permutations for PERMANOVA (Required)
 ```{r}
 #Vascular 
-          dwarfscrub_composition <- dwarfscrub_df[,c(9:282)]
+          dwarfscrub_composition <- dwarfscrub_df[,c(8:261)]
           dwarfscrub_composition <- as.matrix(dwarfscrub_composition) 
           
           #design permutation structure 
@@ -3209,7 +3209,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
             nperm = 999)
 
 #Lichen 
-          dwarfscrub_composition_lichen <- dwarfscrub_df_lichen[,c(13:179)]
+          dwarfscrub_composition_lichen <- dwarfscrub_df_lichen[,c(10:167)]
           dwarfscrub_composition_lichen <- as.matrix(dwarfscrub_composition_lichen) 
 
           #design permutation structure 
@@ -3226,7 +3226,7 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
 
 #Nonvascular 
 
-          dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(13:219)]
+          dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(10:210)]
           dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc) 
           
           #design permutation structure 
@@ -4165,13 +4165,13 @@ dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Mod
 ## Load Data Frames (Required)
 ```{r}
 #quick load from T Drive 
-forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_vasc.xlsx")
-forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_lichen.xlsx")
-forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_df_nonvasc.xlsx") 
+forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx")
+forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx")
+forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx") 
     
-forest_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_env_vasc.xlsx")
-forest_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_env_lichen.xlsx")
-forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/forest_env_nonvasc.xlsx") 
+forest_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_vasc_filtered.xlsx")
+forest_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_lichen_filtered.xlsx")
+forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_nonvasc_filtered.xlsx") 
 ```
 
 ## Calculate Species Richness Averages and Standard Error (Optional)
@@ -4218,7 +4218,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 ## Create composition matrices, and restrict permutations for PERMANOVA (Required)
 ```{r}
 #Vascular 
-          forest_composition <- forest_df[,c(9:282)]
+          forest_composition <- forest_df[,c(8:261)]
           forest_composition <- as.matrix(forest_composition) 
           
           #design permutation structure 
@@ -4232,7 +4232,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
             nperm = 999)
 
 #Lichen 
-          forest_composition_lichen <- forest_df_lichen[,c(13:179)]
+          forest_composition_lichen <- forest_df_lichen[,c(10:167)]
           forest_composition_lichen <- as.matrix(forest_composition_lichen)
 
           #design permutation structure 
@@ -4246,7 +4246,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
             nperm = 999)
 
 #Nonvascular 
-          forest_composition_nonvasc <- forest_df_nonvasc[,c(13:219)]
+          forest_composition_nonvasc <- forest_df_nonvasc[,c(10:210)]
           forest_composition_nonvasc <- as.matrix(forest_composition_nonvasc) 
           
           #design permutation structure 
@@ -5156,13 +5156,13 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 
 ## Load Data Frames (Required)
 ```{r}
-alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_vasc.xlsx")
-alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_lichen.xlsx")
-alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc.xlsx")
+alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx")
+alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx")
+alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx")
 
-alpine_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_env_vasc.xlsx")
-alpine_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_env_lichen.xlsx")
-alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_env_nonvasc.xlsx")
+alpine_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_vasc_filtered.xlsx")
+alpine_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_lichen_filtered.xlsx")
+alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_nonvasc_filtered.xlsx")
 ```
 
 ## Calculate Species Richness Averages and Standard Error (Optional) 
@@ -5207,13 +5207,13 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 ## Create composition matrices, and restrict permutations for PERMANOVA (Required)
 ```{r}
 #Create species matrices 
-      alpine_composition <- alpine_df[,c(9:282)]
+      alpine_composition <- alpine_df[,c(8:261)]
       alpine_composition <- as.matrix(alpine_composition) 
           
-      alpine_lichen_composition <- alpine_df_lichen[,c(13:179)]
+      alpine_lichen_composition <- alpine_df_lichen[,c(10:167)]
       alpine_lichen_composition <- as.matrix(alpine_lichen_composition) 
           
-      alpine_nonvasc_composition <- alpine_df_nonvasc[,c(13:219)]
+      alpine_nonvasc_composition <- alpine_df_nonvasc[,c(10:210)]
       alpine_nonvasc_composition <- as.matrix(alpine_nonvasc_composition) 
 
 
