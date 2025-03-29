@@ -686,34 +686,34 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_univariate_lichen_subclass)
           
           #create permutation object 
-          perms3 <- rbind(1:nrow(beetle_env_lichen),
+          perms03 <- rbind(1:nrow(beetle_env_lichen),
                           shuffleSet(n = nrow(beetle_env_lichen), control = perm_design_beetle_lichen_time, nset = 999))
           
           #create object for Ss to be stored 
-          results3 <- matrix(nrow = nrow(perms3), ncol = 7)
-          colnames(results3) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+          results03 <- matrix(nrow = nrow(perms03), ncol = 7)
+          colnames(results03) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
           
           #loop 
-          for (i in 1:nrow(perms3)) {
-            temp.data <- beetle_env_lichen[perms3[i, ], ]
+          for (i in 1:nrow(perms03)) {
+            temp.data <- beetle_env_lichen[perms03[i, ], ]
             temp <- adonis2(beetle_env_lichen$Species_Richness ~ Viereck.3 + Park + 
                                             Plot + Sample_Year + Viereck.3*Sample_Year,
                             data = temp.data,
                             method = "euclidian",
                             by = "terms",
                             permutations = 0)
-            results3[i, ] <- t(temp$SumOfSqs)
+            results03[i, ] <- t(temp$SumOfSqs)
           }
           
           #create F value column 
-          results3 <- results3 |>
+          results03 <- results03 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/11))
-          head3 <- head(results3)
-          print.data.frame(head3)
+          head03 <- head(results03)
+          print.data.frame(head03)
           
           #calculate P value 
-          with(results3, sum(F.Park >= F.Park[1]) / length(F.Park))
+          with(results03, sum(F.Park >= F.Park[1]) / length(F.Park))
           
           #rest of table 
           print(beetle_univariate_lichen_subclass)          
@@ -784,32 +784,32 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_multivariate_lichen_subclass)
           
           #create permutation structure and results object 
-          perms4 <- rbind(1:nrow(beetle_lichen_composition),
+          perms04 <- rbind(1:nrow(beetle_lichen_composition),
                           shuffleSet(n = nrow(beetle_lichen_composition), control = perm_design_beetle_lichen_time, nset = 999))
-          results4 <- matrix(nrow = nrow(perms4), ncol = 7)
-          colnames(results4) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+          results04 <- matrix(nrow = nrow(perms04), ncol = 7)
+          colnames(results04) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
           
           #loop 
-          for (i in 1:nrow(perms4)) {
-            temp.data <- beetle_env_lichen[perms4[i, ], ]
+          for (i in 1:nrow(perms04)) {
+            temp.data <- beetle_env_lichen[perms04[i, ], ]
             temp <- adonis2(beetle_lichen_composition ~ Viereck.3 + Park + 
                                             Plot + Sample_Year + Viereck.3*Sample_Year,
                             data = temp.data,
                             method = "bray",
                             by = "terms",
                             permutations = 0)
-            results4[i, ] <- t(temp$SumOfSqs)
+            results04[i, ] <- t(temp$SumOfSqs)
           }
           
           #calculate F statistics for each permutation using correct equation 
-          results4 <- results4 |>
+          results04 <- results04 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/11))
-          head4 <- head(results4)
-          print.data.frame(head4)
+          head04 <- head(results04)
+          print.data.frame(head04)
           
           #calculate P value 
-          with(results4, sum(F.Park >= F.Park[1]) / length(F.Park))
+          with(results04, sum(F.Park >= F.Park[1]) / length(F.Park))
           
           #print rest of table 
           print(beetle_multivariate_lichen_subclass)          
@@ -859,7 +859,17 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_lichen_subclass)
 
 
+### Beta Diversity 
 
+#based on visit 
+beetle_dispersion_result2_lichen <- betadisper(vegdist(beetle_lichen_composition, 
+                                                method = "bray"), beetle_env_lichen$Visit)
+beetle_dispersion_result2_lichen 
+permutest(beetle_dispersion_result2_lichen, permutations = 999)
+
+
+          
+          
           
 #Nonvascular 
     #Species richness 

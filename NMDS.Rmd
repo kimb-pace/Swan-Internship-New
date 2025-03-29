@@ -400,9 +400,9 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
     beetle_df_lichen <- beetle_df_lichen %>%
       left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
     beetle_df_lichen <- beetle_df_lichen %>% distinct()
-    beetle_nonvasc_df <- beetle_nonvasc_df %>%
+    beetle_df_nonvasc <- beetle_df_nonvasc %>%
       left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
-    beetle_nonvasc_df <- beetle_nonvasc_df %>% distinct()
+    beetle_df_nonvasc <- beetle_df_nonvasc %>% distinct()
 ```
 
 ## Vascular 
@@ -830,9 +830,9 @@ forest_df <- forest_df %>% distinct()
 forest_df_lichen <- forest_df_lichen %>%
   left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
 forest_df_lichen <- forest_df_lichen %>% distinct()
-forest_nonvasc_df <- forest_nonvasc_df %>%
+forest_df_nonvasc <- forest_df_nonvasc %>%
   left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
-forest_nonvasc_df <- forest_nonvasc_df %>% distinct()
+forest_df_nonvasc <- forest_df_nonvasc %>% distinct()
 
 #add elevation info to dataframes 
 forest_df <- forest_df %>%
@@ -1069,7 +1069,7 @@ forestvasc_plot_viereck <- recordPlot()
       nmds_scores <- scores(scores(mds_forest_lichen, display = "sites"))
       nmds_scores <- as.data.frame(nmds_scores)
       nmds_scores$Plot_Year <- forest_df_lichen$Plot_Year
-      nmds_scores$Percent_Cover <- forest_df_lichens$Percent_Cover
+      nmds_scores$Percent_Cover <- forest_df_lichen$Percent_Cover
       color_gradient <- colorRampPalette(c("orange", "blue3"))(100)
       point_colors <- color_gradient[cut(nmds_scores$Percent_Cover, breaks = 100)]
       ordiplot(mds_forest_lichen, type = "n", xlim = xlim, ylim = ylim, 
@@ -1343,10 +1343,17 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
   left_join(canopy_cover %>% select(Plot_Year, Percent_Cover), by = c("Plot_Year"))
 needle_df_nonvasc <- needle_df_nonvasc %>% distinct()
 
+needle_df <- needle_df %>%
+  mutate(Percent_Cover = ifelse(is.na(Percent_Cover), 0, Percent_Cover))
+needle_df_lichen <- needle_df_lichen %>%
+  mutate(Percent_Cover = ifelse(is.na(Percent_Cover), 0, Percent_Cover))
+needle_df_nonvasc <- needle_df_nonvasc %>%
+  mutate(Percent_Cover = ifelse(is.na(Percent_Cover), 0, Percent_Cover))
+
 #add elevation info for overlay 
 needle_df <- needle_df %>%
   left_join(plot_elevation_data %>% select(Plot, Elevation), by = "Plot")
-needle_df_lichens <- needle_df_lichens %>%
+needle_df_lichen <- needle_df_lichen %>%
   left_join(plot_elevation_data %>% select(Plot, Elevation), by = "Plot")
 needle_df_nonvasc <- needle_df_nonvasc %>%
   left_join(plot_elevation_data %>% select(Plot, Elevation), by = "Plot")
@@ -1591,7 +1598,7 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
       nmds_scores <- scores(scores(mds_needle_lichen, display = "sites"))
       nmds_scores <- as.data.frame(nmds_scores)
       nmds_scores$Plot_Year <- needle_df_lichen$Plot_Year
-      nmds_scores$Percent_Cover <- needle_df_lichens$Percent_Cover
+      nmds_scores$Percent_Cover <- needle_df_lichen$Percent_Cover
       color_gradient <- colorRampPalette(c("orange", "blue3"))(100)
       point_colors <- color_gradient[cut(nmds_scores$Percent_Cover, breaks = 100)]
       ordiplot(mds_needle_lichen, type = "n", xlim = xlim, ylim = ylim, 
@@ -2129,7 +2136,7 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
 ## Nonvascular NMDS
 ```{r}
 #Run NMDS
-  mds_openlow_nonvasc <- metaMDS(openlow_nonvasc_composition, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
+  mds_openlow_nonvasc <- metaMDS(openlow_composition_nonvasc, distance = "bray", k = 3, autotransform = TRUE, trymax = 200)
 
 #Get descriptive info for caption 
   length(unique(openlow_df_nonvasc[["Plot"]])) #number of plots 
@@ -2212,8 +2219,8 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
 #Species Loading values 
 
   #axis1 scores 
-      axis1_scores <- scores(openlow_nonvasc_composition, display = "sites")[, 1]
-      species_cor <- apply(openlow_nonvasc_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+      axis1_scores <- scores(mds_openlow_nonvasc, display = "sites")[, 1]
+      species_cor <- apply(openlow_composition_nonvasc, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
@@ -2236,7 +2243,7 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
 
   #axis2 scores
       axis2_scores <- scores(mds_openlow_nonvasc, display = "sites")[, 2]
-      species_cor <- apply(openlow_nonvasc_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+      species_cor <- apply(openlow_composition_nonvasc, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
@@ -2306,7 +2313,7 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
     ylim <- c(-1.5, 1)
 
 #Plot with base overlay 
-    ordiplot(mds_dwarfscrub, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+    ordiplot(mds_dwarfscrub, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub (Vascular Species)", cex.main = 2,
              xlab = "NMDS1", ylab = "NMDS2")
     text(x = par("usr")[1],
          y = par("usr")[4] - 0.1,
@@ -2343,7 +2350,7 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
     nmds_scores$Elevation <- dwarfscrub_df$Elevation
     color_gradient <- colorRampPalette(c("blue", "red"))(100)
     point_colors <- color_gradient[cut(nmds_scores$Elevation, breaks = 100)]
-    ordiplot(mds_dwarfscrub, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+    ordiplot(mds_dwarfscrub, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub (Vascular Species)", cex.main = 2,
              xlab = "NMDS1", ylab = "NMDS2")
     text(x = par("usr")[1],
          y = par("usr")[4] - 0.1,
@@ -2453,7 +2460,7 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
            ncol=1,
            col = veg_colors, pch = 19, cex = 1.4)
     ordiarrows(mds_dwarfscrub_lichen, 
-               groups = dwarfscrub_df_lichen$PlotID, 
+               groups = dwarfscrub_df_lichen$Plot, 
                levels = dwarfscrub_df_lichen$Sample_Year, col = 'blue')
     ordihull(mds_dwarfscrub_lichen, groups = dwarfscrub_df_lichen$Park, draw ="polygon", label = TRUE, cex = 1.8)
     ordihull(mds_dwarfscrub_lichen, groups = dwarfscrub_df_lichen$Elevation_Band, draw ="polygon", label = TRUE)
@@ -2501,7 +2508,7 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
       
   #axis1 scores 
       axis1_scores <- scores(mds_dwarfscrub_lichen, display = "sites")[, 1]
-      species_cor <- apply(dwarfscrub_composition_lichens, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+      species_cor <- apply(dwarfscrub_composition_lichen, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
@@ -2524,7 +2531,7 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
 
   #axis2 scores
       axis2_scores <- scores(mds_dwarfscrub_lichen, display = "sites")[, 2]
-      species_cor <- apply(dwarfscrub_composition_lichens, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+      species_cor <- apply(dwarfscrub_composition_lichen, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
@@ -2567,7 +2574,7 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
 
 #plot with base overlay 
     ordiplot(mds_dwarfscrub_nonvasc, type = "n", xlim = xlim, ylim = ylim, 
-             cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+             cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub (Nonvascular Species)", cex.main = 2,
              xlab = "NMDS1", ylab = "NMDS2")
     text(x = par("usr")[1],
          y = par("usr")[4] - 0.1,
@@ -2616,7 +2623,7 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
     color_gradient <- colorRampPalette(c("blue", "red"))(100)
     point_colors <- color_gradient[cut(nmds_scores$Elevation, breaks = 100)]
     ordiplot(mds_dwarfscrub_nonvasc, type = "n", xlim = xlim, ylim = ylim, 
-                 cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub", cex.main = 2,
+                 cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub (Nonvascular Species)", cex.main = 2,
                  xlab = "NMDS1", ylab = "NMDS2")
     text(x = par("usr")[1],
              y = par("usr")[4] - 0.1,

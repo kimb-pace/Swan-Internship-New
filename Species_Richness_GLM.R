@@ -45,20 +45,27 @@ ggplot(simdata, aes(Y)) +
 
 
 
+use GLMM if you have count data, data is grouped or heirarchical (plots in sites), non-normal distributed data, and you need to control for random effects 
+to avoid pseudoreplication 
 
 
 #scale sample year to remove warnings 
 openlow_env_lichen$Sample_Year <- as.numeric(openlow_env_lichen$Sample_Year)
 openlow_env_lichen$Sample_Year_Scaled <- scale(openlow_env_lichen$Sample_Year)
 
-#Poisson 
+
+
+#Poisson, assumes mean = variance 
     model_pois <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
                         data = openlow_env_lichen, family = poisson)
     summary(model_pois)
     model_pois@optinfo$conv #0 = converged, 1 = not converged
     confint(model_pois)
+    
+#generalized poisson model 
+    gen_pois <- vglm(count ~ fixed_var + random_var, family = poissonff, data = data)
 
-#Negative Binomial 
+#Negative Binomial = use when variance > mean (over dispersed)
     model_nb1 <- glmmTMB(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
                          data = openlow_env_lichen, family = nbinom2)
     summary(model_nb1)
@@ -68,19 +75,22 @@ openlow_env_lichen$Sample_Year_Scaled <- scale(openlow_env_lichen$Sample_Year)
 #MODEL COMPARISON 
   #checking the overdispersion statistics 
     #Poisson 
-        pearson_overdisp <- sum(residuals(model_pois, type = "pearson")^2) / df.residual(model_pois)
-        deviance_overdisp <- deviance(model_pois) / df.residual(model_pois)
+        pearson_overdisp <- sum(residuals(model_pois, type = "pearson")^2) / df.residual(model_pois) #pearson = how much each observation deviates from expected value
+        deviance_overdisp <- deviance(model_pois) / df.residual(model_pois) #how well the model fits the data 
         cat("Pearson Overdispersion:", pearson_overdisp, "\n")
         cat("Deviance Overdispersion:", deviance_overdisp, "\n")
         summary(model_pois)
         #if ratio is higher than 1, data is likely overdispersed and should use a negative binomial model
-    
+        
     #negative binomial 
         pearson_overdisp <- sum(residuals(model_nb1, type = "pearson")^2) / df.residual(model_nb1)
         deviance_overdisp <- deviance(model_nb1) / df.residual(model_nb1)
         cat("Pearson Overdispersion:", pearson_overdisp, "\n")
         cat("Deviance Overdispersion:", deviance_overdisp, "\n")
         summary(model_nb1)
+        
+        AIC(model_pois, model_nb1) #lower = better
+        BIC(model_pois, model_nb1) #lower = better 
 
     
 #Interpretation of slope coefficient when using scaled years: 
@@ -109,6 +119,21 @@ openlow_env_lichen$Sample_Year_Scaled <- scale(openlow_env_lichen$Sample_Year)
              x = "Sample Year",
              y = "Species Richness")
       
+      
+#mean vs. variance 
+      mean_var_data <- openlow_env_lichen %>%
+        group_by(Sample_Year) %>%
+        summarise(mean_richness = mean(Species_Richness, na.rm = TRUE),
+                  var_richness = var(Species_Richness, na.rm = TRUE))
+      ggplot(mean_var_data, aes(x=mean_richness, y = var_richness)) +
+        geom_point() +
+        geom_smooth(method = "lm", se = FALSE, color = "blue") + #trend line 
+        geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + #poisson distribution expectation 
+        theme_minimal()+
+        labs(title = "Mean vs. Variance of Species Richness", 
+             x = "Mean Species Richness",
+             y = "Variance of Species Richness")
+      
 sim_res <- simulateResiduals(model_pois)
 plot(sim_res)
 #QQ plot has perfect fit line and points along it. 
@@ -123,7 +148,6 @@ ggplot(openlow_env_lichen, aes(x=Species_Richness)) +
   labs(title = "Distribution of Species Richness",
        x = "Species Richness",
        y = "Density")
-
 qqnorm(openlow_env_lichen$Species_Richness)
 qqline(openlow_env_lichen$Species_Richness, col = "red")
 
@@ -139,19 +163,17 @@ ggplot()+
        x = "Species Richness", 
        y = "Density")
 
-#mean vs. variance 
-mean_var_data <- openlow_env_lichen %>%
-  group_by(Sample_Year) %>%
-  summarise(mean_richness = mean(Species_Richness, na.rm = TRUE),
-            var_richness = var(Species_Richness, na.rm = TRUE))
-ggplot(mean_var_data, aes(x=mean_richness, y = var_richness)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") + #trend line 
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + #poisson distribution expectation 
-  theme_minimal()+
-  labs(title = "Mean vs. Variance of Species Richness", 
-       x = "Mean Species Richness",
-       y = "Variance of Species Richness")
+
+
+
+ranef(model_nb1)$cond
+#large differences = significant site to site variation 
+
+
+
+
+
+
 
 
 model_quasi <- glm(Species_Richness ~ Sample_Year, family = quasipoisson, data = openlow_env_lichen)
