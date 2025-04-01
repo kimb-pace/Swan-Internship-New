@@ -9,10 +9,706 @@ library(ggplot2)
 library(readxl)
 library(DHARMa)
 
+#Open Low Shrub 
+      openlow_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_vasc_filtered.xlsx")
+  #Vascular 
+      #scale sample year to remove warnings 
+      openlow_env$Sample_Year <- as.numeric(openlow_env$Sample_Year)
+      openlow_env$Sample_Year_Scaled <- scale(openlow_env$Sample_Year)
+      
+      #Poisson, assumes mean = variance 
+      model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                               data = openlow_env, family = poisson)
+      summary(model_pois_vasc)
+      
+      pearson_overdisp <- sum(residuals(model_pois_vasc, type = "pearson")^2) / df.residual(model_pois_vasc) #pearson = how much each observation deviates from expected value
+      deviance_overdisp <- deviance(model_pois_vasc) / df.residual(model_pois_vasc) #how well the model fits the data 
+      cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+      cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+      
+      model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
+      
+      confint(model_pois_vasc)
+      #negative interval
+      exp(-0.06847906/sd(openlow_env$Sample_Year))
+      (0.9829035-1)*100 #-1.71
+      #positive interval 
+      exp(0.0562481/sd(openlow_env$Sample_Year))
+      (1.014265-1)*100 #1.01
+      
+      original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(openlow_env$Sample_Year)
+      #calculate percent change per year using corrected coefficient 
+      (exp(-0.00158) -1)*100 #=percent change 
 
-openlow_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_env_vasc.xlsx")
-openlow_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_env_lichen.xlsx")
-openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/openlow_env_nonvasc.xlsx")
+  #Lichen 
+      openlow_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_lichen_filtered.xlsx")
+      #scale sample year to remove warnings 
+      openlow_env_lichen$Sample_Year <- as.numeric(openlow_env_lichen$Sample_Year)
+      openlow_env_lichen$Sample_Year_Scaled <- scale(openlow_env_lichen$Sample_Year)
+      
+      #Poisson, assumes mean = variance 
+      model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                 data = openlow_env_lichen, family = poisson)
+      summary(model_pois_lichen)
+      
+      pearson_overdisp <- sum(residuals(model_pois_lichen, type = "pearson")^2) / df.residual(model_pois_lichen) #pearson = how much each observation deviates from expected value
+      deviance_overdisp <- deviance(model_pois_lichen) / df.residual(model_pois_lichen) #how well the model fits the data 
+      cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+      cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+      
+      model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
+      
+      confint(model_pois_lichen)
+      #negative interval
+      exp(-0.12536944/sd(openlow_env_lichen$Sample_Year))
+      (0.9730882-1)*100 #-2.69
+      #positive interval 
+      exp(-0.01917884/sd(openlow_env_lichen$Sample_Year))
+      (0.9958354-1)*100 #-0.42
+      
+      original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(openlow_env_lichen$Sample_Year)
+      #calculate percent change per year using corrected coefficient 
+      (exp(-0.0158) -1)*100 #=percent change 
+
+  #Nonvascular 
+      openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_nonvasc_filtered.xlsx")
+      #scale sample year to remove warnings 
+      openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
+      openlow_env_nonvasc$Sample_Year_Scaled <- scale(openlow_env_nonvasc$Sample_Year)
+      
+      #Poisson, assumes mean = variance 
+      model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                  data = openlow_env_nonvasc, family = poisson)
+      summary(model_pois_nonvasc)
+      
+      pearson_overdisp <- sum(residuals(model_pois_nonvasc, type = "pearson")^2) / df.residual(model_pois_nonvasc) #pearson = how much each observation deviates from expected value
+      deviance_overdisp <- deviance(model_pois_nonvasc) / df.residual(model_pois_nonvasc) #how well the model fits the data 
+      cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+      cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+      
+      model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
+      
+      confint(model_pois_nonvasc)
+      #negative interval
+      exp(-0.1426947/sd(openlow_env_nonvasc$Sample_Year))
+      (0.9694265-1)*100 #-3.06
+      #positive interval 
+      exp(0.005000223/sd(openlow_env_nonvasc$Sample_Year))
+      (1.001089-1)*100 #0.11
+      
+      original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(openlow_env_nonvasc$Sample_Year)
+      #calculate percent change per year using corrected coefficient 
+      (exp(-0.0151) -1)*100 #=percent change 
+
+          
+          
+    
+#Spruce Woodland 
+      needle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_vasc_filtered.xlsx")
+      
+  #Vascular 
+      #scale sample year to remove warnings 
+      needle_env$Sample_Year <- as.numeric(needle_env$Sample_Year)
+      needle_env$Sample_Year_Scaled <- scale(needle_env$Sample_Year)
+      
+      #Poisson, assumes mean = variance 
+      model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                               data = needle_env, family = poisson)
+      summary(model_pois_vasc)
+      
+      pearson_overdisp <- sum(residuals(model_pois_vasc, type = "pearson")^2) / df.residual(model_pois_vasc) #pearson = how much each observation deviates from expected value
+      deviance_overdisp <- deviance(model_pois_vasc) / df.residual(model_pois_vasc) #how well the model fits the data 
+      cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+      cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+      
+      model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
+      
+      confint(model_pois_vasc)
+      #negative interval
+      exp(-0.07878733/sd(needle_env$Sample_Year))
+      (0.9771621-1)*100 #-2.28
+      #positive interval 
+      exp(0.05138275/sd(needle_env$Sample_Year))
+      (1.015181-1)*100 #1.52
+      
+      original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(needle_env$Sample_Year)
+      #calculate percent change per year using corrected coefficient 
+      (exp(-0.00411)-1)*100 #=percent change 
+      
+  #Lichen 
+      needle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_lichen_filtered.xlsx")
+      #scale sample year to remove warnings 
+      needle_env_lichen$Sample_Year <- as.numeric(needle_env_lichen$Sample_Year)
+      needle_env_lichen$Sample_Year_Scaled <- scale(needle_env_lichen$Sample_Year)
+      
+      #Poisson, assumes mean = variance 
+      model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                 data = needle_env_lichen, family = poisson)
+      summary(model_pois_lichen)
+      
+      pearson_overdisp <- sum(residuals(model_pois_lichen, type = "pearson")^2) / df.residual(model_pois_lichen) #pearson = how much each observation deviates from expected value
+      deviance_overdisp <- deviance(model_pois_lichen) / df.residual(model_pois_lichen) #how well the model fits the data 
+      cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+      cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+      
+      model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
+      
+      confint(model_pois_lichen)
+      #negative interval
+      exp(-0.1427322/sd(needle_env_lichen$Sample_Year))
+      (0.96139-1)*100 #-3.86
+      ((exp(-0.1427322/sd(needle_env_lichen$Sample_Year)))-1)*100
+      #positive interval 
+      exp(-0.0376746/sd(needle_env_lichen$Sample_Year))
+      (0.9896606-1)*100 #-1.03
+      
+      original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(needle_env_lichen$Sample_Year)
+      #calculate percent change per year using corrected coefficient 
+      (exp(-0.0249) -1)*100 #=percent change 
+      
+  #Nonvascular 
+      needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_nonvasc_filtered.xlsx")
+      #scale sample year to remove warnings 
+      needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
+      needle_env_nonvasc$Sample_Year_Scaled <- scale(needle_env_nonvasc$Sample_Year)
+      
+      #Poisson, assumes mean = variance 
+      model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                  data = needle_env_nonvasc, family = poisson)
+      summary(model_pois_nonvasc)
+      
+      pearson_overdisp <- sum(residuals(model_pois_nonvasc, type = "pearson")^2) / df.residual(model_pois_nonvasc) #pearson = how much each observation deviates from expected value
+      deviance_overdisp <- deviance(model_pois_nonvasc) / df.residual(model_pois_nonvasc) #how well the model fits the data 
+      cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+      cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+      
+      model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
+      
+      original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(needle_env_nonvasc$Sample_Year)
+      #calculate percent change per year using corrected coefficient 
+      (exp(-0.0214) -1)*100 #=percent change  
+      
+      confint(model_pois_nonvasc)
+      #negative interval
+      ((exp(-0.1427495/sd(needle_env_nonvasc$Sample_Year)))-1)*100
+      #positive interval 
+      ((exp(-0.009377086/sd(needle_env_nonvasc$Sample_Year)))-1)*100
+      
+
+      
+
+#Spruce Forest 
+          forest_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_vasc_filtered.xlsx")
+  #Vascular 
+          #scale sample year to remove warnings 
+          forest_env$Sample_Year <- as.numeric(forest_env$Sample_Year)
+          forest_env$Sample_Year_Scaled <- scale(forest_env$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                     data = forest_env, family = poisson)
+          summary(model_pois_vasc)
+          
+          pearson_overdisp <- sum(residuals(model_pois_vasc, type = "pearson")^2) / df.residual(model_pois_vasc) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_vasc) / df.residual(model_pois_vasc) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(forest_env$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(-0.0154) -1)*100 #=percent change 
+          
+          
+          #negative interval
+          #exp(-0.1427495/sd(forest_env$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(forest_env$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+          confint(model_pois_vasc)
+          #negative interval
+          ((exp(-0.1015123/sd(forest_env$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(0.0176431/sd(forest_env$Sample_Year)))-1)*100
+
+          
+  #Lichen 
+          forest_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_lichen_filtered.xlsx")
+          #scale sample year to remove warnings 
+          forest_env_lichen$Sample_Year <- as.numeric(forest_env_lichen$Sample_Year)
+          forest_env_lichen$Sample_Year_Scaled <- scale(forest_env_lichen$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                      data = forest_env_lichen, family = poisson)
+          summary(model_pois_lichen)
+          
+          pearson_overdisp <- sum(residuals(model_pois_lichen, type = "pearson")^2) / df.residual(model_pois_lichen) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_lichen) / df.residual(model_pois_lichen) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(forest_env_lichen$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(-0.0367) -1)*100 #=percent change 
+          
+          
+          #negative interval
+          #exp(-0.1427495/sd(forest_env_lichen$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(forest_env_lichen$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+          confint(model_pois_lichen)
+          #negative interval
+          ((exp(-0.1806259/sd(forest_env_lichen$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(-0.01977007/sd(forest_env_lichen$Sample_Year)))-1)*100
+
+          
+  #Nonvascular 
+          forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_nonvasc_filtered.xlsx") 
+          #scale sample year to remove warnings 
+          forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
+          forest_env_nonvasc$Sample_Year_Scaled <- scale(forest_env_nonvasc$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                      data = forest_env_nonvasc, family = poisson)
+          summary(model_pois_nonvasc)
+          
+          pearson_overdisp <- sum(residuals(model_pois_nonvasc, type = "pearson")^2) / df.residual(model_pois_nonvasc) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_nonvasc) / df.residual(model_pois_nonvasc) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
+        
+          original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(forest_env_nonvasc$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(-0.0437) -1)*100 #=percent change 
+          
+          
+              #negative interval
+              #exp(-0.1427495/sd(forest_env_nonvasc$Sample_Year))
+              #(0.9613854-1)*100 #-3.86
+              #positive interval 
+              #exp(-0.009377086/sd(forest_env_nonvasc$Sample_Year))
+              #(0.9974165-1)*100 #-0.26
+              
+          confint(model_pois_nonvasc)
+              #negative interval
+              ((exp(-0.20026648/sd(forest_env_nonvasc$Sample_Year)))-1)*100
+              #positive interval 
+              ((exp(-0.03815634/sd(forest_env_nonvasc$Sample_Year)))-1)*100
+
+
+#Beetle 
+          beetle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_vasc_filtered.xlsx")
+    #Vascular 
+          #scale sample year to remove warnings 
+          beetle_env$Sample_Year <- as.numeric(beetle_env$Sample_Year)
+          beetle_env$Sample_Year_Scaled <- scale(beetle_env$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                   data = beetle_env, family = poisson)
+          summary(model_pois_vasc)
+          
+          pearson_overdisp <- sum(residuals(model_pois_vasc, type = "pearson")^2) / df.residual(model_pois_vasc) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_vasc) / df.residual(model_pois_vasc) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
+         
+          original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(beetle_env$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(0.00727) -1)*100 #=percent change 
+           
+          #negative interval
+          #exp(-0.1427495/sd(beetle_env$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(beetle_env$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+          confint(model_pois_vasc)
+          #negative interval
+          ((exp(-0.05080881/sd(beetle_env$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(0.09308241/sd(beetle_env$Sample_Year)))-1)*100
+          
+
+          
+    #Lichen
+          beetle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_lichen_filtered.xlsx")
+          #scale sample year to remove warnings 
+          beetle_env_lichen$Sample_Year <- as.numeric(beetle_env_lichen$Sample_Year)
+          beetle_env_lichen$Sample_Year_Scaled <- scale(beetle_env_lichen$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                     data = beetle_env_lichen, family = poisson)
+          summary(model_pois_lichen)
+          
+          pearson_overdisp <- sum(residuals(model_pois_lichen, type = "pearson")^2) / df.residual(model_pois_lichen) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_lichen) / df.residual(model_pois_lichen) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(beetle_env_lichen$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(-0.0772) -1)*100 #=percent change 
+          
+          confint(model_pois_lichen)
+          #negative interval
+          ((exp(-0.3377355/sd(beetle_env_lichen$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(-0.1239696/sd(beetle_env_lichen$Sample_Year)))-1)*100
+          
+          #negative interval
+          #exp(-0.1427495/sd(beetle_env_lichen$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(beetle_env_lichen$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+
+          
+    #Nonvascular 
+          beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc_filtered.xlsx")
+          #scale sample year to remove warnings 
+          beetle_env_nonvasc$Sample_Year <- as.numeric(beetle_env_nonvasc$Sample_Year)
+          beetle_env_nonvasc$Sample_Year_Scaled <- scale(beetle_env_nonvasc$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                      data = beetle_env_nonvasc, family = poisson)
+          summary(model_pois_nonvasc)
+          
+          pearson_overdisp <- sum(residuals(model_pois_nonvasc, type = "pearson")^2) / df.residual(model_pois_nonvasc) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_nonvasc) / df.residual(model_pois_nonvasc) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(beetle_env_nonvasc$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(-0.0215) -1)*100 #=percent change 
+          
+          confint(model_pois_nonvasc)
+          #negative interval
+          ((exp(-0.147474/sd(beetle_env_nonvasc$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(0.01905762/sd(beetle_env_nonvasc$Sample_Year)))-1)*100
+          
+          
+          #negative interval
+          #exp(-0.1427495/sd(beetle_env_nonvasc$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(beetle_env_nonvasc$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+
+
+#dwarfscrub
+          dwarfscrub_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_vasc_filtered.xlsx")
+    #Vascular 
+          #scale sample year to remove warnings 
+          dwarfscrub_env$Sample_Year <- as.numeric(dwarfscrub_env$Sample_Year)
+          dwarfscrub_env$Sample_Year_Scaled <- scale(dwarfscrub_env$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                   data = dwarfscrub_env, family = poisson)
+          summary(model_pois_vasc)
+          
+          pearson_overdisp <- sum(residuals(model_pois_vasc, type = "pearson")^2) / df.residual(model_pois_vasc) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_vasc) / df.residual(model_pois_vasc) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(dwarfscrub_env$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(0.0022) -1)*100 #=percent change 
+          
+          confint(model_pois_vasc)
+          #negative interval
+          ((exp(-0.03527206/sd(dwarfscrub_env$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(0.05808153/sd(dwarfscrub_env$Sample_Year)))-1)*100
+          
+          #negative interval
+          #exp(-0.1427495/sd(dwarfscrub_env$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(dwarfscrub_env$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+
+
+    #Lichen 
+          dwarfscrub_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_lichen_filtered.xlsx")
+          #scale sample year to remove warnings 
+          dwarfscrub_env_lichen$Sample_Year <- as.numeric(dwarfscrub_env_lichen$Sample_Year)
+          dwarfscrub_env_lichen$Sample_Year_Scaled <- scale(dwarfscrub_env_lichen$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                     data = dwarfscrub_env_lichen, family = poisson)
+          summary(model_pois_lichen)
+          
+          pearson_overdisp <- sum(residuals(model_pois_lichen, type = "pearson")^2) / df.residual(model_pois_lichen) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_lichen) / df.residual(model_pois_lichen) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(dwarfscrub_env_lichen$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(-0.0156) -1)*100 #=percent change
+          
+          confint(model_pois_lichen)
+          #negative interval
+          ((exp(-0.1034390/sd(dwarfscrub_env_lichen$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(0.01536733/sd(dwarfscrub_env_lichen$Sample_Year)))-1)*100
+          
+          
+          #negative interval
+          #exp(-0.1427495/sd(dwarfscrub_env_lichen$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(dwarfscrub_env_lichen$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+ 
+          
+   #Nonvascular 
+          dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_nonvasc_filtered.xlsx") 
+          #scale sample year to remove warnings 
+          dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Year)
+          dwarfscrub_env_nonvasc$Sample_Year_Scaled <- scale(dwarfscrub_env_nonvasc$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                      data = dwarfscrub_env_nonvasc, family = poisson)
+          summary(model_pois_nonvasc)
+          
+          pearson_overdisp <- sum(residuals(model_pois_nonvasc, type = "pearson")^2) / df.residual(model_pois_nonvasc) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_nonvasc) / df.residual(model_pois_nonvasc) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(dwarfscrub_env_nonvasc$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(-0.00211) -1)*100 #=percent change 
+          
+          confint(model_pois_nonvasc)
+          #negative interval
+          ((exp(-0.08833292/sd(dwarfscrub_env_nonvasc$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(0.07659689/sd(dwarfscrub_env_nonvasc$Sample_Year)))-1)*100
+          
+          
+          #negative interval
+          #exp(-0.1427495/sd(dwarfscrub_env_nonvasc$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(dwarfscrub_env_nonvasc$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+
+
+
+#alpine 
+          alpine_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_vasc_filtered.xlsx")
+
+  #Vascular 
+          #scale sample year to remove warnings 
+          alpine_env$Sample_Year <- as.numeric(alpine_env$Sample_Year)
+          alpine_env$Sample_Year_Scaled <- scale(alpine_env$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                   data = alpine_env, family = poisson)
+          summary(model_pois_vasc)
+          
+          pearson_overdisp <- sum(residuals(model_pois_vasc, type = "pearson")^2) / df.residual(model_pois_vasc) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_vasc) / df.residual(model_pois_vasc) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(alpine_env$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(0.00818) -1)*100 #=percent change 
+          
+          confint(model_pois_vasc)
+          #negative interval
+          ((exp(-0.01222514/sd(alpine_env$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(0.09459859/sd(alpine_env$Sample_Year)))-1)*100
+          
+          
+          #negative interval
+          #exp(-0.1427495/sd(alpine_env$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(alpine_env$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+
+          
+          
+          
+    #Lichen 
+          alpine_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_lichen_filtered.xlsx")
+          #scale sample year to remove warnings 
+          alpine_env_lichen$Sample_Year <- as.numeric(alpine_env_lichen$Sample_Year)
+          alpine_env_lichen$Sample_Year_Scaled <- scale(alpine_env_lichen$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                     data = alpine_env_lichen, family = poisson)
+          summary(model_pois_lichen)
+          
+          pearson_overdisp <- sum(residuals(model_pois_lichen, type = "pearson")^2) / df.residual(model_pois_lichen) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_lichen) / df.residual(model_pois_lichen) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(alpine_env_lichen$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(-0.00951) -1)*100 #=percent change 
+          
+          confint(model_pois_lichen)
+          #negative interval
+          ((exp(-0.08255785/sd(alpine_env_lichen$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(0.03348602/sd(alpine_env_lichen$Sample_Year)))-1)*100
+          
+          #negative interval
+          #exp(-0.1427495/sd(alpine_env_lichen$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(alpine_env_lichen$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+
+          
+          
+    #Nonvascular 
+          alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_nonvasc_filtered.xlsx")
+          #scale sample year to remove warnings 
+          alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
+          alpine_env_nonvasc$Sample_Year_Scaled <- scale(alpine_env_nonvasc$Sample_Year)
+          
+          #Poisson, assumes mean = variance 
+          model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                                      data = alpine_env_nonvasc, family = poisson)
+          summary(model_pois_nonvasc)
+          
+          pearson_overdisp <- sum(residuals(model_pois_nonvasc, type = "pearson")^2) / df.residual(model_pois_nonvasc) #pearson = how much each observation deviates from expected value
+          deviance_overdisp <- deviance(model_pois_nonvasc) / df.residual(model_pois_nonvasc) #how well the model fits the data 
+          cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+          cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+          
+          model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
+          
+          original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(alpine_env_nonvasc$Sample_Year)
+          #calculate percent change per year using corrected coefficient 
+          (exp(-0.0106) -1)*100 #=percent change
+          
+          confint(model_pois_nonvasc)
+          #negative interval
+          ((exp(-0.112528/sd(alpine_env_nonvasc$Sample_Year)))-1)*100
+          #positive interval 
+          ((exp(0.05784369/sd(alpine_env_nonvasc$Sample_Year)))-1)*100
+          
+          #negative interval
+          #exp(-0.1427495/sd(alpine_env_nonvasc$Sample_Year))
+          #(0.9613854-1)*100 #-3.86
+          #positive interval 
+          #exp(-0.009377086/sd(alpine_env_nonvasc$Sample_Year))
+          #(0.9974165-1)*100 #-0.26
+          
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 str(openlow_env_lichen)
 openlow_env_lichen$Sample_Year <- as.numeric(openlow_env_lichen$Sample_Year)
 
@@ -255,3 +951,346 @@ model_nb1 <- glmmTMB(Species_Richness ~ Sample_Year + (1 | Plot),
 summary(model_nb1)
 
 #use scaled year
+# OPen Low vascular 
+
+#scale sample year to remove warnings 
+openlow_env$Sample_Year <- as.numeric(openlow_env$Sample_Year)
+openlow_env$Sample_Year_Scaled <- scale(openlow_env$Sample_Year)
+
+#Poisson, assumes mean = variance 
+model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                         data = openlow_env, family = poisson)
+summary(model_pois_vasc)
+model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
+confint(model_pois_vasc)
+#negative interval
+exp(-0.06847/sd(openlow_env_lichen$Sample_Year))
+(0.9852-1)*100 #-1.48
+#positive interval 
+exp(0.05624/sd(openlow_env_lichen$Sample_Year))
+(1.01231-1)*100 #1.23
+
+#Negative Binomial = use when variance > mean (over dispersed)
+#model_nb1_vasc <- glmmTMB(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+#                          data = openlow_env_lichen, family = nbinom2)
+#summary(model_nb1_vasc)
+#model_nb1_vasc$fit$convergence #0 = converged, 1 = not converged
+#confint(model_nb1_vasc)
+
+#MODEL COMPARISON 
+#checking the overdispersion statistics 
+#Poisson 
+pearson_overdisp <- sum(residuals(model_pois_vasc, type = "pearson")^2) / df.residual(model_pois_vasc) #pearson = how much each observation deviates from expected value
+deviance_overdisp <- deviance(model_pois_vasc) / df.residual(model_pois_vasc) #how well the model fits the data 
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_pois_vasc)
+#if ratio is higher than 1, data is likely overdispersed and should use a negative binomial model
+
+#negative binomial 
+pearson_overdisp <- sum(residuals(model_nb1_vasc, type = "pearson")^2) / df.residual(model_nb1_vasc)
+deviance_overdisp <- deviance(model_nb1_vasc) / df.residual(model_nb1_vasc)
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_nb1_vasc)
+
+AIC(model_pois_vasc, model_nb1_vasc) #lower = better
+BIC(model_pois_vasc, model_nb1_vasc) #lower = better 
+
+
+#Interpretation of slope coefficient when using scaled years: 
+#need to divide by SD(Sample_Year)
+#For poisson 
+original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(openlow_env_lichen$Sample_Year)
+#for NB models:
+original_slope <- fixef(model_pois_vasc)$cond["Sample_Year_Scaled"]/sd(openlow_env_lichen$Sample_Year)
+
+#calculate percent change per year using corrected coefficient 
+(exp(-0.00137) -1)*100 #=percent change 
+#exp(slope) > 1 species richness is increasing per year, if < 1 its decreasing per year 
+
+# Open Low Lichen 
+
+#scale sample year to remove warnings 
+openlow_env_lichen$Sample_Year <- as.numeric(openlow_env_lichen$Sample_Year)
+openlow_env_lichen$Sample_Year_Scaled <- scale(openlow_env_lichen$Sample_Year)
+
+#Poisson, assumes mean = variance 
+model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                           data = openlow_env_lichen, family = poisson)
+summary(model_pois_lichen)
+model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
+confint(model_pois_lichen)
+#negative interval
+exp(-0.12536944/sd(openlow_env_lichen$Sample_Year))
+(0.9730882-1)*100 #-2.69
+#positive interval 
+exp(-0.01917884/sd(openlow_env_lichen$Sample_Year))
+(0.9958354-1)*100 #-0.42
+
+#generalized poisson model 
+#gen_pois <- vglm(count ~ fixed_var + random_var, family = poissonff, data = data)
+
+#Negative Binomial = use when variance > mean (over dispersed)
+model_nb1_lichen <- glmmTMB(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                            data = openlow_env_lichen, family = nbinom2)
+summary(model_nb1_lichen)
+model_nb1_lichen$fit$convergence #0 = converged, 1 = not converged
+confint(model_nb1_lichen)
+
+#MODEL COMPARISON 
+#checking the overdispersion statistics 
+#Poisson 
+pearson_overdisp <- sum(residuals(model_pois_lichen, type = "pearson")^2) / df.residual(model_pois_lichen) #pearson = how much each observation deviates from expected value
+deviance_overdisp <- deviance(model_pois_lichen) / df.residual(model_pois_lichen) #how well the model fits the data 
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_pois_lichen)
+#if ratio is higher than 1, data is likely overdispersed and should use a negative binomial model
+
+#negative binomial 
+pearson_overdisp <- sum(residuals(model_nb1_lichen, type = "pearson")^2) / df.residual(model_nb1_lichen)
+deviance_overdisp <- deviance(model_nb1_lichen) / df.residual(model_nb1_lichen)
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_nb1_lichen)
+
+AIC(model_pois_lichen, model_nb1_lichen) #lower = better
+BIC(model_pois_lichen, model_nb1_lichen) #lower = better 
+
+
+#Interpretation of slope coefficient when using scaled years: 
+#need to divide by SD(Sample_Year)
+#For poisson 
+original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(openlow_env_lichen$Sample_Year)
+#for NB models:
+original_slope <- fixef(model_pois_lichen)$cond["Sample_Year_Scaled"]/sd(openlow_env_lichen$Sample_Year)
+
+#calculate percent change per year using corrected coefficient 
+(exp(-0.0158) -1)*100 #=percent change 
+#exp(slope) > 1 species richness is increasing per year, if < 1 its decreasing per year 
+
+# Open Low nonvascular 
+
+#scale sample year to remove warnings 
+openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
+openlow_env_nonvasc$Sample_Year_Scaled <- scale(openlow_env_nonvasc$Sample_Year)
+
+#Poisson, assumes mean = variance 
+model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                            data = openlow_env_nonvasc, family = poisson)
+summary(model_pois_nonvasc)
+model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
+confint(model_pois_nonvasc)
+#negative interval
+exp(-0.1426947/sd(openlow_env_lichen$Sample_Year))
+(0.9694265-1)*100 #-3.06
+#positive interval 
+exp(0.005000223/sd(openlow_env_lichen$Sample_Year))
+(1.001089-1)*100 #0.11
+
+#generalized poisson model 
+#gen_pois <- vglm(count ~ fixed_var + random_var, family = poissonff, data = data)
+
+#Negative Binomial = use when variance > mean (over dispersed)
+model_nb1_nonvasc <- glmmTMB(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                             data = openlow_env_nonvasc, family = nbinom2)
+summary(model_nb1_nonvasc)
+model_nb1_nonvasc$fit$convergence #0 = converged, 1 = not converged
+confint(model_nb1_nonvasc)
+
+#MODEL COMPARISON 
+#checking the overdispersion statistics 
+#Poisson 
+pearson_overdisp <- sum(residuals(model_pois_nonvasc, type = "pearson")^2) / df.residual(model_pois_nonvasc) #pearson = how much each observation deviates from expected value
+deviance_overdisp <- deviance(model_pois_nonvasc) / df.residual(model_pois_nonvasc) #how well the model fits the data 
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_pois_nonvasc)
+#if ratio is higher than 1, data is likely overdispersed and should use a negative binomial model
+
+#negative binomial 
+pearson_overdisp <- sum(residuals(model_nb1_nonvasc, type = "pearson")^2) / df.residual(model_nb1_nonvasc)
+deviance_overdisp <- deviance(model_nb1_nonvasc) / df.residual(model_nb1_nonvasc)
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_nb1_lichen)
+
+AIC(model_pois_nonvasc, model_nb1_nonvasc) #lower = better
+BIC(model_pois_nonvasc, model_nb1_nonvasc) #lower = better 
+
+
+#Interpretation of slope coefficient when using scaled years: 
+#need to divide by SD(Sample_Year)
+#For poisson 
+original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(openlow_env_nonvasc$Sample_Year)
+#for NB models:
+original_slope <- fixef(model_pois_nonvasc)$cond["Sample_Year_Scaled"]/sd(openlow_env_nonvasc$Sample_Year)
+
+#calculate percent change per year using corrected coefficient 
+(exp(-0.0151) -1)*100 #=percent change 
+#exp(slope) > 1 species richness is increasing per year, if < 1 its decreasing per year 
+
+
+# spruce woodland vascular 
+needle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_vasc_filtered.xlsx")
+needle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_lichen_filtered.xlsx")
+needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_nonvasc_filtered.xlsx")
+
+#scale sample year to remove warnings 
+needle_env$Sample_Year <- as.numeric(needle_env$Sample_Year)
+needle_env$Sample_Year_Scaled <- scale(needle_env$Sample_Year)
+
+#Poisson, assumes mean = variance 
+model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                         data = needle_env, family = poisson)
+summary(model_pois_vasc)
+model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
+confint(model_pois_vasc)
+#negative interval
+exp(-0.07878733/sd(needle_env$Sample_Year))
+(0.9784997-1)*100 #-2.15
+#positive interval 
+exp(0.05138275/sd(needle_env$Sample_Year))
+(1.014276-1)*100 #1.43
+
+#Negative Binomial = use when variance > mean (over dispersed)
+model_nb1_vasc <- glmmTMB(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                          data = needle_env_lichen, family = nbinom2)
+summary(model_nb1_vasc)
+model_nb1_vasc$fit$convergence #0 = converged, 1 = not converged
+confint(model_nb1_vasc)
+
+#MODEL COMPARISON 
+#checking the overdispersion statistics 
+#Poisson 
+pearson_overdisp <- sum(residuals(model_pois_vasc, type = "pearson")^2) / df.residual(model_pois_vasc) #pearson = how much each observation deviates from expected value
+deviance_overdisp <- deviance(model_pois_vasc) / df.residual(model_pois_vasc) #how well the model fits the data 
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_pois_vasc)
+#if ratio is higher than 1, data is likely overdispersed and should use a negative binomial model
+
+#negative binomial 
+pearson_overdisp <- sum(residuals(model_nb1_vasc, type = "pearson")^2) / df.residual(model_nb1_vasc)
+deviance_overdisp <- deviance(model_nb1_vasc) / df.residual(model_nb1_vasc)
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_nb1_vasc)
+
+AIC(model_pois_vasc, model_nb1_vasc) #lower = better
+BIC(model_pois_vasc, model_nb1_vasc) #lower = better 
+
+
+#Interpretation of slope coefficient when using scaled years: 
+#need to divide by SD(Sample_Year)
+#For poisson 
+original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(needle_env$Sample_Year)
+
+#calculate percent change per year using corrected coefficient 
+(exp(-0.00386) -1)*100 #=percent change 
+#exp(slope) > 1 species richness is increasing per year, if < 1 its decreasing per year 
+
+# spruce woodland Lichen 
+
+#scale sample year to remove warnings 
+needle_env_lichen$Sample_Year <- as.numeric(needle_env_lichen$Sample_Year)
+needle_env_lichen$Sample_Year_Scaled <- scale(needle_env_lichen$Sample_Year)
+
+#Poisson, assumes mean = variance 
+model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                           data = needle_env_lichen, family = poisson)
+summary(model_pois_lichen)
+model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
+confint(model_pois_lichen)
+#negative interval
+exp(-0.1427322/sd(needle_env_lichen$Sample_Year))
+(0.96139-1)*100 #-3.86
+#positive interval 
+exp(-0.0376746/sd(needle_env_lichen$Sample_Year))
+(0.9896606-1)*100 #-1.03
+
+#generalized poisson model 
+#gen_pois <- vglm(count ~ fixed_var + random_var, family = poissonff, data = data)
+
+#Negative Binomial = use when variance > mean (over dispersed)
+model_nb1_lichen <- glmmTMB(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                            data = needle_env_lichen, family = nbinom2)
+summary(model_nb1_lichen)
+model_nb1_lichen$fit$convergence #0 = converged, 1 = not converged
+confint(model_nb1_lichen)
+
+#MODEL COMPARISON 
+#checking the overdispersion statistics 
+#Poisson 
+pearson_overdisp <- sum(residuals(model_pois_lichen, type = "pearson")^2) / df.residual(model_pois_lichen) #pearson = how much each observation deviates from expected value
+deviance_overdisp <- deviance(model_pois_lichen) / df.residual(model_pois_lichen) #how well the model fits the data 
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_pois_lichen)
+#if ratio is higher than 1, data is likely overdispersed and should use a negative binomial model
+
+#negative binomial 
+pearson_overdisp <- sum(residuals(model_nb1_lichen, type = "pearson")^2) / df.residual(model_nb1_lichen)
+deviance_overdisp <- deviance(model_nb1_lichen) / df.residual(model_nb1_lichen)
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_nb1_lichen)
+
+AIC(model_pois_lichen, model_nb1_lichen) #lower = better
+BIC(model_pois_lichen, model_nb1_lichen) #lower = better 
+
+
+#Interpretation of slope coefficient when using scaled years: 
+#need to divide by SD(Sample_Year)
+#For poisson 
+original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(needle_env_lichen$Sample_Year)
+#for NB models:
+original_slope <- fixef(model_pois_lichen)$cond["Sample_Year_Scaled"]/sd(needle_env_lichen$Sample_Year)
+
+#calculate percent change per year using corrected coefficient 
+(exp(-0.0249) -1)*100 #=percent change 
+#exp(slope) > 1 species richness is increasing per year, if < 1 its decreasing per year 
+
+
+#spruce woodland nonvascular 
+
+#scale sample year to remove warnings 
+needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
+needle_env_nonvasc$Sample_Year_Scaled <- scale(needle_env_nonvasc$Sample_Year)
+
+#Poisson, assumes mean = variance 
+model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+                            data = needle_env_nonvasc, family = poisson)
+summary(model_pois_nonvasc)
+model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
+confint(model_pois_nonvasc)
+#negative interval
+exp(-0.1427495/sd(needle_env_nonvasc$Sample_Year))
+(0.9613854-1)*100 #-3.86
+#positive interval 
+exp(-0.009377086/sd(needle_env_nonvasc$Sample_Year))
+(0.9974165-1)*100 #-0.26
+
+#generalized poisson model 
+#gen_pois <- vglm(count ~ fixed_var + random_var, family = poissonff, data = data)
+
+
+#MODEL COMPARISON 
+#checking the overdispersion statistics 
+#Poisson 
+pearson_overdisp <- sum(residuals(model_pois_nonvasc, type = "pearson")^2) / df.residual(model_pois_nonvasc) #pearson = how much each observation deviates from expected value
+deviance_overdisp <- deviance(model_pois_nonvasc) / df.residual(model_pois_nonvasc) #how well the model fits the data 
+cat("Pearson Overdispersion:", pearson_overdisp, "\n")
+cat("Deviance Overdispersion:", deviance_overdisp, "\n")
+summary(model_pois_nonvasc)
+#if ratio is higher than 1, data is likely overdispersed and should use a negative binomial model
+
+#Interpretation of slope coefficient when using scaled years: 
+#need to divide by SD(Sample_Year)
+#For poisson 
+original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(needle_env_nonvasc$Sample_Year)
+
+#calculate percent change per year using corrected coefficient 
+(exp(-0.0214) -1)*100 #=percent change 
+#exp(slope) > 1 species richness is increasing per year, if < 1 its decreasing per year 
