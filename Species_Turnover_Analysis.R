@@ -602,3 +602,130 @@ forest_nonvasc_turnover %>%
     se_disapp = sd(Disapp_Nonvasc_Prop, na.rm = TRUE)/sqrt(n()),
     app = mean(App_Nonvasc_Prop, na.rm = TRUE),
     se_app = sd(App_Nonvasc_Prop, na.rm = TRUE)/sqrt(n()))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx")
+beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx")
+beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx")
+
+needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx")
+needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx")
+needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx")
+
+openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx")
+openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx")
+openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx")
+
+dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx")
+dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx")
+dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx") 
+
+forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx")
+forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx")
+forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx") 
+
+alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx")
+alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx")
+alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx")
+
+#calculating species richness by park for each veg class 
+KATM_needle_vasc <- needle_df %>%
+  filter(Park == "KATM")
+LACL_needle_vasc <- needle_df %>%
+  filter(Park == "LACL")
+
+KATM_needle_lichen <- needle_df_lichen %>%
+  filter(Park == "KATM")
+LACL_needle_lichen <- needle_df_lichen %>%
+  filter(Park == "LACL")
+
+KATM_needle_nonvasc <- needle_df_nonvasc %>%
+  filter(Park == "KATM")
+LACL_needle_nonvasc <- needle_df_nonvasc %>%
+  filter(Park == "LACL")
+
+#TOTAL 
+summary <- needle_df %>%
+  select(8:261) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+summary <- needle_df_lichen %>%
+  select(10:167) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+summary <- needle_df_nonvasc %>%
+  select(10:210) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+
+#LACL
+summary <- LACL_needle_vasc %>%
+  select(8:261) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+summary <- LACL_needle_lichen %>%
+  select(10:167) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+summary <- LACL_needle_nonvasc %>%
+  select(10:210) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+
+#KATM
+summary <- KATM_needle_vasc %>%
+  select(8:261) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+summary <- KATM_needle_lichen %>%
+  select(10:167) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+summary <- KATM_needle_nonvasc %>%
+  select(10:210) %>%
+  summarise(
+    nonzero_cols = sum(colSums(. != 0) > 0),
+    all_zero_cols = sum(colSums(. != 0) == 0)
+  )
+print(summary)
+
+
+
