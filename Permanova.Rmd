@@ -425,7 +425,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       
       #create permutation object 
       perms01 <- rbind(1:nrow(beetle_env),
-                      shuffleSet(n = nrow(beetle_env), control = perm_design_beetle_time, nset = 999))
+                      shuffleSet(n = nrow(beetle_env), control = perm_design_beetle, nset = 999))
       
       #create object for SS to be stored 
       results01 <- matrix(nrow = nrow(perms01), ncol = 7)
@@ -443,17 +443,28 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
         results01[i, ] <- t(temp$SumOfSqs)
       }
       
-    #create F value column 
+      
+    #create F value column for park term 
       results01 <- results01 |>
         data.frame() |>
         mutate(F.Park = (Park/1)/(Plot/12))
-      head1 <- head(results01)
+      head01 <- head(results01)
       print.data.frame(head01)
     
       #calculate P value 
       with(results01, sum(F.Park >= F.Park[1]) / length(F.Park))
-    #rest of table 
-      print(beetle_univariate_vasc_subclass)
+    
+    #create F value column for viereck term
+      results01 <- results01 |>
+        data.frame() |>
+        mutate(F.Viereck = (Viereck.3/1)/(Plot/12))
+      head001 <- head(results01)
+      print.data.frame(head001)
+    
+      #calculate P value 
+      with(results01, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
+
+      
       
       
 #multivariate 
@@ -507,7 +518,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       
       #create permutation structure and results object 
       perms02 <- rbind(1:nrow(beetle_composition),
-                      shuffleSet(n = nrow(beetle_composition), control = perm_design_beetle_time, nset = 999))
+                      shuffleSet(n = nrow(beetle_composition), control = perm_design_beetle, nset = 999))
       results02 <- matrix(nrow = nrow(perms02), ncol = 7)
       colnames(results02) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
       
@@ -523,7 +534,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
         results02[i, ] <- t(temp$SumOfSqs)
       }
       
-      #calculate F statistics for each permutation using correct equation 
+      #calculate F statistic for park 
       results02 <- results02 |>
         data.frame() |>
         mutate(F.Park = (Park/1)/(Plot/12))
@@ -533,8 +544,17 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       #calculate P value 
       with(results02, sum(F.Park >= F.Park[1]) / length(F.Park))
       
-      #rest of table 
-      print(beetle_multivariate_vasc_subclass)      
+      
+      #calculate F for viereck 
+      results02 <- results02 |>
+        data.frame() |>
+        mutate(F.Viereck = (Viereck.3/1)/(Plot/12))
+      head002 <- head(results02)
+      print.data.frame(head002)
+      
+      #calculate P value 
+      with(results02, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
+     
       
   
 #Full Models 
@@ -573,20 +593,20 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       print(beetle_multivariate_year)
     
     
-#canopy cover effects on frequency 
-      #Species richness 
-      beetle_CC_univariate <- adonis2(beetle_env$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
+#canopy cover effects 
+#Species richness 
+        beetle_CC_univariate <- adonis2(beetle_env$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
                                         data = beetle_env, method = "bray", 
                                         permutations = perm_design_beetle_time, 
                                         by = "terms")
-      print(beetle_CC_univariate)
-      
-      #Species frequency 
-      beetle_CC_multivariate <- adonis2(beetle_env$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
-                                        data = beetle_env, method = "bray", 
-                                        permutations = perm_design_beetle_time, 
-                                        by = "terms")
-      print(beetle_CC_multivariate) 
+        print(beetle_CC_univariate)
+
+#Species frequency 
+        beetle_CC_multivariate <- adonis2(beetle_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
+                                          data = beetle_env, method = "bray", 
+                                          permutations = perm_design_beetle_time, 
+                                          by = "terms")
+        print(beetle_CC_multivariate) 
       
 
 #viereck classes within - testing different arguments for partitioning 
@@ -627,6 +647,12 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                                           method = "bray"), beetle_env$Park)
           beetle_dispersion_result3 
           permutest(beetle_dispersion_result3, permutations = 999)
+          
+      #based on subclass
+          beetle_dispersion_result4 <- betadisper(vegdist(beetle_composition, 
+                                                          method = "bray"), beetle_env$Viereck.3)
+          beetle_dispersion_result4 
+          permutest(beetle_dispersion_result4, permutations = 999)
 
 
            
@@ -670,8 +696,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           #calculate P value 
           with(results3, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #rest of table 
-          print(beetle_univariate_lichen_park)
+
           
           
 #Differences between subclasses 
@@ -687,9 +712,9 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           
           #create permutation object 
           perms03 <- rbind(1:nrow(beetle_env_lichen),
-                          shuffleSet(n = nrow(beetle_env_lichen), control = perm_design_beetle_lichen_time, nset = 999))
+                          shuffleSet(n = nrow(beetle_env_lichen), control = perm_design_beetle_lichen, nset = 999))
           
-          #create object for Ss to be stored 
+          #create object for SS to be stored 
           results03 <- matrix(nrow = nrow(perms03), ncol = 7)
           colnames(results03) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
           
@@ -705,7 +730,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             results03[i, ] <- t(temp$SumOfSqs)
           }
           
-          #create F value column 
+          #create F value column for park 
           results03 <- results03 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/11))
@@ -715,20 +740,15 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           #calculate P value 
           with(results03, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #rest of table 
-          print(beetle_univariate_lichen_subclass)          
+          #create F value column for viereck class
+          results03 <- results03 |>
+            data.frame() |>
+            mutate(F.Viereck = (Viereck.3/1)/(Plot/11))
+          head03 <- head(results03)
+          print.data.frame(head03)
           
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
+          #calculate P value 
+          with(results03, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))        
           
           
           
@@ -775,6 +795,9 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_multivariate_lichen_park)
           
           
+          
+          
+          
       #differences between subclasses 
           beetle_multivariate_lichen_subclass <- adonis2(beetle_lichen_composition ~ Viereck.3 + Park + 
                                             Plot + Sample_Year + Viereck.3*Sample_Year, 
@@ -785,9 +808,11 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           
           #create permutation structure and results object 
           perms04 <- rbind(1:nrow(beetle_lichen_composition),
-                          shuffleSet(n = nrow(beetle_lichen_composition), control = perm_design_beetle_lichen_time, nset = 999))
+                          shuffleSet(n = nrow(beetle_lichen_composition), 
+                                     control = perm_design_beetle_lichen, nset = 999))
           results04 <- matrix(nrow = nrow(perms04), ncol = 7)
-          colnames(results04) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+          colnames(results04) <- c("Viereck.3", "Park", "Plot", 
+                                   "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
           
           #loop 
           for (i in 1:nrow(perms04)) {
@@ -801,7 +826,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             results04[i, ] <- t(temp$SumOfSqs)
           }
           
-          #calculate F statistics for each permutation using correct equation 
+          #calculate F statistics for park 
           results04 <- results04 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/11))
@@ -811,8 +836,15 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           #calculate P value 
           with(results04, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #print rest of table 
-          print(beetle_multivariate_lichen_subclass)          
+           #calculate F statistics for subclass
+          results04 <- results04 |>
+            data.frame() |>
+            mutate(F.Viereck = (Viereck.3/1)/(Plot/11))
+          head04 <- head(results04)
+          print.data.frame(head04)
+          
+          #calculate P value 
+          with(results04, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
           
           
     #time based models 
@@ -832,12 +864,19 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           beetle_lichen_multivariate_visit
 
           
-          #canopy cover effects on frequency 
-          beetle_CC_multivariate_lichen <- adonis2(beetle_lichen_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
-                                                   data = beetle_env_lichen, method = "bray", 
-                                                   permutations = perm_design_beetle_lichen_time, 
-                                                   by = "terms")
-          beetle_CC_multivariate_lichen 
+#canopy cover effects
+        beetle_CC_univariate_lichen <- adonis2(beetle_env_lichen$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
+                                                 data = beetle_env_lichen, method = "bray", 
+                                                 permutations = perm_design_beetle_lichen_time, 
+                                                 by = "terms")
+        print(beetle_CC_univariate_lichen)   
+        
+        
+        beetle_CC_multivariate_lichen <- adonis2(beetle_lichen_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
+                                                 data = beetle_env_lichen, method = "bray", 
+                                                 permutations = perm_design_beetle_lichen_time, 
+                                                 by = "terms")
+        print(beetle_CC_multivariate_lichen) 
           
           
           #viereck subclasses
@@ -867,6 +906,11 @@ beetle_dispersion_result2_lichen <- betadisper(vegdist(beetle_lichen_composition
 beetle_dispersion_result2_lichen 
 permutest(beetle_dispersion_result2_lichen, permutations = 999)
 
+#based on subclass
+beetle_dispersion_result4_lichen <- betadisper(vegdist(beetle_lichen_composition, 
+                                                method = "bray"), beetle_env_lichen$Viereck.3)
+beetle_dispersion_result4_lichen 
+permutest(beetle_dispersion_result4_lichen, permutations = 999)
 
           
           
@@ -926,7 +970,7 @@ permutest(beetle_dispersion_result2_lichen, permutations = 999)
           
           #create permutation object 
           perms05 <- rbind(1:nrow(beetle_env_nonvasc),
-                          shuffleSet(n = nrow(beetle_env_nonvasc), control = perm_design_beetle_nonvasc_time, nset = 999))
+                          shuffleSet(n = nrow(beetle_env_nonvasc), control = perm_design_beetle_nonvasc, nset = 999))
           
           #create object for Ss to be stored 
           results05 <- matrix(nrow = nrow(perms05), ncol = 7)
@@ -948,27 +992,22 @@ permutest(beetle_dispersion_result2_lichen, permutations = 999)
           results05 <- results05 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/11))
-          head5 <- head(results05)
+          head05 <- head(results05)
           print.data.frame(head05)
           
           #calculate P value 
           with(results05, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #rest of table
-          print(beetle_univariate_nonvasc_subclass)
+          #create F value column 
+          results05 <- results05 |>
+            data.frame() |>
+            mutate(F.Viereck = (Viereck.3/1)/(Plot/11))
+          head05 <- head(results05)
+          print.data.frame(head05)
           
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
+          #calculate P value 
+          with(results05, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
+
           
           
 #multivariate - species frequency 
@@ -1022,9 +1061,11 @@ permutest(beetle_dispersion_result2_lichen, permutations = 999)
           
           #create permutation structure and results object 
           perms06 <- rbind(1:nrow(beetle_nonvasc_composition),
-                          shuffleSet(n = nrow(beetle_nonvasc_composition), control = perm_design_beetle_nonvasc_time, nset = 999))
+                          shuffleSet(n = nrow(beetle_nonvasc_composition), 
+                                     control = perm_design_beetle_nonvasc, nset = 999))
           results06 <- matrix(nrow = nrow(perms06), ncol = 7)
-          colnames(results06) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+          colnames(results06) <- c("Viereck.3", "Park", "Plot", 
+                                   "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
           
           #loop 
           for (i in 1:nrow(perms06)) {
@@ -1039,17 +1080,26 @@ permutest(beetle_dispersion_result2_lichen, permutations = 999)
           }
           
           #calculate F statistics for each permutation using correct equation 
+          #park
           results06 <- results06 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/11))
-          head6 <- head(results06)
+          head06 <- head(results06)
           print.data.frame(head06)
           
           #calculate P value 
           with(results06, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #rest of table
-          print(beetle_multivariate_nonvasc_subclass)   
+          #calculate F statistics for viereck 
+          results06 <- results06 |>
+            data.frame() |>
+            mutate(F.Viereck= (Viereck.3/1)/(Plot/11))
+          head06 <- head(results06)
+          print.data.frame(head06)
+          
+          #calculate P value 
+          with(results06, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
+  
 
           
 #Visit model 
@@ -1067,13 +1117,21 @@ permutest(beetle_dispersion_result2_lichen, permutations = 999)
           beetle_nonvasc_multivariate_visit
           
           
-#canopy cover effects on frequency 
-          beetle_CC_nonvasc <- adonis2(beetle_nonvasc_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
-                                                    data = beetle_env_nonvasc, method = "bray", 
-                                                    permutations = perm_design_beetle_nonvasc_time, 
-                                                    by = "terms")
-          beetle_CC_nonvasc 
           
+#canopy cover effects 
+        beetle_CC_univariate_nonvasc <- adonis2(beetle_env_nonvasc$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
+                                     data = beetle_env_nonvasc, method = "bray", 
+                                     permutations = perm_design_beetle_nonvasc_time, 
+                                     by = "terms")
+        print(beetle_CC_univariate_nonvasc)         
+        
+        beetle_CC_multivariate_nonvasc <- adonis2(beetle_nonvasc_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
+                                     data = beetle_env_nonvasc, method = "bray", 
+                                     permutations = perm_design_beetle_nonvasc_time, 
+                                     by = "terms")
+        print(beetle_CC_multivariate_nonvasc) 
+        
+        
           
 #viereck subclasses within 
       #species richness
@@ -1098,6 +1156,12 @@ permutest(beetle_dispersion_result2_lichen, permutations = 999)
                                                           method = "bray"), beetle_env_nonvasc$Visit)
           beetle_dispersion_result4
           permutest(beetle_dispersion_result4, permutations = 999)
+          
+          #based on subclass
+beetle_dispersion_result4_nonvasc <- betadisper(vegdist(beetle_nonvasc_composition, 
+                                                       method = "bray"), beetle_env_nonvasc$Viereck.3)
+beetle_dispersion_result4_nonvasc 
+permutest(beetle_dispersion_result4_nonvasc, permutations = 999)
 
 ```
 
@@ -4489,7 +4553,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           
           
           #species frequency 
-          forest_vascular_CC_univariate <- adonis2(forest_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
+          forest_vascular_CC_multivariate <- adonis2(forest_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
                                             data = forest_env, method = "bray", 
                                             permutations = perm_design_forest_time, 
                                             by = "terms")
@@ -4732,7 +4796,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           
           
           #species frequency 
-          forest_lichen_CC_univariate <- adonis2(forest_composition_lichen ~ Percent_Cover + Park + Plot + Sample_Year, 
+          forest_lichen_CC_multivariate <- adonis2(forest_composition_lichen ~ Percent_Cover + Park + Plot + Sample_Year, 
                                             data = forest_env_lichen, method = "bray", 
                                             permutations = perm_design_forest_time_lichen, 
                                             by = "terms")
@@ -4976,7 +5040,7 @@ forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           
           
           #species frequency 
-          forest_nonvasc_CC_univariate <- adonis2(forest_composition_nonvasc ~ Percent_Cover + Park + Plot + Sample_Year, 
+          forest_nonvasc_CC_multivariate <- adonis2(forest_composition_nonvasc ~ Percent_Cover + Park + Plot + Sample_Year, 
                                             data = forest_env_nonvasc, method = "bray", 
                                             permutations = perm_design_forest_time_nonvasc, 
                                             by = "terms")
@@ -5325,9 +5389,11 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           
       #create permutation framework + results object 
           perms32 <- rbind(1:nrow(alpine_env),
-                         shuffleSet(n = nrow(alpine_env), control = perm_design_alpine_time, nset = 999))
+                         shuffleSet(n = nrow(alpine_env), 
+                                    control = perm_design_alpine, nset = 999))
           results32 <- matrix(nrow = nrow(perms32), ncol = 7)
-          colnames(results32) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+          colnames(results32) <- c("Viereck.3", "Park", "Plot", 
+                                   "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
           
       #loop 
           for (i in 1:nrow(perms32)) {
@@ -5341,17 +5407,25 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
             results32[i, ] <- t(temp$SumOfSqs)
           }
           
-      #create F value column 
+      #create F value column - park 
           results32 <- results32 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/12))
           head(results32) #top row has term F statistic for model 
-          
       #calculate P value 
           with(results32, sum(F.Park >= F.Park[1]) / length(F.Park))
-          print(alpine_univariate)
         
-          print(alpine_univariate_vasc_subclass)
+          
+      #create F value column - subclass
+          results32 <- results32 |>
+            data.frame() |>
+            mutate(F.Viereck = (Viereck.3/3)/(Plot/12))
+          head32 <- head(results32)
+          print.data.frame(head32) #top row has term F statistic for model 
+          
+      #calculate P value 
+          with(results32, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
+
           
           
           
@@ -5428,9 +5502,11 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           
       #create permutation framework + results object 
           perms34 <- rbind(1:nrow(alpine_composition),
-                shuffleSet(n = nrow(alpine_composition), control = perm_design_alpine_time, nset = 999))
+                shuffleSet(n = nrow(alpine_composition), 
+                           control = perm_design_alpine, nset = 999))
           results34 <- matrix(nrow = nrow(perms34), ncol = 7)
-          colnames(results34) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+          colnames(results34) <- c("Viereck.3", "Park", "Plot", 
+                                   "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
 
       #loop 
           for (i in 1:nrow(perms34)) {
@@ -5444,17 +5520,25 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
             results34[i, ] <- t(temp$SumOfSqs)
           }
           
-      #calculate F values for permutations 
+      #calculate F values for permutations - park 
           results34 <- results34 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/12))
-          head(results34)
+          head34 <- head(results34)
+          print.data.frame(head34)
           
       #calculate P value 
           with(results34, sum(F.Park >= F.Park[1]) / length(F.Park))
-          print(alpine_multivariate_vasc_subclass)
           
+      #calculate F values for permutations - subclass
+          results34 <- results34 |>
+            data.frame() |>
+            mutate(F.Viereck = (Viereck.3/3)/(Plot/12))
+          head34 <- head(results34)
+          print.data.frame(head34)
           
+      #calculate P value 
+          with(results34, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
           
 
     #park*time model 
@@ -5557,12 +5641,14 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                 
                 #create permutation object 
                 perms36 <- rbind(1:nrow(alpine_env_lichen),
-                               shuffleSet(n = nrow(alpine_env_lichen), control = perm_design_alpine_lichen_time, nset = 999))
+                               shuffleSet(n = nrow(alpine_env_lichen), 
+                                          control = perm_design_alpine_lichen, nset = 999))
                 
                 #create object for Ss to be stored 
-                results36 <- matrix(nrow = nrow(perms36), ncol = 7)
-                colnames(results36) <- c("Viereck.3", "Park", "Plot", "Sample_Year", 
-                                        "Viereck.3*Sample_YEar", "Residual", "Total")
+                #remove park because it is auto-dropped by adonis 
+                results36 <- matrix(nrow = nrow(perms36), ncol = 6)
+                colnames(results36) <- c("Viereck.3", "Plot", "Sample_Year", 
+                                        "Viereck.3*Sample_Year", "Residual", "Total")
                 
                 #loop 
                 for (i in 1:nrow(perms36)) {
@@ -5576,18 +5662,27 @@ alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                   results36[i, ] <- t(temp$SumOfSqs)
                 }
                 
-                #create F value column 
+            #create F value column - park 
                 results36 <- results36 |>
                   data.frame() |>
                   mutate(F.Park = (Park/1)/(Plot/12))
-                head(results36)
+                head36 <- head(results36)
+                print.data.frame(head36)
                 #first row is observed/your data, rows 2-1000 are the permuted data 
                 
                 #calculate P value 
                 with(results36, sum(F.Park >= F.Park[1]) / length(F.Park))                
-                print(alpine_lichen_univariate_subclass)
                 
-      
+            #create F value column - viereck 
+                results36 <- results36 |>
+                  data.frame() |>
+                  mutate(F.Viereck = (Viereck.3/4)/(Plot/12))
+                head36 <- head(results36)
+                print.data.frame(head36)
+                #first row is observed/your data, rows 2-1000 are the permuted data 
+                
+                #calculate P value 
+                with(results36, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck)) 
                 
                 
                 
@@ -5660,16 +5755,18 @@ alpine_lichen_univariate_subclasstime
                 
                 #create permutation object 
                 perms38 <- rbind(1:nrow(alpine_lichen_composition),
-                                shuffleSet(n = nrow(alpine_lichen_composition), control = perm_design_alpine_lichen_time, nset = 999))
+                                shuffleSet(n = nrow(alpine_lichen_composition), 
+                                           control = perm_design_alpine_lichen, nset = 999))
                 
-                results38 <- matrix(nrow = nrow(perms38), ncol = 7)
-                colnames(results38) <- c("Viereck.3", "Park", "Plot", "Sample_Year", 
-                                                        "Viereck.3*Sample_YEar", "Residual", "Total")
+                results38 <- matrix(nrow = nrow(perms38), ncol = 6)
+                colnames(results38) <- c("Viereck.3", "Plot", "Sample_Year", 
+                                                        "Viereck.3*Sample_Year", "Residual", "Total")
                 
                 #loop 
                 for (i in 1:nrow(perms38)) {
-                  temp.data <- lichens_env_alpine[perms38[i, ], ]
-                  temp <- adonis2(alpine_lichen_composition ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year,
+                  temp.data <- alpine_env_lichen[perms38[i, ], ]
+                  temp <- adonis2(alpine_lichen_composition ~ Viereck.3 + 
+                                    Park + Plot + Sample_Year + Viereck.3*Sample_Year,
                                   data = temp.data,
                                   method = "bray",
                                   by = "terms",
@@ -5677,7 +5774,7 @@ alpine_lichen_univariate_subclasstime
                   results38[i, ] <- t(temp$SumOfSqs)
                 }
                 
-                #calculate F values for permutations 
+                #calculate F values for permutations - park 
                 results38 <- results38 |>
                   data.frame() |>
                   mutate(F.Park = (Park/1)/(Plot/12))
@@ -5685,8 +5782,16 @@ alpine_lichen_univariate_subclasstime
                 
                 #calculate P value 
                 with(results38, sum(F.Park >= F.Park[1]) / length(F.Park))
-                print(alpine_lichen_multivariate_subclass)
 
+                #calculate F values for permutations - subclass
+                results38 <- results38 |>
+                  data.frame() |>
+                  mutate(F.Viereck = (Viereck.3/4)/(Plot/12))
+                head38 <- head(results38)
+                print.data.frame(head38)
+                
+                #calculate P value 
+                with(results38, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
 
 
 #park*subclass model 
@@ -5787,11 +5892,12 @@ alpine_lichen_univariate_subclasstime
           
           #create permutation object 
           perms40 <- rbind(1:nrow(alpine_env_nonvasc),
-                         shuffleSet(n = nrow(alpine_env_nonvasc), control = perm_design_alpine_nonvasc_time, nset = 999))
+                         shuffleSet(n = nrow(alpine_env_nonvasc), 
+                                    control = perm_design_alpine_nonvasc, nset = 999))
           
           #create object for Ss to be stored 
-          results40 <- matrix(nrow = nrow(perms40), ncol = 7)
-          colnames(results40) <- c("Viereck.3", "Park", "Plot", "Sample_Year", 
+          results40 <- matrix(nrow = nrow(perms40), ncol = 6)
+          colnames(results40) <- c("Viereck.3", "Plot", "Sample_Year", 
                                  "Viereck.3*Sample_Year", "Residual", "Total")
           
           #loop 
@@ -5815,8 +5921,17 @@ alpine_lichen_univariate_subclasstime
           
           #calculate P value 
           with(results40, sum(F.Park >= F.Park[1]) / length(F.Park))
-          print(alpine_nonvasc_univariate_subclass)
 
+          #create F value column 
+          results40 <- results40 |>
+            data.frame() |>
+            mutate(F.Viereck = (Viereck.3/4)/(Plot/12))
+          head40 <- head(results40)
+          print.data.frame(head40)
+          #first row is observed/your data, rows 2-1000 are the permuted data 
+          
+          #calculate P value 
+          with(results40, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
 
 
 
@@ -5896,10 +6011,12 @@ alpine_lichen_univariate_subclasstime
             
         #create permutation object 
             perms42 <- rbind(1:nrow(alpine_nonvasc_composition),
-                            shuffleSet(n = nrow(alpine_nonvasc_composition), control = perm_design_alpine_nonvasc_time, nset = 999))
+                            shuffleSet(n = nrow(alpine_nonvasc_composition), 
+                                       control = perm_design_alpine_nonvasc, nset = 999))
         #create results object 
-            results42 <- matrix(nrow = nrow(perms42), ncol = 7)
-            colnames(results42) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+            results42 <- matrix(nrow = nrow(perms42), ncol = 6)
+            colnames(results42) <- c("Viereck.3",  
+                                     "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
             
         #loop 
             for (i in 1:nrow(perms42)) {
@@ -5923,6 +6040,15 @@ alpine_lichen_univariate_subclasstime
             with(results42, sum(F.Park >= F.Park[1]) / length(F.Park))
             print(alpine_nonvasc_multivariate_subclass)
 
+        #calculate F values for permutations 
+            results42 <- results42 |>
+              data.frame() |>
+              mutate(F.Viereck = (Viereck.3/4)/(Plot/14))
+            head42 <- head(results42)
+            print.data.frame(head42)
+            
+        #calculate P value 
+            with(results42, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
 
             
             
