@@ -8,6 +8,11 @@ library(readr)
 library(dplyr)
 library(tibble)
 
+str(forest_env)
+
+
+
+
 
 openlow_df_nonvasc <- openlow_df_nonvasc %>% rename(Sample_Year = Sample_Year.x)
 
