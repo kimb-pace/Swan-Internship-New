@@ -9,6 +9,38 @@ library(ggplot2)
 library(readxl)
 library(DHARMa)
 
+viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_env.xlsx")
+lichen_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/lichen_sp_richness_filtered.xlsx")
+nonvasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/nonvasc_sp_richness_filtered.xlsx")
+vasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/vascular_sp_richness_filtered.xlsx")
+
+#overall species richness spreadsheet
+# Renaming column 'A' to 'X'
+vasc_sp_richness <- vasc_sp_richness %>% rename(Vasc_Species_Richness = Species_Richness)
+lichen_sp_richness <- lichen_sp_richness %>% rename(Lichen_Species_Richness = Species_Richness)
+nonvasc_sp_richness <- nonvasc_sp_richness %>% rename(Nonvasc_Species_Richness = Species_Richness)
+
+combined_df <- vasc_sp_richness %>%
+  left_join(lichen_sp_richness, by = c("Plot", "Sample_Year"))
+
+
+
+combined_df <- combined_df %>%
+  left_join(nonvasc_sp_richness, by = c("Plot", "Sample_Year"))
+combined_df <- combined_df %>%
+  left_join(viereck %>% select(Plot, Sample_Year, Vegetation_Class, Viereck.3), by = c("Plot", "Sample_Year"))
+str(viereck)
+viereck$Sample_Year <- as.numeric(viereck$Sample_Year)
+str(combined_df)  
+
+
+combined_df <- combined_df[, -4]
+combined_df <- combined_df[, -5]
+combined_df <- combined_df[, -6]
+
+write.csv(combined_df, "T:/Users/KPace/Species_Richness_Collapsed_For_Mike.csv")
+
+
 #Open Low Shrub 
       openlow_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_vasc_filtered.xlsx")
   #Vascular 
