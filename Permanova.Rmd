@@ -30,17 +30,17 @@ library(writexl)
 #Optional (Can avoid if using quickload within subsets)
       
     #If interested in how I balanced the subsets and built the .env files
-      summary_table_vasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_vasc.xlsx")
-      summary_table_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_nonvasc.xlsx")
-      summary_table_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_lichens.xlsx")
+summary_table_vasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_vasc.xlsx")
+summary_table_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_nonvasc.xlsx")
+summary_table_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_lichens.xlsx")
       
-      lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
-      nonvasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_nonvasc.xlsx")
-      vasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_vascular.xlsx")
+lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
+nonvasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_nonvasc.xlsx")
+vasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_vascular.xlsx")
       
-      lichen_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/Lichen_Species_Richness.xlsx")
-      nonvasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/Nonvascular_Species_Richness.xlsx")
-      vasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/Vascular_Species_Richness.xlsx")
+lichen_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/Lichen_Species_Richness.xlsx")
+nonvasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/Nonvascular_Species_Richness.xlsx")
+vasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/Vascular_Species_Richness.xlsx")
 ```
 
 # Creation of Summary Tables, Code for Reference (not required to run if using quick load)
@@ -271,6 +271,7 @@ beetle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collap
 beetle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_lichen_filtered.xlsx")
 beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc_filtered.xlsx")
 
+#make sure sample year is numeric 
 beetle_env$Sample_Year <- as.numeric(beetle_env$Sample_Year)
 beetle_env_lichen$Sample_Year <- as.numeric(beetle_env_lichen$Sample_Year)
 beetle_env_nonvasc$Sample_Year <- as.numeric(beetle_env_nonvasc$Sample_Year) 
@@ -413,8 +414,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
     
       #calculate P value 
       with(results1, sum(F.Park >= F.Park[1]) / length(F.Park))
-    #rest of table 
-      print(beetle_univariate_vasc_park)
+
       
 #Differences between subclasses
     #univariate (Species richness)
@@ -433,7 +433,8 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       
       #create object for SS to be stored 
       results01 <- matrix(nrow = nrow(perms01), ncol = 7)
-      colnames(results01) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+      colnames(results01) <- c("Viereck.3", "Park", "Plot", "Sample_Year", 
+                               "Viereck.3*Sample_Year", "Residual", "Total")
       
       #loop 
       for (i in 1:nrow(perms01)) {
@@ -454,7 +455,6 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
         mutate(F.Park = (Park/1)/(Plot/12))
       head01 <- head(results01)
       print.data.frame(head01)
-    
       #calculate P value 
       with(results01, sum(F.Park >= F.Park[1]) / length(F.Park))
     
@@ -464,14 +464,10 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
         mutate(F.Viereck = (Viereck.3/1)/(Plot/12))
       head001 <- head(results01)
       print.data.frame(head001)
-    
       #calculate P value 
       with(results01, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
-
       
-      
-      
-#multivariate 
+#Multivariate 
   #differences between parks 
       beetle_multivariate_vasc_park <- adonis2(beetle_composition ~ Park + Plot, 
                                data = beetle_env, method = "bray", 
@@ -503,13 +499,8 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
         mutate(F.Park = (Park/1)/(Plot/13))
       head2 <- head(results2)
       print.data.frame(head2)
-      
       #calculate P value 
       with(results2, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #rest of table 
-      print(beetle_multivariate_vasc_park)
-      
 
   #differences between subclasses
       beetle_multivariate_vasc_subclass <- adonis2(beetle_composition ~ Viereck.3 + Park + 
@@ -524,7 +515,8 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       perms02 <- rbind(1:nrow(beetle_composition),
                       shuffleSet(n = nrow(beetle_composition), control = perm_design_beetle, nset = 999))
       results02 <- matrix(nrow = nrow(perms02), ncol = 7)
-      colnames(results02) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+      colnames(results02) <- c("Viereck.3", "Park", "Plot", "Sample_Year", 
+                               "Viereck.3*Sample_Year", "Residual", "Total")
       
       #loop 
       for (i in 1:nrow(perms02)) {
@@ -544,7 +536,6 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
         mutate(F.Park = (Park/1)/(Plot/12))
       head02 <- head(results02)
       print.data.frame(head02)
-      
       #calculate P value 
       with(results02, sum(F.Park >= F.Park[1]) / length(F.Park))
       
@@ -555,57 +546,19 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
         mutate(F.Viereck = (Viereck.3/1)/(Plot/12))
       head002 <- head(results02)
       print.data.frame(head002)
-      
       #calculate P value 
       with(results02, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
      
       
-  
-#Full Models 
-      
-#Species richness - just time added, no interaction 
-  #by visit 
-      beetle_univariate_visit <- adonis2(beetle_env$Species_Richness ~ Park + Plot + Visit,
-                                              data = beetle_env, 
-                                              method = "euclidian",
-                                              permutations = perm_design_beetle_time,
-                                              by = "terms")
-      print(beetle_univariate_visit)
-      
-  #time as a continuous predictor 
-      beetle_univariate_year <- adonis2(beetle_env$Species_Richness ~ Park + Plot + Sample_Year,
-                                              data = beetle_env, 
-                                              method = "euclidian",
-                                              permutations = perm_design_beetle_time,
-                                              by = "terms")
-      print(beetle_univariate_year)
-      
-
-#species frequency - just time added, no interaction 
-  #By visit 
-      beetle_multivariate_visit <- adonis2(beetle_composition ~ Park + Plot + Visit, 
-                                          data = beetle_env, method = "bray", 
-                                          permutations = perm_design_beetle_time, 
-                                          by = "terms")
-      print(beetle_multivariate_visit)
-      
-  #time as a continuous predictor  
-      beetle_multivariate_year <- adonis2(beetle_composition ~ Park + Plot + Sample_Year, 
-                                          data = beetle_env, method = "bray", 
-                                          permutations = perm_design_beetle_time, 
-                                          by = "terms")
-      print(beetle_multivariate_year)
-    
-    
 #canopy cover effects 
-#Species richness 
+    #Species richness 
         beetle_CC_univariate <- adonis2(beetle_env$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
                                         data = beetle_env, method = "bray", 
                                         permutations = perm_design_beetle_time, 
                                         by = "terms")
         print(beetle_CC_univariate)
 
-#Species frequency 
+    #Species frequency 
         beetle_CC_multivariate <- adonis2(beetle_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
                                           data = beetle_env, method = "bray", 
                                           permutations = perm_design_beetle_time, 
@@ -613,53 +566,26 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
         print(beetle_CC_multivariate) 
       
 
-#viereck classes within - testing different arguments for partitioning 
-      
-      #species richness 
-      beetle_univariate_vascular_subclass_year <- adonis2(beetle_env$Species_Richness ~ Viereck.3 + Park + 
-                                                            Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                       data = beetle_env, method = "bray", 
-                                       permutations = perm_design_beetle_time, 
-                                       by = "terms")
-      print(beetle_univariate_vascular_subclass_year) 
-      
-      
-    #species frequency 
-      beetle_vascular_multivariate_subclass_year <- adonis2(beetle_composition ~ Viereck.3 + Park + 
-                                                              Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                       data = beetle_env, method = "bray", 
-                                       permutations = perm_design_beetle_time, 
-                                       by = "terms")
-      print(beetle_vascular_multivariate_subclass_year)   
-      
-      
 ### Beta Diversity 
-      #based on sample year 
-          beetle_dispersion_result <- betadisper(vegdist(beetle_composition, 
-                                                         method = "bray"), beetle_env$Sample_Year)
-          print(beetle_dispersion_result) 
-          permutest(beetle_dispersion_result, permutations = 999)
-      
       #based on visit 
-          beetle_dispersion_result2 <- betadisper(vegdist(beetle_composition, 
+          beetle_dispersion_result1 <- betadisper(vegdist(beetle_composition, 
                                                           method = "bray"), beetle_env$Visit)
-          beetle_dispersion_result2 
-          permutest(beetle_dispersion_result2, permutations = 999)
+          beetle_dispersion_result1 
+          permutest(beetle_dispersion_result1, permutations = 999)
       
       #based on park 
-          beetle_dispersion_result3 <- betadisper(vegdist(beetle_composition, 
+          beetle_dispersion_result2 <- betadisper(vegdist(beetle_composition, 
                                                           method = "bray"), beetle_env$Park)
+          beetle_dispersion_result2 
+          permutest(beetle_dispersion_result2, permutations = 999)
+          
+      #based on subclass
+          beetle_dispersion_result3 <- betadisper(vegdist(beetle_composition, 
+                                                          method = "bray"), beetle_env$Viereck.3)
           beetle_dispersion_result3 
           permutest(beetle_dispersion_result3, permutations = 999)
           
-      #based on subclass
-          beetle_dispersion_result4 <- betadisper(vegdist(beetle_composition, 
-                                                          method = "bray"), beetle_env$Viereck.3)
-          beetle_dispersion_result4 
-          permutest(beetle_dispersion_result4, permutations = 999)
-
-
-           
+----------------------------------------------------------------------------------------------------------------           
 #Lichen 
     #Differences between parks 
           #Species richness (univariate)
@@ -696,14 +622,10 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             mutate(F.Park = (Park/1)/(Plot/12))
           head3 <- head(results3)
           print.data.frame(head3)
-          
           #calculate P value 
           with(results3, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
 
-          
-          
-#Differences between subclasses 
+    #Differences between subclasses 
           #Species richness (univariate)
           #base model 
           beetle_univariate_lichen_subclass <- adonis2(beetle_env_lichen$Species_Richness ~ Viereck.3 + Park + 
@@ -716,11 +638,13 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           
           #create permutation object 
           perms03 <- rbind(1:nrow(beetle_env_lichen),
-                          shuffleSet(n = nrow(beetle_env_lichen), control = perm_design_beetle_lichen, nset = 999))
+                          shuffleSet(n = nrow(beetle_env_lichen), 
+                                     control = perm_design_beetle_lichen, nset = 999))
           
           #create object for SS to be stored 
           results03 <- matrix(nrow = nrow(perms03), ncol = 7)
-          colnames(results03) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+          colnames(results03) <- c("Viereck.3", "Park", "Plot", "Sample_Year", 
+                                   "Viereck.3*Sample_Year", "Residual", "Total")
           
           #loop 
           for (i in 1:nrow(perms03)) {
@@ -740,7 +664,6 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             mutate(F.Park = (Park/1)/(Plot/11))
           head03 <- head(results03)
           print.data.frame(head03)
-          
           #calculate P value 
           with(results03, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -750,15 +673,10 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             mutate(F.Viereck = (Viereck.3/1)/(Plot/11))
           head03 <- head(results03)
           print.data.frame(head03)
-          
           #calculate P value 
           with(results03, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))        
           
-          
-          
-          
-          
-          
+
 #multivariate (Species Frequency)
           
     #differences between parks 
@@ -770,7 +688,8 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           
           #create permutation structure and results object 
           perms4 <- rbind(1:nrow(beetle_lichen_composition),
-                          shuffleSet(n = nrow(beetle_lichen_composition), control = perm_design_beetle_lichen, nset = 999))
+                          shuffleSet(n = nrow(beetle_lichen_composition), 
+                                     control = perm_design_beetle_lichen, nset = 999))
           results4 <- matrix(nrow = nrow(perms4), ncol = 4)
           colnames(results4) <- c("Park", "Plot", "Residual", "Total")
           
@@ -791,16 +710,9 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             mutate(F.Park = (Park/1)/(Plot/12))
           head4 <- head(results4)
           print.data.frame(head4)
-          
           #calculate P value 
           with(results4, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #print rest of table 
-          print(beetle_multivariate_lichen_park)
-          
-          
-          
-          
+ 
           
       #differences between subclasses 
           beetle_multivariate_lichen_subclass <- adonis2(beetle_lichen_composition ~ Viereck.3 + Park + 
@@ -830,97 +742,59 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
             results04[i, ] <- t(temp$SumOfSqs)
           }
           
-          #calculate F statistics for park 
+          #calculate F statistic for park 
           results04 <- results04 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/11))
           head04 <- head(results04)
           print.data.frame(head04)
-          
           #calculate P value 
           with(results04, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-           #calculate F statistics for subclass
+           #calculate F statistic for subclass
           results04 <- results04 |>
             data.frame() |>
             mutate(F.Viereck = (Viereck.3/1)/(Plot/11))
           head04 <- head(results04)
           print.data.frame(head04)
-          
           #calculate P value 
           with(results04, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
           
-          
-    #time based models 
-          #species richness 
-          beetle_lichen_univariate_visit <- adonis2(beetle_env_lichen$Species_Richness ~ Park + Plot + Sample_Year,
-                                                         data = beetle_env_lichen, 
-                                                         method = "euclidian",
-                                                         permutations = perm_design_beetle_lichen_time,
-                                                         by = "terms")
-          beetle_lichen_univariate_visit
-          
-          #species frequency 
-          beetle_lichen_multivariate_visit <- adonis2(beetle_lichen_composition ~ Park + Plot + Sample_Year, 
-                                                     data = beetle_env_lichen, method = "bray", 
-                                                     permutations = perm_design_beetle_lichen_time, 
-                                                     by = "terms")
-          beetle_lichen_multivariate_visit
-
-          
 #canopy cover effects
-        beetle_CC_univariate_lichen <- adonis2(beetle_env_lichen$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
+    #Species Richness 
+        beetle_CC_univariate_lichen <- adonis2(beetle_env_lichen$Species_Richness ~ 
+                                                 Percent_Cover + Park + Plot + Sample_Year, 
                                                  data = beetle_env_lichen, method = "bray", 
                                                  permutations = perm_design_beetle_lichen_time, 
                                                  by = "terms")
         print(beetle_CC_univariate_lichen)   
         
-        
-        beetle_CC_multivariate_lichen <- adonis2(beetle_lichen_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
+    #Species Frequency 
+        beetle_CC_multivariate_lichen <- adonis2(beetle_lichen_composition ~ 
+                                                   Percent_Cover + Park + Plot + Sample_Year, 
                                                  data = beetle_env_lichen, method = "bray", 
                                                  permutations = perm_design_beetle_lichen_time, 
                                                  by = "terms")
         print(beetle_CC_multivariate_lichen) 
           
-          
-          #viereck subclasses
-          
-        #Species richness 
-          beetle_univariate_lichen_subclass_year <- adonis2(beetle_env_lichen$Species_Richness ~ Viereck.3 + Park + 
-                                                                Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                           data = beetle_env_lichen, method = "bray", 
-                                           permutations = perm_design_beetle_lichen_time, 
-                                           by = "terms")
-          print(beetle_univariate_lichen_subclass_year) 
-      
-        #species frequency 
-          beetle_lichen_subclass <- adonis2(beetle_lichen_composition ~ Viereck.3 + Park + Plot + 
-                                              Sample_Year + Viereck.3*Sample_Year, 
-                                        data = beetle_env_lichen, method = "bray", 
-                                        permutations = perm_design_beetle_lichen_time, 
-                                        by = "terms")
-          print(beetle_lichen_subclass)
-
 
 ### Beta Diversity 
 
-#based on visit 
-beetle_dispersion_result2_lichen <- betadisper(vegdist(beetle_lichen_composition, 
-                                                method = "bray"), beetle_env_lichen$Visit)
-beetle_dispersion_result2_lichen 
-permutest(beetle_dispersion_result2_lichen, permutations = 999)
+      #based on visit 
+      beetle_dispersion_result1_lichen <- betadisper(vegdist(beetle_lichen_composition, 
+                                                      method = "bray"), beetle_env_lichen$Visit)
+      beetle_dispersion_result1_lichen 
+      permutest(beetle_dispersion_result1_lichen, permutations = 999)
+      
+      #based on subclass
+      beetle_dispersion_result2_lichen <- betadisper(vegdist(beetle_lichen_composition, 
+                                                      method = "bray"), beetle_env_lichen$Viereck.3)
+      beetle_dispersion_result2_lichen 
+      permutest(beetle_dispersion_result2_lichen, permutations = 999)
 
-#based on subclass
-beetle_dispersion_result4_lichen <- betadisper(vegdist(beetle_lichen_composition, 
-                                                method = "bray"), beetle_env_lichen$Viereck.3)
-beetle_dispersion_result4_lichen 
-permutest(beetle_dispersion_result4_lichen, permutations = 999)
-
-          
-          
-          
+----------------------------------------------------------------------------------------------------------------        
 #Nonvascular 
-    #Species richness 
+    #Species richness (Univariate)
     #Differences between parks 
           #base park model 
           beetle_univariate_nonvasc_park <- adonis2(beetle_env_nonvasc$Species_Richness ~ Park + Plot,
@@ -932,7 +806,8 @@ permutest(beetle_dispersion_result4_lichen, permutations = 999)
           
           #create permutation object 
           perms5 <- rbind(1:nrow(beetle_env_nonvasc),
-                          shuffleSet(n = nrow(beetle_env_nonvasc), control = perm_design_beetle_nonvasc, nset = 999))
+                          shuffleSet(n = nrow(beetle_env_nonvasc), 
+                                     control = perm_design_beetle_nonvasc, nset = 999))
           
           #create object for Ss to be stored 
           results5 <- matrix(nrow = nrow(perms5), ncol = 4)
@@ -955,15 +830,12 @@ permutest(beetle_dispersion_result4_lichen, permutations = 999)
             mutate(F.Park = (Park/1)/(Plot/12))
           head5 <- head(results5)
           print.data.frame(head5)
-          
           #calculate P value 
           with(results5, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table
-          print(beetle_univariate_nonvasc_park)
+
 
   #Differences between subclasses 
-          #base park model 
+          #base model 
           beetle_univariate_nonvasc_subclass <- adonis2(beetle_env_nonvasc$Species_Richness ~ Viereck.3 + 
                                                           Park + Plot + Sample_Year + Viereck.3*Sample_Year,
                                        data = beetle_env_nonvasc, 
@@ -974,11 +846,13 @@ permutest(beetle_dispersion_result4_lichen, permutations = 999)
           
           #create permutation object 
           perms05 <- rbind(1:nrow(beetle_env_nonvasc),
-                          shuffleSet(n = nrow(beetle_env_nonvasc), control = perm_design_beetle_nonvasc, nset = 999))
+                          shuffleSet(n = nrow(beetle_env_nonvasc), 
+                                     control = perm_design_beetle_nonvasc, nset = 999))
           
           #create object for Ss to be stored 
           results05 <- matrix(nrow = nrow(perms05), ncol = 7)
-          colnames(results05) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+          colnames(results05) <- c("Viereck.3", "Park", "Plot", "Sample_Year", 
+                                   "Viereck.3*Sample_Year", "Residual", "Total")
           
           #loop 
           for (i in 1:nrow(perms05)) {
@@ -998,7 +872,6 @@ permutest(beetle_dispersion_result4_lichen, permutations = 999)
             mutate(F.Park = (Park/1)/(Plot/11))
           head05 <- head(results05)
           print.data.frame(head05)
-          
           #calculate P value 
           with(results05, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -1008,13 +881,10 @@ permutest(beetle_dispersion_result4_lichen, permutations = 999)
             mutate(F.Viereck = (Viereck.3/1)/(Plot/11))
           head05 <- head(results05)
           print.data.frame(head05)
-          
           #calculate P value 
           with(results05, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
-
           
-          
-#multivariate - species frequency 
+#Multivariate - Species Frequency 
           
       #differences between parks 
           #base model 
@@ -1026,7 +896,8 @@ permutest(beetle_dispersion_result4_lichen, permutations = 999)
           
           #create permutation structure and results object 
           perms6 <- rbind(1:nrow(beetle_nonvasc_composition),
-                          shuffleSet(n = nrow(beetle_nonvasc_composition), control = perm_design_beetle_nonvasc, nset = 999))
+                          shuffleSet(n = nrow(beetle_nonvasc_composition), 
+                                     control = perm_design_beetle_nonvasc, nset = 999))
           results6 <- matrix(nrow = nrow(perms6), ncol = 4)
           colnames(results6) <- c("Park", "Plot", "Residual", "Total")
           
@@ -1047,12 +918,8 @@ permutest(beetle_dispersion_result4_lichen, permutations = 999)
             mutate(F.Park = (Park/1)/(Plot/12))
           head6 <- head(results6)
           print.data.frame(head6)
-          
           #calculate P value 
           with(results6, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table
-          print(beetle_multivariate_nonvasc_park)
           
   #differences between subclasses 
           #base model 
@@ -1083,14 +950,13 @@ permutest(beetle_dispersion_result4_lichen, permutations = 999)
             results06[i, ] <- t(temp$SumOfSqs)
           }
           
-          #calculate F statistics for each permutation using correct equation 
+      #calculate F statistics for each permutation using corrected equation 
           #park
           results06 <- results06 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/11))
           head06 <- head(results06)
           print.data.frame(head06)
-          
           #calculate P value 
           with(results06, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -1100,72 +966,38 @@ permutest(beetle_dispersion_result4_lichen, permutations = 999)
             mutate(F.Viereck= (Viereck.3/1)/(Plot/11))
           head06 <- head(results06)
           print.data.frame(head06)
-          
           #calculate P value 
           with(results06, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
   
 
-          
-#Visit model 
-          beetle_nonvasc_univariate_visit <- adonis2(beetle_env_nonvasc$Species_Richness ~ Park + Plot + Sample_Year,
-                                                          data = beetle_env_nonvasc, 
-                                                          method = "euclidian",
-                                                          permutations = perm_design_beetle_nonvasc_time,
-                                                          by = "terms")
-          beetle_nonvasc_univariate_visit
-          
-          beetle_nonvasc_multivariate_visit <- adonis2(beetle_nonvasc_composition ~ Park + Plot + Sample_Year, 
-                                                      data = beetle_env_nonvasc, method = "bray", 
-                                                      permutations = perm_design_beetle_nonvasc_time, 
-                                                      by = "terms")
-          beetle_nonvasc_multivariate_visit
-          
-          
-          
 #canopy cover effects 
-        beetle_CC_univariate_nonvasc <- adonis2(beetle_env_nonvasc$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
+      #Species Richness 
+        beetle_CC_univariate_nonvasc <- adonis2(beetle_env_nonvasc$Species_Richness ~ 
+                                                  Percent_Cover + Park + Plot + Sample_Year, 
                                      data = beetle_env_nonvasc, method = "bray", 
                                      permutations = perm_design_beetle_nonvasc_time, 
                                      by = "terms")
         print(beetle_CC_univariate_nonvasc)         
-        
-        beetle_CC_multivariate_nonvasc <- adonis2(beetle_nonvasc_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
+      #Species Frequency 
+        beetle_CC_multivariate_nonvasc <- adonis2(beetle_nonvasc_composition ~ 
+                                                    Percent_Cover + Park + Plot + Sample_Year, 
                                      data = beetle_env_nonvasc, method = "bray", 
                                      permutations = perm_design_beetle_nonvasc_time, 
                                      by = "terms")
         print(beetle_CC_multivariate_nonvasc) 
-        
-        
           
-#viereck subclasses within 
-      #species richness
-          beetle_nonvasc_univariate_subclass <- adonis2(beetle_env_nonvasc$Species_Richness ~ Viereck.3 + Park + Plot + 
-                                             Sample_Year + Viereck.3*Sample_Year, 
-                                         data = beetle_env_nonvasc, method = "bray", 
-                                         permutations = perm_design_beetle_nonvasc_time, 
-                                         by = "terms")
-          print(beetle_nonvasc_univariate_subclass)        
-          
-      #Species frequency 
-          beetle_nonvasc_multivariate_subclass <- adonis2(beetle_nonvasc_composition ~ Viereck.3 + Park + 
-                                                            Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                         data = beetle_env_nonvasc, method = "bray", 
-                                         permutations = perm_design_beetle_nonvasc_time, 
-                                         by = "terms")
-          print(beetle_nonvasc_multivariate_subclass)
-          
-          
-#beta dispersion based on visit 
-          beetle_dispersion_result4 <- betadisper(vegdist(beetle_nonvasc_composition, 
+#beta dispersion 
+        #based on visit 
+          beetle_dispersion_result1_nonvasc <- betadisper(vegdist(beetle_nonvasc_composition, 
                                                           method = "bray"), beetle_env_nonvasc$Visit)
-          beetle_dispersion_result4
-          permutest(beetle_dispersion_result4, permutations = 999)
+          beetle_dispersion_result1_nonvasc
+          permutest(beetle_dispersion_result1_nonvasc, permutations = 999)
           
-          #based on subclass
-beetle_dispersion_result4_nonvasc <- betadisper(vegdist(beetle_nonvasc_composition, 
-                                                       method = "bray"), beetle_env_nonvasc$Viereck.3)
-beetle_dispersion_result4_nonvasc 
-permutest(beetle_dispersion_result4_nonvasc, permutations = 999)
+        #based on subclass
+          beetle_dispersion_result2_nonvasc <- betadisper(vegdist(beetle_nonvasc_composition, 
+                                                                 method = "bray"), beetle_env_nonvasc$Viereck.3)
+          beetle_dispersion_result2_nonvasc 
+          permutest(beetle_dispersion_result2_nonvasc, permutations = 999)
 
 ```
 
@@ -1406,9 +1238,10 @@ needle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collap
 needle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_lichen_filtered.xlsx")
 needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_nonvasc_filtered.xlsx")
 
-needle_env$Sample_Year <- as.numeric(needle_env$Sample_Year)
-needle_env_lichen$Sample_Year <- as.numeric(needle_env_lichen$Sample_Year)
-needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year) 
+#ensuring that sample year is numeric 
+    needle_env$Sample_Year <- as.numeric(needle_env$Sample_Year)
+    needle_env_lichen$Sample_Year <- as.numeric(needle_env_lichen$Sample_Year)
+    needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year) 
 
 ```
 
@@ -1502,9 +1335,9 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
 
 ## Run PERMANOVA 
 ```{r}
-#vascular 
+#Vascular 
 
-  #species richness 
+  #Species Richness (Univariate)
     #Differences between parks 
           #base model 
           needle_univariate_vascular_park <- adonis2(needle_env$Species_Richness ~ Park + Plot,
@@ -1539,14 +1372,8 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/28))
           head7 <- head(results7)
           print.data.frame(head7)
-          
           #calculate P value 
           with(results7, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table
-          print(needle_univariate_vascular_park)
-          
-          
           
   #Differences between through time  
           #base model 
@@ -1583,15 +1410,10 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/28))
           head07 <- head(results07)
           print.data.frame(head07)
-          
           #calculate P value 
           with(results07, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #rest of table
-          print(needle_univariate_vascular_time)   
-
-          
-  ### Multivariate - species composition 
+  ### Multivariate - species frequency
       #differences between parks 
           #base model 
           needle_multivariate_vascular_park <- adonis2(needle_composition ~ Park + Plot, 
@@ -1602,7 +1424,8 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           
           #create permutation structure and results object 
           perms8 <- rbind(1:nrow(needle_composition),
-                           shuffleSet(n = nrow(needle_composition), control = perm_design_needle, nset = 999))
+                           shuffleSet(n = nrow(needle_composition), 
+                                      control = perm_design_needle, nset = 999))
           results8 <- matrix(nrow = nrow(perms8), ncol = 4)
           colnames(results8) <- c("Park", "Plot", "Residual", "Total")
           
@@ -1623,14 +1446,9 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/28))
           head8 <- head(results8)
           print.data.frame(head8)
-          
           #calculate P value 
           with(results8, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table
-          print(needle_multivariate_vascular_park)
-          
-          
+
       #differences through time 
           #base model 
           needle_multivariate_vascular_time <- adonis2(needle_composition ~ Park + Plot + 
@@ -1642,9 +1460,11 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           
           #create permutation structure and results object 
           perms08 <- rbind(1:nrow(needle_composition),
-                           shuffleSet(n = nrow(needle_composition), control = perm_design_needle, nset = 999))
+                           shuffleSet(n = nrow(needle_composition), 
+                                      control = perm_design_needle, nset = 999))
           results08 <- matrix(nrow = nrow(perms08), ncol = 6)
-          colnames(results08) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
+          colnames(results08) <- c("Park", "Plot", "Sample_Year", 
+                                   "Park*Sample_Year", "Residual", "Total")
           
           #loop 
           for (i in 1:nrow(perms08)) {
@@ -1663,29 +1483,8 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/28))
           head08 <- head(results08)
           print.data.frame(head08)
-          
           #calculate P value 
           with(results08, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table
-          print(needle_multivariate_vascular_time)          
-          
-          
-  #time based models 
-        #species richness
-          needle_univariate_vasc_year <- adonis2(needle_env$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
-                                                  data = needle_env, 
-                                                  method = "euclidian",
-                                                  permutations = perm_design_needle_time,
-                                                  by = "terms")
-          print(needle_univariate_vasc_year)
-          
-        #species frequency 
-          needle_multivariate_vasc_year <- adonis2(needle_composition ~ Park + Plot + Sample_Year + Park*Sample_Year, 
-                                              data = needle_env, method = "bray", 
-                                              permutations = perm_design_needle_time, 
-                                              by = "terms")
-          print(needle_multivariate_vasc_year)
           
   #beta diversity 
           
@@ -1700,17 +1499,10 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
                                                           method = "bray"), needle_env$Visit)
           needle_dispersion_result2 
           permutest(needle_dispersion_result2, permutations = 999)
-
-      
-          
-          
-          
-          
-          
-              
+----------------------------------------------------------------------------------------------------------------
 #Lichen 
           
-  #species richness 
+  #Species Richness (Univariate) 
     #Differences between parks 
           #base model 
           needle_univariate_lichen_park <- adonis2(needle_env_lichen$Species_Richness ~ Park + Plot,
@@ -1722,7 +1514,8 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           
           #create permutation object 
           perms9 <- rbind(1:nrow(needle_env_lichen),
-                           shuffleSet(n = nrow(needle_env_lichen), control = perm_design_needle_lichen, nset = 999))
+                           shuffleSet(n = nrow(needle_env_lichen), 
+                                      control = perm_design_needle_lichen, nset = 999))
           
           #create object for Ss to be stored 
           results9 <- matrix(nrow = nrow(perms9), ncol = 4)
@@ -1745,14 +1538,9 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/30))
           head9 <- head(results9)
           print.data.frame(head9)
-          
           #calculate P value 
           with(results9, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(needle_univariate_lichen_park)
-        
-          
+
             
     #Differences through time 
           #base model 
@@ -1771,12 +1559,14 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           
           #create object for Ss to be stored 
           results09 <- matrix(nrow = nrow(perms09), ncol = 6)
-          colnames(results09) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
+          colnames(results09) <- c("Park", "Plot", "Sample_Year",
+                                   "Park*Sample_Year", "Residual", "Total")
           
           #loop 
           for (i in 1:nrow(perms09)) {
             temp.data <- needle_env_lichen[perms09[i, ], ]
-            temp <- adonis2(needle_env_lichen$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
+            temp <- adonis2(needle_env_lichen$Species_Richness ~ Park + Plot + 
+                              Sample_Year + Park*Sample_Year,
                             data = temp.data,
                             method = "euclidian",
                             by = "terms",
@@ -1794,12 +1584,8 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           #calculate P value 
           with(results09, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #rest of table 
-          print(needle_univariate_lichen_time)          
-          
   
-### Multivariate 
-          
+### Multivariate (Species Frequency)
       #differences between parks 
           #base model 
           needle_multivariate_lichen_park <- adonis2(needle_composition_lichen ~ Park + Plot, 
@@ -1810,7 +1596,8 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           
           #create permutation structure and results object 
           perms10 <- rbind(1:nrow(needle_composition_lichen),
-                           shuffleSet(n = nrow(needle_composition_lichen), control = perm_design_needle_lichen, nset = 999))
+                           shuffleSet(n = nrow(needle_composition_lichen), 
+                                      control = perm_design_needle_lichen, nset = 999))
           results10 <- matrix(nrow = nrow(perms10), ncol = 4)
           colnames(results10) <- c("Park", "Plot", "Residual", "Total")
           
@@ -1831,15 +1618,9 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/30))
           head10 <- head(results10)
           print.data.frame(head10)
-          
           #calculate P value 
           with(results10, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(needle_multivariate_lichen_park)
-          
-          
-          
+  
       #differences through time 
           #base model 
           needle_multivariate_lichen_time <- adonis2(needle_composition_lichen ~ Park + Plot + 
@@ -1851,9 +1632,11 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           
           #create permutation structure and results object 
           perms010 <- rbind(1:nrow(needle_composition_lichen),
-                           shuffleSet(n = nrow(needle_composition_lichen), control = perm_design_needle_lichen, nset = 999))
+                           shuffleSet(n = nrow(needle_composition_lichen), 
+                                      control = perm_design_needle_lichen, nset = 999))
           results010 <- matrix(nrow = nrow(perms010), ncol = 6)
-          colnames(results010) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
+          colnames(results010) <- c("Park", "Plot", "Sample_Year", 
+                                    "Park*Sample_Year", "Residual", "Total")
           
           #loop 
           for (i in 1:nrow(perms010)) {
@@ -1872,28 +1655,8 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/30))
           head010 <- head(results010)
           print.data.frame(head010)
-          
           #calculate P value 
           with(results010, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(needle_multivariate_lichen_time)          
-
-          
-  #based on visit - time for rest of table 
-          needle_univariate_year_lichen <- adonis2(needle_env_lichen$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
-                                                         data = needle_env_lichen, 
-                                                         method = "euclidian",
-                                                         permutations = perm_design_needle_time_lichen,
-                                                         by = "terms")
-          print(needle_univariate_year_lichen)
-          
-          needle_multivariate_year_lichen <- adonis2(needle_composition_lichen ~ Park + Plot + Sample_Year + Park*Sample_Year, 
-                                                     data = needle_env_lichen, method = "bray", 
-                                                     permutations = perm_design_needle_time_lichen, 
-                                                     by = "terms")
-          print(needle_multivariate_year_lichen)
-          
           
   #beta diversity 
           
@@ -1909,18 +1672,9 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           needle_dispersion_result2_lichen
           permutest(needle_dispersion_result2_lichen, permutations = 999)
           
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
+----------------------------------------------------------------------------------------------------------------
 #Nonvascular 
-  #species richness 
+  #Species Richness (Univariate)
           
     #Differences between parks 
           #base model 
@@ -1933,7 +1687,8 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           
           #create permutation object 
           perms11 <- rbind(1:nrow(needle_env_nonvasc),
-                           shuffleSet(n = nrow(needle_env_nonvasc), control = perm_design_needle_nonvasc, nset = 999))
+                           shuffleSet(n = nrow(needle_env_nonvasc), 
+                                      control = perm_design_needle_nonvasc, nset = 999))
           
           #create object for Ss to be stored 
           results11 <- matrix(nrow = nrow(perms11), ncol = 4)
@@ -1956,16 +1711,9 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/30))
           head11 <- head(results11)
           print.data.frame(head11)
-          
           #calculate P value 
           with(results11, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(needle_univariate_nonvasc_park)
-          
-          
-          
-          
+
     #Differences through time 
           #base model 
           needle_univariate_nonvasc_time <- adonis2(needle_env_nonvasc$Species_Richness ~ Park + 
@@ -1978,16 +1726,19 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           
           #create permutation object 
           perms011 <- rbind(1:nrow(needle_env_nonvasc),
-                           shuffleSet(n = nrow(needle_env_nonvasc), control = perm_design_needle_nonvasc, nset = 999))
+                           shuffleSet(n = nrow(needle_env_nonvasc), 
+                                      control = perm_design_needle_nonvasc, nset = 999))
           
           #create object for Ss to be stored 
           results011 <- matrix(nrow = nrow(perms011), ncol = 6)
-          colnames(results011) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
+          colnames(results011) <- c("Park", "Plot", "Sample_Year", 
+                                    "Park*Sample_Year", "Residual", "Total")
           
           #loop 
           for (i in 1:nrow(perms011)) {
             temp.data <- needle_env_nonvasc[perms011[i, ], ]
-            temp <- adonis2(needle_env_nonvasc$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
+            temp <- adonis2(needle_env_nonvasc$Species_Richness ~ Park + Plot + 
+                              Sample_Year + Park*Sample_Year,
                             data = temp.data,
                             method = "euclidian",
                             by = "terms",
@@ -2001,17 +1752,10 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/30))
           head011 <- head(results011)
           print.data.frame(head011)
-          
           #calculate P value 
           with(results011, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(needle_univariate_nonvasc_time)       
-          
-          
-          
-          
-  ### Multivariate - species frequency 
+
+  ### Multivariate - Species Frequency 
           
         #differences between parks 
           #base model 
@@ -2023,7 +1767,8 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
           
           #create permutation structure and results object 
           perms12 <- rbind(1:nrow(needle_composition_nonvasc),
-                           shuffleSet(n = nrow(needle_composition_nonvasc), control = perm_design_needle_nonvasc, nset = 999))
+                           shuffleSet(n = nrow(needle_composition_nonvasc), 
+                                      control = perm_design_needle_nonvasc, nset = 999))
           results12 <- matrix(nrow = nrow(perms12), ncol = 4)
           colnames(results12) <- c("Park", "Plot", "Residual", "Total")
           
@@ -2044,17 +1789,14 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/30))
           head12 <- head(results12)
           print.data.frame(head12)
-          
           #calculate P value 
           with(results12, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table
-          print(needle_multivariate_nonvasc_park)
           
           
     #differences through time 
           #base model 
-          needle_multivariate_nonvasc_time <- adonis2(needle_composition_nonvasc ~ Park + Plot + Sample_Year + Park*Sample_Year, 
+          needle_multivariate_nonvasc_time <- adonis2(needle_composition_nonvasc ~ Park + Plot + 
+                                                        Sample_Year + Park*Sample_Year, 
                                            data = needle_env_nonvasc, method = "bray", 
                                            permutations = perm_design_needle_time_nonvasc, 
                                            by = "terms")
@@ -2084,41 +1826,18 @@ needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/30))
           head012 <- head(results012)
           print.data.frame(head012)
-          
           #calculate P value 
           with(results012, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #rest of table
-          print(needle_multivariate_nonvasc_time)          
- 
-          
-    #time based models 
-        #species richness
-          needle_univariate_year_nonvasc <- adonis2(needle_env_nonvasc$Species_Richness ~ Park + 
-                                                      Plot + Sample_Year + Park*Sample_Year,
-                                                          data = needle_env_nonvasc, 
-                                                          method = "euclidian",
-                                                          permutations = perm_design_needle_time_nonvasc,
-                                                          by = "terms")
-          print(needle_univariate_year_nonvasc)
-          
-        #species frequency 
-          needle_multivariate_year_nonvasc <- adonis2(needle_composition_nonvasc ~ Park + Plot + Sample_Year + Park*Sample_Year, 
-                                                      data = needle_env_nonvasc, method = "bray", 
-                                                      permutations = perm_design_needle_time_nonvasc, 
-                                                      by = "terms")
-          print(needle_multivariate_year_nonvasc)
-          
-          
     #beta diversity 
           
-          #based on park 
+        #based on park 
           needle_dispersion_result_nonvasc <- betadisper(vegdist(needle_composition_nonvasc, 
                                                                  method = "bray"), needle_env_nonvasc$Park)
           needle_dispersion_result_nonvasc 
           permutest(needle_dispersion_result_nonvasc, permutations = 999)
           
-          #based on visit 
+        #based on visit 
           needle_dispersion_result2_nonvasc <- betadisper(vegdist(needle_composition_nonvasc, 
                                                                   method = "bray"), needle_env_nonvasc$Visit)
           needle_dispersion_result2_nonvasc
@@ -2475,19 +2194,16 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
         mutate(F.Park = (Park/1)/(Plot/34))
       head13 <- head(results13)
       print.data.frame(head13)
-      
       #calculate P value 
       with(results13, sum(F.Park >= F.Park[1]) / length(F.Park))
       
-      #rest of table 
-      print(openlow_univariate_vasc_park)
-      
       
   #Differences through time 
-      check(openlow_env, control = perm_design_openlow) #check how many possible permutations - to catch obvious error in structure 
+      check(openlow_env, control = perm_design_openlow) #check how many possible permutations
      
       #base model 
-      openlow_univariate_vasc_time <- adonis2(openlow_env$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
+      openlow_univariate_vasc_time <- adonis2(openlow_env$Species_Richness ~ 
+                                                Park + Plot + Sample_Year + Park*Sample_Year,
                                     data = openlow_env, 
                                     method = "euclidian",
                                     permutations = perm_design_openlow_time,
@@ -2517,14 +2233,9 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
         mutate(F.Park = (Park/1)/(Plot/34))
       head013 <- head(results013)
       print.data.frame(head013)
-      
       #calculate P value 
       with(results013, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #rest of table 
-      print(openlow_univariate_vasc_time)
 
-      
 #species frequency (multivariate)
     #differences between parks 
       #base model 
@@ -2557,17 +2268,14 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
         mutate(F.Park = (Park/1)/(Plot/34))
       head14 <- head(results14)
       print.data.frame(head14)
-      
       #calculate P value 
       with(results14, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #rest of table 
-      print(openlow_multivariate_vasc_park)
 
       
-    #differences throuh time 
+    #differences through time 
       #base model 
-      openlow_multivariate_vasc_time <- adonis2(openlow_composition ~ Park + Plot + Sample_Year + Park*Sample_Year, 
+      openlow_multivariate_vasc_time <- adonis2(openlow_composition ~ Park + Plot + 
+                                                  Sample_Year + Park*Sample_Year, 
                                 data = openlow_env, method = "bray", 
                                 permutations = perm_design_openlow_time, 
                                 by = "terms")
@@ -2596,53 +2304,23 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
         mutate(F.Park = (Park/1)/(Plot/34))
       head014 <- head(results014)
       print.data.frame(head014)
-      
       #calculate P value 
       with(results014, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #rest of table 
-      print(openlow_multivariate_vasc_time)
-      
-
-
-#Time based models 
-  #species richness
-      openlow_univariate_year <- adonis2(openlow_env$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
-                                               data = openlow_env, 
-                                               method = "euclidian",
-                                               permutations = perm_design_openlow_time,
-                                               by = "terms")
-      print(openlow_univariate_year)
-
-      
-  #species frequency 
-      openlow_multivariate_year <- adonis2(openlow_composition ~ Park + Plot + Sample_Year + Park*Sample_Year, 
-                                           data = openlow_env, method = "bray", 
-                                           permutations = perm_design_openlow_time, 
-                                           by = "terms")
-      print(openlow_multivariate_year)
-      
 
 #beta diversity 
-      #based on park 
+    #based on park 
       openlow_dispersion_result <- betadisper(vegdist(openlow_composition, 
                                                       method = "bray"), openlow_env$Park)
       openlow_dispersion_result 
       permutest(openlow_dispersion_result, permutations = 999)
       
-      #based on visit 
+    #based on visit 
       openlow_dispersion_result2 <- betadisper(vegdist(openlow_composition, 
                                                        method = "bray"), openlow_env$Visit)
       openlow_dispersion_result2 
       permutest(openlow_dispersion_result2, permutations = 999)
 
-
-      
-      
-      
-      
-      
-      
+----------------------------------------------------------------------------------------------------------------
 #Lichen 
       
     ### Univariate 
@@ -2683,24 +2361,21 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
         mutate(F.Park = (Park/1)/(Plot/26))
       head15 <- head(results15)
       print.data.frame(head15)
-      
       #calculate P value 
       with(results15, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #rest of table 
-      print(openlow_univariate_lichen_park)
+
       
       
   #Differences through time  
       check(openlow_env_lichen, control = perm_design_openlow_lichen) #how many possible permutations 
       #Base Model 
-      openlow_univariate_lichen_time <- adonis2(openlow_env_lichen$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
+      openlow_univariate_lichen_time <- adonis2(openlow_env_lichen$Species_Richness ~ Park + 
+                                                  Plot + Sample_Year + Park*Sample_Year,
                                     data = openlow_env_lichen, 
                                     method = "euclidian",
                                     permutations = perm_design_openlow_time_lichen,
                                     by = "terms")
       print(openlow_univariate_lichen_time)
-      
       
       #create permutation object 
       perms015 <- rbind(1:nrow(openlow_env_lichen),
@@ -2727,20 +2402,12 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
         mutate(F.Park = (Park/1)/(Plot/26))
       head015 <- head(results015)
       print.data.frame(head015)
-      
       #calculate P value 
       with(results015, sum(F.Park >= F.Park[1]) / length(F.Park))
+    
+
       
-      #rest of table 
-      print(openlow_univariate_lichen_time)     
-      
-      
-      
-      
-      
-      
-      
-  ### Multivariate 
+### Multivariate 
   #differences between parks 
       #base model 
       openlow_multivariate_lichen_park <- adonis2(openlow_composition_lichen ~ Park + Plot, 
@@ -2751,7 +2418,8 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
       
       #create permutation structure and results object 
       perms16 <- rbind(1:nrow(openlow_composition_lichen),
-                       shuffleSet(n = nrow(openlow_composition_lichen), control = perm_design_openlow_lichen, nset = 999))
+                       shuffleSet(n = nrow(openlow_composition_lichen), 
+                                  control = perm_design_openlow_lichen, nset = 999))
       results16 <- matrix(nrow = nrow(perms16), ncol = 4)
       colnames(results16) <- c("Park", "Plot", "Residual", "Total")
       
@@ -2772,17 +2440,15 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
         mutate(F.Park = (Park/1)/(Plot/26))
       head16 <- head(results16)
       print.data.frame(head16)
-      
       #calculate P value 
       with(results16, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #rest of table
-      print(openlow_multivariate_lichen_park)
 
 
-  #differences through time 
+
+  #Differences through time (Species Frequency)
       #base model 
-      openlow_multivariate_lichen_time <- adonis2(openlow_composition_lichen ~ Park + Plot + Sample_Year + Park*Sample_Year, 
+      openlow_multivariate_lichen_time <- adonis2(openlow_composition_lichen ~ Park + 
+                                                    Plot + Sample_Year + Park*Sample_Year, 
                                 data = openlow_env_lichen, method = "bray", 
                                 permutations = perm_design_openlow_time_lichen, 
                                 by = "terms")
@@ -2790,9 +2456,11 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
       
       #create permutation structure and results object 
       perms016 <- rbind(1:nrow(openlow_composition_lichen),
-                       shuffleSet(n = nrow(openlow_composition_lichen), control = perm_design_openlow_lichen, nset = 999))
+                       shuffleSet(n = nrow(openlow_composition_lichen), 
+                                  control = perm_design_openlow_lichen, nset = 999))
       results016 <- matrix(nrow = nrow(perms016), ncol = 6)
-      colnames(results016) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
+      colnames(results016) <- c("Park", "Plot", "Sample_Year", 
+                                "Park*Sample_Year", "Residual", "Total")
       
       #loop 
       for (i in 1:nrow(perms016)) {
@@ -2814,48 +2482,26 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
       
       #calculate P value 
       with(results016, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #rest of table
-      print(openlow_multivariate_lichen_time)      
-      
-
-      
-      
-#models based on visit 
-      #species richness (univariate)
-      openlow_univariate_year_lichen <- adonis2(openlow_env_lichen$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
-                                               data = openlow_env_lichen, 
-                                               method = "euclidian",
-                                               permutations = perm_design_openlow_time_lichen,
-                                               by = "terms")
-      print(openlow_univariate_year_lichen)
-      
-      #species frequency (multivariate)
-      openlow_result_year_lichen <- adonis2(openlow_composition_lichen ~ Park + Plot + Sample_Year + Park*Sample_Year, 
-                                           data = openlow_env_lichen, method = "bray", 
-                                           permutations = perm_design_openlow_time_lichen, 
-                                           by = "terms")
-      print(openlow_result_year_lichen)
 
 
 #beta diversity 
-    #based on park 
+  #based on park 
     openlow_dispersion_result_lichen <- betadisper(vegdist(openlow_composition_lichen, 
                                                     method = "bray"), openlow_env_lichen$Park)
     openlow_dispersion_result_lichen 
     permutest(openlow_dispersion_result_lichen, permutations = 999)
     
-    #based on visit 
+  #based on visit 
     openlow_dispersion_result2_lichen <- betadisper(vegdist(openlow_composition_lichen, 
                                                      method = "bray"), openlow_env_lichen$Visit)
     openlow_dispersion_result2_lichen 
     permutest(openlow_dispersion_result2_lichen, permutations = 999)
 
-
+----------------------------------------------------------------------------------------------------------------
 
 #Nonvascular 
     
-  ### Univariate (species richness)
+  ### Univariate (Species Richness)
     #Differences between parks 
       check(openlow_env_nonvasc, control = perm_design_openlow_nonvasc) #how many possible permutations 
       
@@ -2870,7 +2516,8 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
       
       #create permutation object 
           perms17 <- rbind(1:nrow(openlow_env_nonvasc),
-                       shuffleSet(n = nrow(openlow_env_nonvasc), control = perm_design_openlow_nonvasc, nset = 999))
+                       shuffleSet(n = nrow(openlow_env_nonvasc), 
+                                  control = perm_design_openlow_nonvasc, nset = 999))
       
       #create object for Ss to be stored 
           results17 <- matrix(nrow = nrow(perms17), ncol = 4)
@@ -2893,38 +2540,38 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/26))
           head17 <- head(results17)
           print.data.frame(head17)
-      
       #calculate P value 
           with(results17, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #Rest of table
-          print(openlow_univariate_nonvasc_park)
+
 
           
   #Differences through time  
       check(openlow_env_nonvasc, control = perm_design_openlow_nonvasc) #how many possible permutations 
       
       #base model 
-      openlow_univariate_nonvasc_time <- adonis2(openlow_env_nonvasc$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
+      openlow_univariate_nonvasc_time <- adonis2(openlow_env_nonvasc$Species_Richness ~ 
+                                                   Park + Plot + Sample_Year + Park*Sample_Year,
                                            data = openlow_env_nonvasc, 
                                            method = "euclidian",
                                            permutations = perm_design_openlow_time_nonvasc,
                                            by = "terms")
       print(openlow_univariate_nonvasc_time)
       
-      
       #create permutation object 
           perms017 <- rbind(1:nrow(openlow_env_nonvasc),
-                       shuffleSet(n = nrow(openlow_env_nonvasc), control = perm_design_openlow_nonvasc, nset = 999))
+                       shuffleSet(n = nrow(openlow_env_nonvasc), 
+                                  control = perm_design_openlow_nonvasc, nset = 999))
       
       #create object for Ss to be stored 
           results017 <- matrix(nrow = nrow(perms017), ncol = 6)
-          colnames(results017) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
+          colnames(results017) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", 
+                                    "Residual", "Total")
       
       #loop 
           for (i in 1:nrow(perms017)) {
             temp.data <- openlow_env_nonvasc[perms017[i, ], ]
-            temp <- adonis2(openlow_env_nonvasc$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
+            temp <- adonis2(openlow_env_nonvasc$Species_Richness ~ Park + Plot + 
+                              Sample_Year + Park*Sample_Year,
                             data = temp.data,
                             method = "euclidian",
                             by = "terms",
@@ -2938,21 +2585,10 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/26))
           head017 <- head(results017)
           print.data.frame(head017)
-      
       #calculate P value 
           with(results017, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #Rest of table
-          print(openlow_univariate_nonvasc_time)
 
-          
-          
-          
 
-          
-          
-          
-          
 ### Multivariate (species frequency)
     #differences between parks 
       #base model 
@@ -2964,7 +2600,8 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
       
       #create permutation structure and results object 
           perms18 <- rbind(1:nrow(openlow_composition_nonvasc),
-                           shuffleSet(n = nrow(openlow_composition_nonvasc), control = perm_design_openlow_nonvasc, nset = 999))
+                           shuffleSet(n = nrow(openlow_composition_nonvasc), 
+                                      control = perm_design_openlow_nonvasc, nset = 999))
           results18 <- matrix(nrow = nrow(perms18), ncol = 4)
           colnames(results18) <- c("Park", "Plot", "Residual", "Total")
       
@@ -2985,17 +2622,15 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/26))
           head18 <- head(results18)
           print.data.frame(head18)
-      
       #calculate P value 
           with(results18, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #rest of table 
-          print(openlow_multivariate_nonvasc_park)
+
 
           
   #differences through time 
       #base model 
-      openlow_multivariate_nonvasc_time <- adonis2(openlow_composition_nonvasc ~ Park + Plot + Sample_Year + Park*Sample_Year, 
+      openlow_multivariate_nonvasc_time <- adonis2(openlow_composition_nonvasc ~ 
+                                                     Park + Plot + Sample_Year + Park*Sample_Year, 
                                        data = openlow_env_nonvasc, method = "bray", 
                                        permutations = perm_design_openlow_time_nonvasc, 
                                        by = "terms")
@@ -3006,12 +2641,14 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                            shuffleSet(n = nrow(openlow_composition_nonvasc), 
                                       control = perm_design_openlow_nonvasc, nset = 999))
           results018 <- matrix(nrow = nrow(perms018), ncol = 6)
-          colnames(results018) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
+          colnames(results018) <- c("Park", "Plot", "Sample_Year", 
+                                    "Park*Sample_Year", "Residual", "Total")
       
       #loop 
           for (i in 1:nrow(perms018)) {
             temp.data <- openlow_env_nonvasc[perms018[i, ], ]
-            temp <- adonis2(openlow_composition_nonvasc ~ Park + Plot + Sample_Year + Park*Sample_Year,
+            temp <- adonis2(openlow_composition_nonvasc ~ Park + Plot + 
+                              Sample_Year + Park*Sample_Year,
                             data = temp.data,
                             method = "bray",
                             by = "terms",
@@ -3028,36 +2665,15 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
       
       #calculate P value 
           with(results018, sum(F.Park >= F.Park[1]) / length(F.Park))
-      
-      #rest of table 
-          print(openlow_multivariate_nonvasc_time)
-          
-          
-    
-#models based on time 
-      #species richness 
-      openlow_univariate_year_nonvasc <- adonis2(openlow_env_nonvasc$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
-                                                      data = openlow_env_nonvasc, 
-                                                      method = "euclidian",
-                                                      permutations = perm_design_openlow_time_nonvasc,
-                                                      by = "terms")
-      print(openlow_univariate_year_nonvasc)
-      
-      #species frequency 
-      openlow_multivariate_year_nonvasc <- adonis2(openlow_composition_nonvasc ~ Park + Plot + Sample_Year + Park*Sample_Year, 
-                                                  data = openlow_env_nonvasc, method = "bray", 
-                                                  permutations = perm_design_openlow_time_nonvasc, 
-                                                  by = "terms")
-      print(openlow_multivariate_year_nonvasc)
 
 #beta diversity 
-    #based on park 
+  #based on park 
     openlow_dispersion_result_nonvasc <- betadisper(vegdist(openlow_composition_nonvasc, 
                                                            method = "bray"), openlow_env_nonvasc$Park)
     openlow_dispersion_result_nonvasc 
     permutest(openlow_dispersion_result_nonvasc, permutations = 999)
     
-    #based on visit 
+  #based on visit 
     openlow_dispersion_result2_nonvasc <- betadisper(vegdist(openlow_composition_nonvasc, 
                                                             method = "bray"), openlow_env_nonvasc$Visit)
     openlow_dispersion_result2_nonvasc 
@@ -3348,8 +2964,8 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
 ## Run PERMANOVA 
 ```{r}
 #Vascular 
-    #Differences between parks 
     ### Univariate (species richness)
+    #Differences between parks 
           check(dwarfscrub_env, control = perm_design_dwarfscrub) #how many possible permutations 
           
         #Base model 
@@ -3363,7 +2979,8 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           #create permutation object 
           perms19 <- rbind(1:nrow(dwarfscrub_env),
-                           shuffleSet(n = nrow(dwarfscrub_env), control = perm_design_dwarfscrub, nset = 999))
+                           shuffleSet(n = nrow(dwarfscrub_env), 
+                                      control = perm_design_dwarfscrub, nset = 999))
           
           #create object for Ss to be stored 
           results19 <- matrix(nrow = nrow(perms19), ncol = 4)
@@ -3386,15 +3003,11 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Park = (Park/1)/(Plot/17))
           head19 <- head(results19)
           print.data.frame(head19)
-          
           #calculate P value 
           with(results19, sum(F.Park >= F.Park[1]) / length(F.Park))
+
           
-          #rest of table 
-          print(dwarfscrub_univariate_vasc_park)
-          
-#Differences between subclasses 
-    ### Univariate (species richness)
+  #Differences between subclasses 
           check(dwarfscrub_env, control = perm_design_dwarfscrub) #how many possible permutations 
           
         #Base model 
@@ -3409,7 +3022,8 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           #create permutation object 
           perms019 <- rbind(1:nrow(dwarfscrub_env),
-                           shuffleSet(n = nrow(dwarfscrub_env), control = perm_design_dwarfscrub, nset = 999))
+                           shuffleSet(n = nrow(dwarfscrub_env), 
+                                      control = perm_design_dwarfscrub, nset = 999))
           
           #create object for Ss to be stored 
           results019 <- matrix(nrow = nrow(perms019), ncol = 7)
@@ -3444,13 +3058,9 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Viereck = (Viereck.3/1)/(Plot/16))
           head019 <- head(results019)
           print.data.frame(head019)
-          
           #calculate P value 
           with(results019, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
-          
-          #rest of table 
-          print(dwarfscrub_univariate_vasc_subclass)         
-          
+ 
 
   ### Multivariate (species frequency)
       #differences between parks 
@@ -3463,7 +3073,8 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           #create permutation structure and results object 
           perms20 <- rbind(1:nrow(dwarfscrub_composition),
-                           shuffleSet(n = nrow(dwarfscrub_composition), control = perm_design_dwarfscrub, nset = 999))
+                           shuffleSet(n = nrow(dwarfscrub_composition), 
+                                      control = perm_design_dwarfscrub, nset = 999))
           results20 <- matrix(nrow = nrow(perms20), ncol = 4)
           colnames(results20) <- c("Park", "Plot", "Residual", "Total")
           
@@ -3484,16 +3095,10 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Park = (Park/1)/(Plot/17))
           head20 <- head(results20)
           print.data.frame(head20)
-          
           #calculate P value 
           with(results20, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #rest of table
-          print(dwarfscrub_multivariate_vasc_park)
-          
-          
-  ### Multivariate (species frequency)
-      #differences between subclasses 
+    #differences between subclasses 
           #base model 
           dwarfscrub_multivariate_vasc_subclass <- adonis2(dwarfscrub_composition ~ Viereck.3 + Park + 
                                                             Plot + Sample_Year + Viereck.3*Sample_Year,, 
@@ -3538,72 +3143,30 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Viereck = (Viereck.3/1)/(Plot/16))
           head020 <- head(results020)
           print.data.frame(head020)
-          
           #calculate P value 
           with(results020, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
           
           
-    #based on visit 
-          #species richness (univariate)
-          dwarfscrub_univariate_year <- adonis2(dwarfscrub_env$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
-                                                      data = dwarfscrub_env, 
-                                                      method = "euclidian",
-                                                      permutations = perm_design_dwarfscrub_time,
-                                                      by = "terms")
-          print(dwarfscrub_univariate_year)
-          
-          #Species frequency (multivariate)
-          dwarfscrub_multivariate_year <- adonis2(dwarfscrub_composition ~ Park + Plot + Sample_Year + Park*Sample_Year, 
-                                                  data = dwarfscrub_env, method = "bray", 
-                                                  permutations = perm_design_dwarfscrub_time, 
-                                                  by = "terms")
-          print(dwarfscrub_multivariate_year)
-          
-          
-    #subclass model 
-          #species richness
-          dwarfscrub_vascular_terms_univariate <- adonis2(dwarfscrub_env$Species_Richness ~ Viereck.3 + Park + 
-                                                            Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                               data = dwarfscrub_env, method = "bray", 
-                                               permutations = perm_design_dwarfscrub_time, 
-                                               by = "terms")
-          print(dwarfscrub_vascular_terms_univariate)
-          
-          
-          #species frequency 
-          dwarfscrub_vascular_subclass_multivariate <- adonis2(dwarfscrub_composition ~ Viereck.3 + Park + 
-                                                                 Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                               data = dwarfscrub_env, method = "bray", 
-                                               permutations = perm_design_dwarfscrub_time, 
-                                               by = "terms")
-          print(dwarfscrub_vascular_subclass_multivariate)
-          
- 
-          
     #beta diversity 
-          #park 
+        #park 
           dwarfscrub_dispersion_result <- betadisper(vegdist(dwarfscrub_composition, 
                                                              method = "bray"), dwarfscrub_env$Park)
           dwarfscrub_dispersion_result 
           permutest(dwarfscrub_dispersion_result, permutations = 999)
           
-          #based on visit 
+        #based on visit 
           dwarfscrub_dispersion_result2 <- betadisper(vegdist(dwarfscrub_composition, 
                                                               method = "bray"), dwarfscrub_env$Visit)
           dwarfscrub_dispersion_result2 
           permutest(dwarfscrub_dispersion_result2, permutations = 999)
           
-          #based on viereck
+        #based on viereck
           dwarfscrub_dispersion_result3 <- betadisper(vegdist(dwarfscrub_composition, 
                                                               method = "bray"), dwarfscrub_env$Viereck.3)
           dwarfscrub_dispersion_result3 
           permutest(dwarfscrub_dispersion_result3, permutations = 999)
-          
-          
-          
-          
-          
-          
+
+---------------------------------------------------------------------------------------------------------------- 
 #Lichen 
     ### Univariate (species richness)
     #Differences between parks 
@@ -3620,7 +3183,8 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           #create permutation object 
           perms21 <- rbind(1:nrow(dwarfscrub_env_lichen),
-                           shuffleSet(n = nrow(dwarfscrub_env_lichen), control = perm_design_dwarfscrub_lichen, nset = 999))
+                           shuffleSet(n = nrow(dwarfscrub_env_lichen), 
+                                      control = perm_design_dwarfscrub_lichen, nset = 999))
           
           #create object for Ss to be stored 
           results21 <- matrix(nrow = nrow(perms21), ncol = 4)
@@ -3643,20 +3207,16 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Park = (Park/1)/(Plot/14))
           head21 <- head(results21)
           print.data.frame(head21)
-          
           #calculate P value 
           with(results21, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(dwarfscrub_univariate_lichen_park)          
-          
-          
-          
+
     #Differences between subclasses  
           check(dwarfscrub_env_lichen, control = perm_design_dwarfscrub_lichen) #how many possible permutations 
+          
           #base model 
-          dwarfscrub_univariate_lichen_subclass <- adonis2(dwarfscrub_env_lichen$Species_Richness ~ Viereck.3 + Park + 
-                                                             Plot + Sample_Year + Viereck.3*Sample_Year,
+          dwarfscrub_univariate_lichen_subclass <- adonis2(dwarfscrub_env_lichen$Species_Richness ~ 
+                                                             Viereck.3 + Park + Plot + Sample_Year +
+                                                             Viereck.3*Sample_Year,
                                                    data = dwarfscrub_env_lichen, 
                                                    method = "euclidian",
                                                    permutations = perm_design_dwarfscrub_time_lichen,
@@ -3691,7 +3251,6 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Park = (Park/1)/(Plot/13))
           head021 <- head(results021)
           print.data.frame(head021)
-          
           #calculate P value 
           with(results021, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -3701,7 +3260,6 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Viereck = (Viereck.3/2)/(Plot/13))
           head021 <- head(results021)
           print.data.frame(head021)
-          
           #calculate P value 
           with(results021, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
         
@@ -3717,7 +3275,8 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           #create permutation structure and results object 
           perms22 <- rbind(1:nrow(dwarfscrub_composition_lichen),
-                           shuffleSet(n = nrow(dwarfscrub_composition_lichen), control = perm_design_dwarfscrub_lichen, nset = 999))
+                           shuffleSet(n = nrow(dwarfscrub_composition_lichen), 
+                                      control = perm_design_dwarfscrub_lichen, nset = 999))
           #head(perms18)
           results22 <- matrix(nrow = nrow(perms22), ncol = 4)
           colnames(results22) <- c("Park", "Plot", "Residual", "Total")
@@ -3740,13 +3299,9 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Park = (Park/1)/(Plot/14))
           head22 <- head(results22)
           print.data.frame(head22)
-          
           #calculate P value 
           with(results22, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(dwarfscrub_multivariate_lichen_park)          
-          
+
           
     #differences between subclasses
           #base model 
@@ -3784,7 +3339,6 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Park = (Park/1)/(Plot/13))
           head022 <- head(results022)
           print.data.frame(head022)
-          
           #calculate P value 
           with(results022, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -3794,62 +3348,23 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Viereck = (Viereck.3/2)/(Plot/13))
           head022 <- head(results022)
           print.data.frame(head022)
-          
           #calculate P value 
           with(results022, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
-          
-
-          
-  #time based models 
-          #species richness
-          dwarfscrub_univariate_year_lichen <- 
-            adonis2(dwarfscrub_env_lichen$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
-                                                              data = dwarfscrub_env_lichen, 
-                                                              method = "euclidian",
-                                                              permutations = perm_design_dwarfscrub_time_lichen,
-                                                              by = "terms")
-          print(dwarfscrub_univariate_year_lichen)
-          
-          #species frequency
-          dwarfscrub_multivariate_year_lichen <- 
-            adonis2(dwarfscrub_composition_lichen ~ Park + Plot + Sample_Year + Park*Sample_Year, 
-                                                          data = dwarfscrub_env_lichen, method = "bray", 
-                                                          permutations = perm_design_dwarfscrub_time_lichen, 
-                                                          by = "terms")
-          print(dwarfscrub_multivariate_year_lichen)
-          
-          
-    #subclass models 
-          #species richness 
-          dwarfscrub_vascular_perm_lichen_univariate <- 
-            adonis2(dwarfscrub_env_lichen$Species_Richness ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                                      data = dwarfscrub_env_lichen, method = "bray", 
-                                                      permutations = perm_design_dwarfscrub_time_lichen, 
-                                                      by = "terms")
-          print(dwarfscrub_vascular_perm_lichen_univariate)
-          
-          #species frequency 
-          dwarfscrub_vascular_perm_lichen <- 
-            adonis2(dwarfscrub_composition_lichen_multivariate ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                                      data = dwarfscrub_env_lichen, method = "bray", 
-                                                      permutations = perm_design_dwarfscrub_time_lichen, 
-                                                      by = "terms")
-          print(dwarfscrub_vascular_perm_lichen_multivariate)          
 
   #beta diversity 
-          #park 
+        #park 
           dwarfscrub_dispersion_result_lichen <- betadisper(vegdist(dwarfscrub_composition_lichen, 
                                                                      method = "bray"), dwarfscrub_env_lichen$Park)
           dwarfscrub_dispersion_result_lichen 
           permutest(dwarfscrub_dispersion_result_lichen, permutations = 999)
           
-          #based on visit 
+        #based on visit 
           dwarfscrub_dispersion_result2_lichen <- betadisper(vegdist(dwarfscrub_composition_lichen, 
                                                                       method = "bray"), dwarfscrub_env_lichen$Visit)
           dwarfscrub_dispersion_result2_lichen
           permutest(dwarfscrub_dispersion_result2_lichen, permutations = 999)
           
-          #based on viereck subclass
+        #based on viereck subclass
           dwarfscrub_dispersion_result3_lichen <- betadisper(vegdist(dwarfscrub_composition_lichen, 
                                                                       method = "bray"), dwarfscrub_env_lichen$Viereck.3)
           dwarfscrub_dispersion_result3_lichen
@@ -3857,9 +3372,9 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           
           
+----------------------------------------------------------------------------------------------------------------           
           
-          
-#nonvascular 
+#Nonvascular 
       ### Univariate 
         #differences between parks 
           check(dwarfscrub_env_nonvasc, control = perm_design_dwarfscrub_nonvasc) #how many possible permutations 
@@ -3874,7 +3389,8 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           #create permutation object 
           perms23 <- rbind(1:nrow(dwarfscrub_env_nonvasc),
-                           shuffleSet(n = nrow(dwarfscrub_env_nonvasc), control = perm_design_dwarfscrub_nonvasc, nset = 999))
+                           shuffleSet(n = nrow(dwarfscrub_env_nonvasc), 
+                                      control = perm_design_dwarfscrub_nonvasc, nset = 999))
           
           #create object for SS to be stored 
           results23 <- matrix(nrow = nrow(perms23), ncol = 4)
@@ -3897,15 +3413,9 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Park = (Park/1)/(Plot/14))
           head23 <- head(results23)
           print.data.frame(head23)
-          
           #calculate P value 
           with(results23, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(dwarfscrub_univariate_nonvasc_park)
-          
-          
-          
+
     #differences between subclasses  
           check(dwarfscrub_env_nonvasc, control = perm_design_dwarfscrub_nonvasc) #how many possible permutations 
           #base model 
@@ -3940,27 +3450,24 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             results023[i, ] <- t(temp$SumOfSqs)
           }
           
-          #create F value column - park 
+        #create F value column - park 
           results023 <- results023 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/13))
           head023 <- head(results023)
           print.data.frame(head023)
-          
           #calculate P value 
           with(results023, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #create F value column - subclass
+        #create F value column - subclass
           results023 <- results023 |>
             data.frame() |>
             mutate(F.Viereck = (Viereck.3/2)/(Plot/13))
           head023 <- head(results023)
           print.data.frame(head023)
-          
           #calculate P value 
           with(results023, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
 
-                    
 
   ### Multivariate (Species frequency)
         #differences between parks 
@@ -3996,15 +3503,9 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             mutate(F.Park = (Park/1)/(Plot/14))
           head24 <- head(results24)
           print.data.frame(head24)
-                          
           #calculate P value 
           with(results24, sum(F.Park >= F.Park[1]) / length(F.Park))
-          #rest of table 
-          print(dwarfscrub_multivariate_nonvasc_park)
-          
-          
-          
-          
+
     #differences between subclasses 
           #base model 
           dwarfscrub_multivariate_nonvasc_subclass <- adonis2(dwarfscrub_composition_nonvasc ~ Viereck.3 + Park + 
@@ -4035,79 +3536,38 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
             results024[i, ] <- t(temp$SumOfSqs)
           }
           
-          #calculate F statistic for park  
+        #calculate F statistic for park  
           results024 <- results024 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/13))
           head024 <- head(results024)
           print.data.frame(head024)
-                          
           #calculate P value 
           with(results024, sum(F.Park >= F.Park[1]) / length(F.Park))
 
-          #calculate F statistic for viereck 
+        #calculate F statistic for viereck 
           results024 <- results024 |>
             data.frame() |>
             mutate(F.Viereck = (Viereck.3/2)/(Plot/13))
           head024 <- head(results024)
           print.data.frame(head024)
-                          
           #calculate P value 
           with(results024, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
                    
-          
-
-    #time based models 
-          #species richness 
-          dwarfscrub_univariate_year_nonvasc <- 
-            adonis2(dwarfscrub_env_nonvasc$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
-                                                              data = dwarfscrub_env_nonvasc, 
-                                                              method = "euclidian",
-                                                              permutations = perm_design_dwarfscrub_time_nonvasc,
-                                                              by = "terms")
-          print(dwarfscrub_univariate_year_nonvasc)
-          
-          #species frequency 
-          dwarfscrub_multivariate_year_nonvasc <- 
-            adonis2(dwarfscrub_composition_nonvasc ~ Park + Plot + Sample_Year + Park*Sample_Year, 
-                                                          data = dwarfscrub_env_nonvasc, method = "bray", 
-                                                          permutations = perm_design_dwarfscrub_time_nonvasc, 
-                                                          by = "terms")
-          print(dwarfscrub_multivariate_year_nonvasc)
-          
-          
-    #subclass models 
-          #species richness 
-          dwarfscrub_vascular_perm_nonvasc_univariate <- 
-            adonis2(dwarfscrub_env_nonvasc$Species_Richness ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                                      data = dwarfscrub_env_nonvasc, method = "bray", 
-                                                      permutations = perm_design_dwarfscrub_time_nonvasc, 
-                                                      by = "terms")
-          print(dwarfscrub_vascular_perm_nonvasc_univariate)
-          
-          #Species frequency 
-          dwarfscrub_vascular_perm_nonvasc <- 
-            adonis2(dwarfscrub_composition_nonvasc_multivariate ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                                      data = dwarfscrub_env_nonvasc, method = "bray", 
-                                                      permutations = perm_design_dwarfscrub_time_nonvasc, 
-                                                      by = "terms")
-          print(dwarfscrub_vascular_perm_nonvasc_multivariate)
-        
-          
   #beta diversity 
-          #park 
+        #park 
           dwarfscrub_dispersion_result_nonvasc <- betadisper(vegdist(dwarfscrub_composition_nonvasc, 
                                                                      method = "bray"), dwarfscrub_env_nonvasc$Park)
           dwarfscrub_dispersion_result_nonvasc 
           permutest(dwarfscrub_dispersion_result_nonvasc, permutations = 999)
           
-          #based on visit 
+        #based on visit 
           dwarfscrub_dispersion_result2_nonvasc <- betadisper(vegdist(dwarfscrub_composition_nonvasc, 
                                                                       method = "bray"), dwarfscrub_env_nonvasc$Visit)
           dwarfscrub_dispersion_result2_nonvasc
           permutest(dwarfscrub_dispersion_result2_nonvasc, permutations = 999)
           
-          #based on viereck
+        #based on viereck
           dwarfscrub_dispersion_result3_nonvasc <- betadisper(vegdist(dwarfscrub_composition_nonvasc, 
                                                                       method = "bray"), dwarfscrub_env_nonvasc$Viereck.3)
           dwarfscrub_dispersion_result3_nonvasc
@@ -4462,15 +3922,11 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/23))
           head25 <- head(results25)
           print.data.frame(head25)
-          
           #calculate P value 
           with(results25, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(forest_univariate_vasc_park)
+
 
       #differences between subclasses
-
           #base model
           forest_univariate_vasc_subclass <- adonis2(forest_env$Species_Richness ~ Viereck.3 + Park + 
                                                        Plot + Sample_Year + Viereck.3*Sample_Year,
@@ -4501,13 +3957,12 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             results025[i, ] <- t(temp$SumOfSqs)
           }
           
-          #create F value column - park 
+        #create F value column - park 
           results025 <- results025 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/22))
           head025 <- head(results025)
           print.data.frame(head025)
-          
           #calculate P value 
           with(results025, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -4517,13 +3972,12 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             mutate(F.Viereck = (Viereck.3/1)/(Plot/22))
           head025 <- head(results025)
           print.data.frame(head025)
-          
           #calculate P value 
           with(results025, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
           
           
     ### Multivariate - species frequency 
-        #differnces between parks 
+        #differences between parks 
           #base model 
           forest_multivariate_vasc_park <- adonis2(forest_composition ~ Park + Plot, 
                                    data = forest_env, method = "bray", 
@@ -4533,9 +3987,11 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
           
           #create permutation structure and results object 
           perms26 <- rbind(1:nrow(forest_composition),
-                           shuffleSet(n = nrow(forest_composition), control = perm_design_forest, nset = 999))
+                           shuffleSet(n = nrow(forest_composition),
+                                      control = perm_design_forest, nset = 999))
           results26 <- matrix(nrow = nrow(perms26), ncol = 7)
-          colnames(results26) <- c("Viereck.3", "Park", "Plot", "Sample_Year", "Viereck.3*Sample_Year", "Residual", "Total")
+          colnames(results26) <- c("Viereck.3", "Park", "Plot", "Sample_Year", 
+                                   "Viereck.3*Sample_Year", "Residual", "Total")
           
           #loop 
           for (i in 1:nrow(perms26)) {
@@ -4562,7 +4018,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
           print(forest_multivariate_vasc_park)
 
           
-    #differnces between subclasses 
+    #differences between subclasses 
           #base model 
           forest_multivariate_vasc_subclass <- adonis2(forest_composition ~ Viereck.3 + Park + 
                                                          Plot + Sample_Year + Viereck.3*Sample_Year, 
@@ -4596,7 +4052,6 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/22))
           head026 <- head(results026)
           print.data.frame(head026)
-          
           #calculate P value 
           with(results026, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -4606,88 +4061,53 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             mutate(F.Viereck = (Viereck.3/1)/(Plot/22))
           head026 <- head(results026)
           print.data.frame(head026)
-          
           #calculate P value 
           with(results026, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
           
-          
-          
-  #time based models 
-          #species richness 
-          forest_univariate_year <- adonis2(forest_env$Species_Richness ~ Park + Plot + Sample_Year,
-                                                  data = forest_env, 
-                                                  method = "euclidian",
-                                                  permutations = perm_design_forest_time,
-                                                  by = "terms")
-          print(forest_univariate_year)
-          
-          #species frequency 
-          forest_multivariate_year <- adonis2(forest_composition ~ Park + Plot + Sample_Year, 
-                                              data = forest_env, method = "bray", 
-                                              permutations = perm_design_forest_time, 
-                                              by = "terms")
-          print(forest_multivariate_year)
-          
-          
-          
-  #subclass models 
-          #species richness 
-          forest_vascular_subclass_univariate <- 
-            adonis2(forest_env$Species_Richness ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                          data = forest_env, method = "bray", 
-                                          permutations = perm_design_forest_time, 
-                                          by = "terms")
-          print(forest_vascular_subclass_univariate)
-          
-          #species frequency 
-          forest_vascular_subclass_multivariate <- 
-            adonis2(forest_composition ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                          data = forest_env, method = "bray", 
-                                          permutations = perm_design_forest_time, 
-                                          by = "terms")
-          print(forest_vascular_subclass_multivariate)          
-          
-          
-  #canopy cover models 
-          forest_vascular_CC_univariate <- adonis2(forest_env$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
+
+  #Canopy Cover
+        #Species Richness 
+          forest_vascular_CC_univariate <- adonis2(forest_env$Species_Richness ~ 
+                                                     Percent_Cover + Park + Plot + Sample_Year, 
                                             data = forest_env, method = "bray", 
                                             permutations = perm_design_forest_time, 
                                             by = "terms")
           print(forest_vascular_CC_univariate)
           
           
-          #species frequency 
-          forest_vascular_CC_multivariate <- adonis2(forest_composition ~ Percent_Cover + Park + Plot + Sample_Year, 
+        #Species Frequency 
+          forest_vascular_CC_multivariate <- adonis2(forest_composition ~ Percent_Cover + Park + 
+                                                       Plot + Sample_Year, 
                                             data = forest_env, method = "bray", 
                                             permutations = perm_design_forest_time, 
                                             by = "terms")
           print(forest_vascular_CC_multivariate)
           
           
-  #beta diversity 
+  #Beta Dispersion  
           
-          #based on park 
+        #based on park 
           forest_dispersion_result <- betadisper(vegdist(forest_composition, 
                                                          method = "bray"), forest_env$Park)
           forest_dispersion_result 
           permutest(forest_dispersion_result, permutations = 999)
           
-          #based on visit 
+        #based on visit 
           forest_dispersion_result2 <- betadisper(vegdist(forest_composition, 
                                                           method = "bray"), forest_env$Visit)
           forest_dispersion_result2 
           permutest(forest_dispersion_result2, permutations = 999)
           
-          #based on viereck
+        #based on viereck
           forest_dispersion_result3 <- betadisper(vegdist(forest_composition, 
                                                           method = "bray"), forest_env$Viereck.3)
           forest_dispersion_result3 
           permutest(forest_dispersion_result3, permutations = 999)
           
           
-          
-#lichen 
-  #species richness (univariate)
+----------------------------------------------------------------------------------------------------------------           
+#Lichen 
+  #Species Richness (Univariate)
     #differences between parks 
           #base model
           forest_univariate_lichen_park <- adonis2(forest_env_lichen$Species_Richness ~ Park + Plot,
@@ -4722,13 +4142,8 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/22))
           head27 <- head(results27)
           print.data.frame(head27)
-          
           #calculate P value 
           with(results27, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(forest_univariate_lichen_park)
-
           
     #differences between subclasses 
           #base model
@@ -4762,29 +4177,25 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             results027[i, ] <- t(temp$SumOfSqs)
           }
           
-          #create F value column - park 
+        #create F value column - park 
           results027 <- results027 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/21))
           head027 <- head(results027)
           print.data.frame(head027)
-          
           #calculate P value 
           with(results027, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #create F value column - viereck 
+        #create F value column - viereck 
           results027 <- results027 |>
             data.frame() |>
             mutate(F.Viereck = (Viereck.3/1)/(Plot/21))
           head027 <- head(results027)
           print.data.frame(head027)
-          
           #calculate P value 
           with(results027, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
 
-          
-          
-  ### Multivariate - species frequency 
+  ### Multivariate - Species Frequency 
         #differences between parks 
           #base model 
           forest_multivariate_lichen_park <- adonis2(forest_composition_lichen ~ Park + Plot, 
@@ -4816,15 +4227,11 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/22))
           head28 <- head(results28)
           print.data.frame(head28)
-          
           #calculate P value 
           with(results28, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #rest of table 
-          print(forest_multivariate_lichen_park)
           
-          
-    #differences between subclasses 
+    #Differences between Subclasses 
           #base model 
           forest_multivariate_lichen_subclass <- adonis2(forest_composition_lichen ~ Viereck.3 + Park + 
                                                            Plot + Sample_Year + Viereck.3*Sample_Year, 
@@ -4853,96 +4260,54 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             results028[i, ] <- t(temp$SumOfSqs)
           }
           
-          #calculate F statistic for park 
+        #calculate F statistic for park 
           results028 <- results028 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/21))
           head028 <- head(results028)
           print.data.frame(head028)
-          
           #calculate P value 
           with(results028, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #calculate F statistic for viereck 
+        #calculate F statistic for viereck 
           results028 <- results028 |>
             data.frame() |>
             mutate(F.Viereck = (Viereck.3/1)/(Plot/21))
           head028 <- head(results028)
           print.data.frame(head028)
-          
           #calculate P value 
           with(results028, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
           
-          
-          
-          
-                
-
-  #time based models 
-          #species richness 
-          forest_univariate_year_lichen <- adonis2(forest_env_lichen$Species_Richness ~ Park + Plot + Sample_Year,
-                                                          data = forest_env_lichen, 
-                                                          method = "euclidian",
-                                                          permutations = perm_design_forest_time_lichen,
-                                                          by = "terms")
-          print(forest_univariate_year_lichen)
-          
-          #species frequency 
-          forest_multivariate_year_lichen <- adonis2(forest_composition_lichen ~ Park + Plot + Sample_Year, 
-                                                      data = forest_env_lichen, method = "bray", 
-                                                      permutations = perm_design_forest_time_lichen, 
-                                                      by = "terms")
-          print(forest_multivariate_year_lichen)
-          
-          
-          
-  #subclass models
-          #species richness
-          forest_vascular_univariate_subclass_lichen <- 
-            adonis2(forest_env_lichen$Species_Richness ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                                  data = forest_env_lichen, method = "bray", 
-                                                  permutations = perm_design_forest_time_lichen, 
-                                                  by = "terms")
-          print(forest_vascular_univariate_subclass_lichen)
-          
-          #species frequency 
-          forest_vascular_multivariate_subclass_lichen <- 
-            adonis2(forest_composition_lichen ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                                  data = forest_env_lichen, method = "bray", 
-                                                  permutations = perm_design_forest_time_lichen, 
-                                                  by = "terms")
-          print(forest_vascular_multivariate_subclass_lichen)          
-          
-          
-      #canopy cover models 
+    #Canopy Cover
+        #Species Richness 
           forest_lichen_CC_univariate <- adonis2(forest_env_lichen$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
                                             data = forest_env_lichen, method = "bray", 
                                             permutations = perm_design_forest_time_lichen, 
                                             by = "terms")
           print(forest_lichen_CC_univariate)
           
-          #species frequency 
+        #Species Frequency 
           forest_lichen_CC_multivariate <- adonis2(forest_composition_lichen ~ Percent_Cover + Park + Plot + Sample_Year, 
                                             data = forest_env_lichen, method = "bray", 
                                             permutations = perm_design_forest_time_lichen, 
                                             by = "terms")
           print(forest_lichen_CC_multivariate)          
           
-  #beta diversity 
+  #Beta Dispersion  
           
-          #based on park 
+        #based on park 
           forest_dispersion_result_lichen <- betadisper(vegdist(forest_composition_lichen, 
                                                                  method = "bray"), forest_env_lichen$Park)
           forest_dispersion_result_lichen 
           permutest(forest_dispersion_result_lichen, permutations = 999)
           
-          #based on visit 
+        #based on visit 
           forest_dispersion_result2_lichen <- betadisper(vegdist(forest_composition_lichen, 
                                                                   method = "bray"), forest_env_lichen$Visit)
           forest_dispersion_result2_lichen 
           permutest(forest_dispersion_result2_lichen, permutations = 999)
           
-          #viereck 
+        #viereck 
           forest_dispersion_result3_lichen <- betadisper(vegdist(forest_composition_lichen, 
                                                                   method = "bray"), forest_env_lichen$Viereck.3)
           forest_dispersion_result3_lichen 
@@ -4950,10 +4315,10 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
 
           
           
+----------------------------------------------------------------------------------------------------------------           
           
-          
-#nonvascular 
-  #species richness (univariate)
+#Nonvascular 
+  #Species Richness (Univariate)
       #differences between parks 
           #base model 
           forest_univariate_nonvasc_park <- adonis2(forest_env_nonvasc$Species_Richness ~ Park + Plot,
@@ -4988,14 +4353,8 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/22))
           head29 <- head(results29)
           print.data.frame(head29)
-          
           #calculate P value 
           with(results29, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(forest_univariate_nonvasc_park)
-          
-          
           
        #differences between subclasses
           #base model 
@@ -5029,28 +4388,26 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             results029[i, ] <- t(temp$SumOfSqs)
           }
           
-          #create F value column - park 
+        #create F value column - park 
           results029 <- results029 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/21))
           head029 <- head(results029)
           print.data.frame(head029)
-          
           #calculate P value 
           with(results029, sum(F.Park >= F.Park[1]) / length(F.Park))
           
-          #create F value column - viereck
+        #create F value column - viereck
           results029 <- results029 |>
             data.frame() |>
             mutate(F.Viereck = (Viereck.3/1)/(Plot/21))
           head029 <- head(results029)
           print.data.frame(head029)
-          
           #calculate P value 
           with(results029, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
 
           
-    ### Multivariate - species composition 
+    ### Multivariate - Species Frequency  
         #differences between parks
           #base model
           forest_result_nonvasc_park <- adonis2(forest_composition_nonvasc ~ Park + Plot, 
@@ -5083,13 +4440,8 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/22))
           head30 <- head(results30)
           print.data.frame(head30)
-          
           #calculate P value 
           with(results30, sum(F.Park >= F.Park[1]) / length(F.Park))
-          
-          #rest of table 
-          print(forest_multivariate_nonvasc_park)
-          
           
     #differences between subclasses 
           #base model
@@ -5120,13 +4472,12 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             results030[i, ] <- t(temp$SumOfSqs)
           }
           
-          #calculate F statistic for park
+        #calculate F statistic for park
           results030 <- results030 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/21))
           head030 <- head(results030)
           print.data.frame(head030)
-          
           #calculate P value 
           with(results030, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -5136,95 +4487,49 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             mutate(F.Viereck = (Viereck.3/1)/(Plot/21))
           head030 <- head(results030)
           print.data.frame(head030)
-          
           #calculate P value 
           with(results030, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
       
-          
-    #time based models 
-          #species richness 
-          forest_univariate_year_nonvasc <- adonis2(forest_env_nonvasc$Species_Richness ~ Park + Plot + Sample_Year,
-                                                          data = forest_env_nonvasc, 
-                                                          method = "euclidian",
-                                                          permutations = perm_design_forest_time_nonvasc,
-                                                          by = "terms")
-          print(forest_univariate_year_nonvasc)
-          
-          #species frequency 
-          forest_multivariate_year_nonvasc <- adonis2(forest_composition_nonvasc ~ Park + Plot + Sample_Year, 
-                                                      data = forest_env_nonvasc, method = "bray", 
-                                                      permutations = perm_design_forest_time_nonvasc, 
-                                                      by = "terms")
-          print(forest_multivariate_year_nonvasc)
-          
-          
-          
-     #subclass models 
-          #Species richness 
-          forest_vascular_univariate_subclass_nonvasc <- 
-            adonis2(forest_env_nonvasc$Species_Richness ~ Viereck.3 + Park + Plot + 
-                      Sample_Year + Viereck.3*Sample_Year, 
-                                                  data = forest_env_nonvasc, method = "bray", 
-                                                  permutations = perm_design_forest_time_nonvasc, 
-                                                  by = "terms")
-          print(forest_vascular_univariate_subclass_nonvasc)
-          
-          #species frequency 
-          forest_vascular_multivariate_subclass_nonvasc <- 
-            adonis2(forest_composition_nonvasc ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                                  data = forest_env_nonvasc, method = "bray", 
-                                                  permutations = perm_design_forest_time_nonvasc, 
-                                                  by = "terms")
-          print(forest_vascular_multivariate_subclass_nonvasc)          
+
           
     #Canopy Cover models 
-          forest_nonvasc_CC_univariate <- adonis2(forest_env_nonvasc$Species_Richness ~ Percent_Cover + Park + Plot + Sample_Year, 
+        #Species Richness 
+          forest_nonvasc_CC_univariate <- adonis2(forest_env_nonvasc$Species_Richness ~ 
+                                                    Percent_Cover + Park + Plot + Sample_Year, 
                                             data = forest_env_nonvasc, method = "bray", 
                                             permutations = perm_design_forest_time_nonvasc, 
                                             by = "terms")
           print(forest_nonvasc_CC_univariate)
-          
-          
-          #species frequency 
-          forest_nonvasc_CC_multivariate <- adonis2(forest_composition_nonvasc ~ Percent_Cover + Park + Plot + Sample_Year, 
+
+        #Species Frequency 
+          forest_nonvasc_CC_multivariate <- adonis2(forest_composition_nonvasc ~ 
+                                                      Percent_Cover + Park + Plot + Sample_Year, 
                                             data = forest_env_nonvasc, method = "bray", 
                                             permutations = perm_design_forest_time_nonvasc, 
                                             by = "terms")
           print(forest_nonvasc_CC_multivariate) 
           
           
-    #beta diversity 
+    #Beta Dispersion 
           
-          #based on park 
+        #based on park 
           forest_dispersion_result_nonvasc <- betadisper(vegdist(forest_composition_nonvasc, 
                                                                  method = "bray"), forest_env_nonvasc$Park)
           forest_dispersion_result_nonvasc 
           permutest(forest_dispersion_result_nonvasc, permutations = 999)
           
-          #based on visit 
+        #based on visit 
           forest_dispersion_result2_nonvasc <- betadisper(vegdist(forest_composition_nonvasc, 
                                                                   method = "bray"), forest_env_nonvasc$Visit)
           forest_dispersion_result2_nonvasc 
           permutest(forest_dispersion_result2_nonvasc, permutations = 999)
           
-          #viereck 
+        #viereck 
           forest_dispersion_result3_nonvasc <- betadisper(vegdist(forest_composition_nonvasc, 
                                                                   method = "bray"), forest_env_nonvasc$Viereck.3)
           forest_dispersion_result3_nonvasc 
           permutest(forest_dispersion_result3_nonvasc, permutations = 999)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -5384,6 +4689,7 @@ alpine_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collap
 alpine_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_lichen_filtered.xlsx")
 alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_nonvasc_filtered.xlsx")
 
+#Ensure that sample year is numeric 
 alpine_env$Sample_Year <- as.numeric(alpine_env$Sample_Year)
 alpine_env_lichen$Sample_Year <- as.numeric(alpine_env_lichen$Sample_Year)
 alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year) 
@@ -5486,9 +4792,9 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
 ```{r}
 ## Vascular 
 
-      #Differences between Parks - Park*Time model 
-          
-        #base model 
+#Species Richness (Univariate)
+      #Differences between Parks 
+        #base model
           alpine_univariate_vasc_park <- adonis2(alpine_env$Species_Richness ~ Park + Plot,
                                      data = alpine_env, 
                                      method = "euclidian",
@@ -5518,16 +4824,11 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/15))
           head(results31) #top row has term F statistic for model 
-          
       #calculate P value 
           with(results31, sum(F.Park >= F.Park[1]) / length(F.Park))
-          print(alpine_univariate)
+        
           
-          print(alpine_univariate_vasc_park)
-          
-          
-          
-  #Differences between Parks - subclass model 
+  #Differences between subclasses 
       #base model 
           alpine_univariate_vasc_subclass <- adonis2(alpine_env$Species_Richness ~ Viereck.3 + Park + 
                                                     Plot + Sample_Year + Viereck.3*Sample_Year,
@@ -5564,47 +4865,18 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
           head(results32) #top row has term F statistic for model 
       #calculate P value 
           with(results32, sum(F.Park >= F.Park[1]) / length(F.Park))
-        
-          
+
       #create F value column - subclass
           results32 <- results32 |>
             data.frame() |>
             mutate(F.Viereck = (Viereck.3/3)/(Plot/12))
           head32 <- head(results32)
           print.data.frame(head32) #top row has term F statistic for model 
-          
       #calculate P value 
           with(results32, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
-
           
-          
-          
-#interaction of park and time for rest of terms in table
-          
-          #park*time model 
-          alpine_vascular_univariate_parktime <- adonis2(alpine_env$Species_Richness ~ Park + Plot + 
-                                                           Sample_Year + Park*Sample_Year,
-                                                data = alpine_env, 
-                                                method = "euclidian",
-                                                permutations = perm_design_alpine_time,
-                                                by = "terms")
-          print(alpine_vascular_univariate_parktime)
-          
-          #subclass model 
-          alpine_vascular_univariate_subclasstime <- adonis2(alpine_env$Species_Richness ~ Viereck.3 + Park + 
-                                                               Plot + Sample_Year + Viereck.3*Sample_Year,
-                                                data = alpine_env, 
-                                                method = "euclidian",
-                                                permutations = perm_design_alpine_time,
-                                                by = "terms")
-          print(alpine_vascular_univariate_subclasstime)
-
-          
-        
-          
-#multivariate 
-
-    #Park model 
+#Multivariate (Species Frequency) 
+    #Differences between parks 
         #base model 
           alpine_multivariate_vasc_park <- adonis2(alpine_composition ~ Park + Plot, 
                        data = alpine_env, method = "bray", 
@@ -5634,14 +4906,13 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/15))
           head(results33)
-          
     #calculate P value 
           with(results33, sum(F.Park >= F.Park[1]) / length(F.Park))
           print(alpine_multivariate_vasc_park)
       
           
           
-  #subclass model 
+  #Differences between subclasses 
       #Base model 
           alpine_multivariate_vasc_subclass <- adonis2(alpine_composition ~ Viereck.3 + Park + Plot + 
                                             Sample_Year + Viereck.3*Sample_Year, 
@@ -5676,7 +4947,6 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
             mutate(F.Park = (Park/1)/(Plot/12))
           head34 <- head(results34)
           print.data.frame(head34)
-          
       #calculate P value 
           with(results34, sum(F.Park >= F.Park[1]) / length(F.Park))
           
@@ -5686,30 +4956,9 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
             mutate(F.Viereck = (Viereck.3/3)/(Plot/12))
           head34 <- head(results34)
           print.data.frame(head34)
-          
       #calculate P value 
           with(results34, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
-          
-
-    #park*time model 
-          alpine_vascular_multivariate_parktime <- adonis2(alpine_composition ~ Park + Plot + 
-                                                              Sample_Year + Park*Sample_Year,
-                                                data = alpine_env, 
-                                                method = "euclidian",
-                                                permutations = perm_design_alpine_time,
-                                                by = "terms")
-          print(alpine_vascular_multivariate_parktime)
-
-
-    #Subclass Model 
-          alpine_vascular_multivariate_subclasstime <- adonis2(alpine_composition ~ Viereck.3 + Park + Plot + 
-                                            Sample_Year + Viereck.3*Sample_Year, 
-                                              data = alpine_env, method = "bray", 
-                                              permutations = perm_design_alpine_time, 
-                                              by = "terms")
-          print(alpine_vascular_multivariate_subclasstime)
-
-          
+ 
 #beta diversity 
 
       #based on park 
@@ -5730,18 +4979,12 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
           alpine_dispersion_result3 
           permutest(alpine_dispersion_result3, permutations = 999)
 
-
-          
-          
-          
-          
-          
+----------------------------------------------------------------------------------------------------------------               
 ## Lichen 
 
-### Univariate park 
-          
-          
+### Univariate (Species Richness)
          #difference between parks  
+              #Base Model 
                 alpine_lichen_univariate_park <- adonis2(alpine_env_lichen$Species_Richness ~ Park + Plot,
                                            data = alpine_env_lichen, 
                                            method = "euclidian",
@@ -5772,15 +5015,15 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                 results35 <- results35 |>
                   data.frame() |>
                   mutate(F.Park = (Park/1)/(Plot/14))
-                head(results35)
-                #first row is observed/your data, rows 2-1000 are the permuted data 
-                
+                head35 <- head(results35)
+                print.data.frame(head35) #first row is observed/your data, rows 2-1000 are the permuted data 
                 #calculate P value 
                 with(results35, sum(F.Park >= F.Park[1]) / length(F.Park))
                 print(alpine_lichen_univariate_park)
 
                 
-         #difference between subclasses 
+    #Differences between subclasses 
+              #Base Model
                 alpine_lichen_univariate_subclass <- adonis2(alpine_env_lichen$Species_Richness ~ Viereck.3 + 
                                                       Park + Plot + Sample_Year + Viereck.3*Sample_Year,
                                            data = alpine_env_lichen, 
@@ -5819,7 +5062,6 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                 head36 <- head(results36)
                 print.data.frame(head36)
                 #first row is observed/your data, rows 2-1000 are the permuted data 
-                
                 #calculate P value 
                 with(results36, sum(F.Park >= F.Park[1]) / length(F.Park))                
                 
@@ -5830,36 +5072,13 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                 head36 <- head(results36)
                 print.data.frame(head36)
                 #first row is observed/your data, rows 2-1000 are the permuted data 
-                
                 #calculate P value 
                 with(results36, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck)) 
-                
-                
-                
-#interaction - park and time for rest of table terms 
-alpine_lichen_univariate_parktime <- adonis2(alpine_env_lichen$Species_Richness ~ Park + Plot + Sample_Year + Park*Sample_Year,
-                                      data = alpine_env_lichen, 
-                                      method = "euclidian",
-                                      permutations = perm_design_alpine_lichen_time,
-                                      by = "terms")
-alpine_lichen_univariate_parktime
-
-alpine_lichen_univariate_subclasstime <- adonis2(alpine_env_lichen$Species_Richness ~ Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year,
-                                      data = alpine_env_lichen, 
-                                      method = "euclidian",
-                                      permutations = perm_design_alpine_lichen_time,
-                                      by = "terms")
-alpine_lichen_univariate_subclasstime
-
-
-
-
-
-
 
 ### Multivariate - presence absence composition 
 
-      #differences between parks 
+      #Differences between parks 
+              #Base Model 
                 alpine_lichen_multivariate_park <- adonis2(alpine_lichen_composition ~ Park + Plot, 
                                        data = alpine_env_lichen, method = "bray", 
                                        permutations = perm_design_alpine_lichen, 
@@ -5868,7 +5087,8 @@ alpine_lichen_univariate_subclasstime
                 
                 #create permutation object 
                 perms37 <- rbind(1:nrow(alpine_lichen_composition),
-                                shuffleSet(n = nrow(alpine_lichen_composition), control = perm_design_alpine_lichen, nset = 999))
+                                shuffleSet(n = nrow(alpine_lichen_composition), 
+                                           control = perm_design_alpine_lichen, nset = 999))
                 
                 results37 <- matrix(nrow = nrow(perms37), ncol = 4)
                 colnames(results37) <- c("Park", "Plot", "Residual", "Total")
@@ -5888,14 +5108,15 @@ alpine_lichen_univariate_subclasstime
                 results37 <- results37 |>
                   data.frame() |>
                   mutate(F.Park = (Park/1)/(Plot/14))
-                head(results37)
-                
+                head37 <- head(results37)
+                print.data.frame(head37)
                 #calculate P value 
                 with(results37, sum(F.Park >= F.Park[1]) / length(F.Park))
                 print(alpine_lichen_multivariate_park)
 
 
       #subclass model 
+              #Base model 
                 alpine_lichen_multivariate_subclass <- adonis2(alpine_lichen_composition ~ Viereck.3 + Park + 
                                                   Plot + Sample_Year + Viereck.3*Sample_Year, 
                                        data = alpine_env_lichen, method = "bray", 
@@ -5924,47 +5145,24 @@ alpine_lichen_univariate_subclasstime
                   results38[i, ] <- t(temp$SumOfSqs)
                 }
                 
-                #calculate F values for permutations - park 
+              #calculate F values for permutations - park 
                 results38 <- results38 |>
                   data.frame() |>
                   mutate(F.Park = (Park/1)/(Plot/12))
                 head(results38)
-                
                 #calculate P value 
                 with(results38, sum(F.Park >= F.Park[1]) / length(F.Park))
-
-                #calculate F values for permutations - subclass
+                
+              #calculate F values for permutations - subclass
                 results38 <- results38 |>
                   data.frame() |>
                   mutate(F.Viereck = (Viereck.3/4)/(Plot/12))
                 head38 <- head(results38)
                 print.data.frame(head38)
-                
                 #calculate P value 
                 with(results38, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
 
-
-#park*subclass model 
-      alpine_lichen_result_parktime <- adonis2(alpine_lichen_composition ~ Park + Plot + 
-                                                 Sample_Year + Park*Sample_Year, 
-                                        data = alpine_env_lichen, method = "bray", 
-                                        permutations = perm_design_alpine_lichen_time, 
-                                        by = "terms")
-      alpine_lichen_result_parktime
-
-
-#subclass model 
-      alpine_lichen_multivariate_subclasstime <- adonis2(alpine_lichen_composition ~ Viereck.3 + Park + 
-                                                           Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                          data = alpine_env_lichen, method = "bray", 
-                                          permutations = perm_design_alpine_lichen_time, 
-                                          by = "terms")
-      print(alpine_lichen_multivariate_subclasstime)
-
-
-
-
-#beta diversity 
+#Beta Dispersion 
 
       #based on park 
             alpine_lichen_dispersion_result <- betadisper(vegdist(alpine_lichen_composition, 
@@ -5984,14 +5182,14 @@ alpine_lichen_univariate_subclasstime
             alpine_lichen_dispersion_result3 
             permutest(alpine_lichen_dispersion_result3, permutations = 999)
 
-
+---------------------------------------------------------------------------------------------------------------------------
 
 ## Nonvascular
+              
+  ### Univariate (Species Richness)
 
-
-### Univeriate 
-
-      #park model 
+      #Differences between Parks 
+        #Base model 
           alpine_nonvasc_univariate_park <- adonis2(alpine_env_nonvasc$Species_Richness ~ Park + Plot,
                                               data = alpine_env_nonvasc, 
                                               method = "euclidian",
@@ -6024,14 +5222,12 @@ alpine_lichen_univariate_subclasstime
             mutate(F.Park = (Park/1)/(Plot/14))
           head(results39)
           #first row is observed/your data, rows 2-1000 are the permuted data 
-          
           #calculate P value 
           with(results39, sum(F.Park >= F.Park[1]) / length(F.Park))
           print(alpine_nonvasc_univariate_park)
 
-
-
-      #subclass model 
+      #Differences between subclasses 
+        #Base Model 
           alpine_nonvasc_univariate_subclass <- adonis2(alpine_env_nonvasc$Species_Richness ~ Viereck.3 + Park + 
                                                  Plot + Sample_Year + Viereck.3*Sample_Year,
                                               data = alpine_env_nonvasc, 
@@ -6062,54 +5258,28 @@ alpine_lichen_univariate_subclasstime
             results40[i, ] <- t(temp$SumOfSqs)
           }
           
-          #create F value column 
+        #create F value column 
           results40 <- results40 |>
             data.frame() |>
             mutate(F.Park = (Park/1)/(Plot/12))
           head(results40)
           #first row is observed/your data, rows 2-1000 are the permuted data 
-          
           #calculate P value 
           with(results40, sum(F.Park >= F.Park[1]) / length(F.Park))
 
-          #create F value column 
+        #create F value column 
           results40 <- results40 |>
             data.frame() |>
             mutate(F.Viereck = (Viereck.3/4)/(Plot/12))
           head40 <- head(results40)
           print.data.frame(head40)
           #first row is observed/your data, rows 2-1000 are the permuted data 
-          
           #calculate P value 
           with(results40, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
 
+### Multivariate - Species Frequency  
 
-
-#Park vs time model 
-      alpine_nonvasc_univariate_parktime <- adonis2(alpine_env_nonvasc$Species_Richness ~ Park + Plot + 
-                                                                      Sample_Year + Park*Sample_Year,
-                                                     data = alpine_env_nonvasc, 
-                                                     method = "euclidian",
-                                                     permutations = perm_design_alpine_nonvasc_time,
-                                                     by = "terms")
-      print(alpine_nonvasc_univariate_parktime)
-
-#subclass model 
-      alpine_nonvasc_univariate_subclasstime <- adonis2(alpine_env_nonvasc$Species_Richness ~ Viereck.3 + Park + Plot + 
-                                                                                    Sample_Year + Viereck.3*Sample_Year,
-                                                     data = alpine_env_nonvasc, 
-                                                     method = "euclidian",
-                                                     permutations = perm_design_alpine_nonvasc_time,
-                                                     by = "terms")
-      print(alpine_nonvasc_univariate_subclasstime)
-
-
-
-
-
-### Multivariate - species composition 
-
-#differences between parks 
+  #Differences between parks 
       #base model 
             alpine_nonvasc_multivariate_park <- adonis2(alpine_nonvasc_composition ~ Park + Plot, 
                                             data = alpine_env_nonvasc, method = "bray", 
@@ -6141,16 +5311,11 @@ alpine_lichen_univariate_subclasstime
               data.frame() |>
               mutate(F.Park = (Park/1)/(Plot/14))
             head(results41)
-            
       #calculate P value 
             with(results41, sum(F.Park >= F.Park[1]) / length(F.Park))
             print(alpine_nonvasc_multivariate_park)
-
             
-            
-            
-#differences among subclasses 
-            
+  #Differences among subclasses 
         #base model 
             alpine_nonvasc_multivariate_subclass <- adonis2(alpine_nonvasc_composition ~ Viereck.3 + Park + 
                                                Plot + Sample_Year + Viereck.3*Sample_Year, 
@@ -6185,7 +5350,6 @@ alpine_lichen_univariate_subclasstime
               data.frame() |>
               mutate(F.Park = (Park/1)/(Plot/14))
             head(results42)
-            
         #calculate P value 
             with(results42, sum(F.Park >= F.Park[1]) / length(F.Park))
             print(alpine_nonvasc_multivariate_subclass)
@@ -6196,34 +5360,10 @@ alpine_lichen_univariate_subclasstime
               mutate(F.Viereck = (Viereck.3/4)/(Plot/14))
             head42 <- head(results42)
             print.data.frame(head42)
-            
         #calculate P value 
             with(results42, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
 
-            
-            
-
-#park * time interaction model  
-        alpine_nonvasc_multivarite_parktime <- adonis2(alpine_nonvasc_composition ~ Park + Plot + Sample_Year + 
-                                                         Park*Sample_Year, 
-                                                   data = alpine_env_nonvasc, method = "bray", 
-                                                   permutations = perm_design_alpine_nonvasc_time, 
-                                                   by = "terms")
-        print(alpine_nonvasc_multivarite_parktime)
-
-
-#subclass model 
-        alpine_nonvasc_multivariate_subclasstime <- adonis2(alpine_nonvasc_composition ~ Viereck.3 + Park + 
-                                                              Plot + Sample_Year + Viereck.3*Sample_Year, 
-                                            data = alpine_env_nonvasc, method = "bray", 
-                                            permutations = perm_design_alpine_nonvasc_time, 
-                                            by = "terms")
-        print(alpine_nonvasc_multivariate_subclasstime)
-
-
-
-
-#beta diversity 
+#Beta Dispersion 
 
     #based on park 
         alpine_nonvasc_dispersion_result <- betadisper(vegdist(alpine_nonvasc_composition, 
