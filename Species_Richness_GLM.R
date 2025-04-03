@@ -38,7 +38,13 @@ combined_df <- combined_df[, -4]
 combined_df <- combined_df[, -5]
 combined_df <- combined_df[, -6]
 
-write.csv(combined_df, "T:/Users/KPace/Species_Richness_Collapsed_For_Mike.csv")
+
+species_richness_collapsed_codes <- read.csv("T:/Users/KPace/Species_Richness_Collapsed_Codes.csv")
+viereck <- read.csv("T:/Users/KPace/Swan-Internship-New/Data/Unmodified/Viereck_Classes.csv")
+species_richness_collapsed_codes <- species_richness_collapsed_codes %>%
+  left_join(viereck %>% select(Plot, Sample_Year, Sample_Date), by = c("Plot", "Sample_Year"))
+write.csv(species_richness_collapsed_codes, "T:/Users/KPace/Species_Richness_Collapsed_Codes.csv")
+
 
 
 #Open Low Shrub 
