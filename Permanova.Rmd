@@ -89,7 +89,7 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
 ```
 
 
-# Beetle Kill Spruce 
+# Beetle Disturbed Spruce 
 
 ## Building the dataframes to be balanced - code for reference (not required to run if using quick load)
 ```{r}
@@ -385,7 +385,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                    permutations = perm_design_beetle,
                                    by = "terms")
       print(beetle_univariate_vasc_park)
-      
+      #hand calculate corrected F values 
       #create permutation object 
       perms1 <- rbind(1:nrow(beetle_env),
                       shuffleSet(n = nrow(beetle_env), control = perm_design_beetle, nset = 999))
@@ -427,6 +427,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                    by = "terms")
       print(beetle_univariate_vasc_subclass)
       
+      #hand calculate corrected F values 
       #create permutation object 
       perms01 <- rbind(1:nrow(beetle_env),
                       shuffleSet(n = nrow(beetle_env), control = perm_design_beetle, nset = 999))
@@ -475,7 +476,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                by = "terms")
       
       print(beetle_multivariate_vasc_park)
-      
+      #hand calculate corrected F values
       #create permutation structure and results object 
       perms2 <- rbind(1:nrow(beetle_composition),
                       shuffleSet(n = nrow(beetle_composition), control = perm_design_beetle, nset = 999))
@@ -510,7 +511,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                by = "terms")
       
       print(beetle_multivariate_vasc_subclass)
-      
+      #hand calculate corrected F values
       #create permutation structure and results object 
       perms02 <- rbind(1:nrow(beetle_composition),
                       shuffleSet(n = nrow(beetle_composition), control = perm_design_beetle, nset = 999))
@@ -597,6 +598,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                        by = "terms")
           print(beetle_univariate_lichen_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms3 <- rbind(1:nrow(beetle_env_lichen),
                           shuffleSet(n = nrow(beetle_env_lichen), control = perm_design_beetle_lichen, nset = 999))
@@ -636,6 +638,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                        by = "terms")
           print(beetle_univariate_lichen_subclass)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms03 <- rbind(1:nrow(beetle_env_lichen),
                           shuffleSet(n = nrow(beetle_env_lichen), 
@@ -686,6 +689,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                    by = "terms")
           print(beetle_multivariate_lichen_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms4 <- rbind(1:nrow(beetle_lichen_composition),
                           shuffleSet(n = nrow(beetle_lichen_composition), 
@@ -722,6 +726,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                    by = "terms")
           print(beetle_multivariate_lichen_subclass)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms04 <- rbind(1:nrow(beetle_lichen_composition),
                           shuffleSet(n = nrow(beetle_lichen_composition), 
@@ -804,6 +809,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                        by = "terms")
           print(beetle_univariate_nonvasc_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms5 <- rbind(1:nrow(beetle_env_nonvasc),
                           shuffleSet(n = nrow(beetle_env_nonvasc), 
@@ -844,6 +850,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                        by = "terms")
           print(beetle_univariate_nonvasc_subclass)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms05 <- rbind(1:nrow(beetle_env_nonvasc),
                           shuffleSet(n = nrow(beetle_env_nonvasc), 
@@ -894,6 +901,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                    by = "terms")
           print(beetle_multivariate_nonvasc_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms6 <- rbind(1:nrow(beetle_nonvasc_composition),
                           shuffleSet(n = nrow(beetle_nonvasc_composition), 
@@ -930,6 +938,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
                                    by = "terms")
           print(beetle_multivariate_nonvasc_subclass)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms06 <- rbind(1:nrow(beetle_nonvasc_composition),
                           shuffleSet(n = nrow(beetle_nonvasc_composition), 
@@ -1347,6 +1356,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                        by = "terms")
           print(needle_univariate_vascular_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms7 <- rbind(1:nrow(needle_env),
                            shuffleSet(n = nrow(needle_env), control = perm_design_needle, nset = 999))
@@ -1389,6 +1399,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
           perms07 <- rbind(1:nrow(needle_env),
                            shuffleSet(n = nrow(needle_env), control = perm_design_needle, nset = 999))
           
+          #hand calculate corrected F values
           #create object for SS to be stored 
           results07 <- matrix(nrow = nrow(perms07), ncol = 6)
           colnames(results07) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
@@ -1422,6 +1433,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                    by = "terms")
           print(needle_multivariate_vascular_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms8 <- rbind(1:nrow(needle_composition),
                            shuffleSet(n = nrow(needle_composition), 
@@ -1458,6 +1470,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                    by = "terms")
           print(needle_multivariate_vascular_time)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms08 <- rbind(1:nrow(needle_composition),
                            shuffleSet(n = nrow(needle_composition), 
@@ -1512,6 +1525,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                               by = "terms")
           print(needle_univariate_lichen_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms9 <- rbind(1:nrow(needle_env_lichen),
                            shuffleSet(n = nrow(needle_env_lichen), 
@@ -1552,6 +1566,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                               by = "terms")
           print(needle_univariate_lichen_time)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms09 <- rbind(1:nrow(needle_env_lichen),
                            shuffleSet(n = nrow(needle_env_lichen), 
@@ -1594,6 +1609,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                           by = "terms")
           print(needle_multivariate_lichen_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms10 <- rbind(1:nrow(needle_composition_lichen),
                            shuffleSet(n = nrow(needle_composition_lichen), 
@@ -1630,6 +1646,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                           by = "terms")
           print(needle_multivariate_lichen_time)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms010 <- rbind(1:nrow(needle_composition_lichen),
                            shuffleSet(n = nrow(needle_composition_lichen), 
@@ -1685,6 +1702,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                                by = "terms")
           print(needle_univariate_nonvasc_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms11 <- rbind(1:nrow(needle_env_nonvasc),
                            shuffleSet(n = nrow(needle_env_nonvasc), 
@@ -1724,6 +1742,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                                by = "terms")
           print(needle_univariate_nonvasc_time)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms011 <- rbind(1:nrow(needle_env_nonvasc),
                            shuffleSet(n = nrow(needle_env_nonvasc), 
@@ -1765,6 +1784,7 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
                                            by = "terms")
           print(needle_multivariate_nonvasc_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms12 <- rbind(1:nrow(needle_composition_nonvasc),
                            shuffleSet(n = nrow(needle_composition_nonvasc), 
@@ -2171,6 +2191,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                     by = "terms")
       print(openlow_univariate_vasc_park)
       
+      #hand calculate corrected F values
       #create permutation object 
       perms13 <- rbind(1:nrow(openlow_env),
                        shuffleSet(n = nrow(openlow_env), control = perm_design_openlow, nset = 999))
@@ -2210,6 +2231,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                     by = "terms")
       print(openlow_univariate_vasc_time)
       
+      #hand calculate corrected F values
       #create permutation object 
       perms013 <- rbind(1:nrow(openlow_env),
                        shuffleSet(n = nrow(openlow_env), control = perm_design_openlow, nset = 999))
@@ -2245,6 +2267,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                 by = "terms")
       print(openlow_multivariate_vasc_park)
       
+      #hand calculate corrected F values
       #create permutation structure and results object 
       perms14 <- rbind(1:nrow(openlow_composition),
                        shuffleSet(n = nrow(openlow_composition), control = perm_design_openlow, nset = 999))
@@ -2281,6 +2304,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                 by = "terms")
       print(openlow_multivariate_vasc_time)
       
+      #hand calculate corrected F values
       #create permutation structure and results object 
       perms014 <- rbind(1:nrow(openlow_composition),
                        shuffleSet(n = nrow(openlow_composition), control = perm_design_openlow, nset = 999))
@@ -2335,7 +2359,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                     by = "terms")
       print(openlow_univariate_lichen_park)
       
-      
+      #hand calculate corrected F values
       #create permutation object 
       perms15 <- rbind(1:nrow(openlow_env_lichen),
                        shuffleSet(n = nrow(openlow_env_lichen), control = perm_design_openlow_lichen, nset = 999))
@@ -2377,6 +2401,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                     by = "terms")
       print(openlow_univariate_lichen_time)
       
+      #hand calculate corrected F values
       #create permutation object 
       perms015 <- rbind(1:nrow(openlow_env_lichen),
                        shuffleSet(n = nrow(openlow_env_lichen), control = perm_design_openlow_lichen, nset = 999))
@@ -2416,6 +2441,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                 by = "terms")
       print(openlow_multivariate_lichen_park)
       
+      #hand calculate corrected F values
       #create permutation structure and results object 
       perms16 <- rbind(1:nrow(openlow_composition_lichen),
                        shuffleSet(n = nrow(openlow_composition_lichen), 
@@ -2454,6 +2480,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                 by = "terms")
       print(openlow_multivariate_lichen_time)
       
+      #hand calculate corrected F values
       #create permutation structure and results object 
       perms016 <- rbind(1:nrow(openlow_composition_lichen),
                        shuffleSet(n = nrow(openlow_composition_lichen), 
@@ -2513,7 +2540,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                            by = "terms")
       print(openlow_univariate_nonvasc_park)
       
-      
+      #hand calculate corrected F values
       #create permutation object 
           perms17 <- rbind(1:nrow(openlow_env_nonvasc),
                        shuffleSet(n = nrow(openlow_env_nonvasc), 
@@ -2544,7 +2571,6 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
           with(results17, sum(F.Park >= F.Park[1]) / length(F.Park))
 
 
-          
   #Differences through time  
       check(openlow_env_nonvasc, control = perm_design_openlow_nonvasc) #how many possible permutations 
       
@@ -2557,6 +2583,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                            by = "terms")
       print(openlow_univariate_nonvasc_time)
       
+      #hand calculate corrected F values
       #create permutation object 
           perms017 <- rbind(1:nrow(openlow_env_nonvasc),
                        shuffleSet(n = nrow(openlow_env_nonvasc), 
@@ -2598,6 +2625,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                        by = "terms")
       print(openlow_multivariate_nonvasc_park)
       
+      #hand calculate corrected F values
       #create permutation structure and results object 
           perms18 <- rbind(1:nrow(openlow_composition_nonvasc),
                            shuffleSet(n = nrow(openlow_composition_nonvasc), 
@@ -2636,6 +2664,7 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
                                        by = "terms")
       print(openlow_multivariate_nonvasc_time)
       
+      #hand calculate corrected F values
       #create permutation structure and results object 
           perms018 <- rbind(1:nrow(openlow_composition_nonvasc),
                            shuffleSet(n = nrow(openlow_composition_nonvasc), 
@@ -2679,12 +2708,6 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
     openlow_dispersion_result2_nonvasc 
     permutest(openlow_dispersion_result2_nonvasc, permutations = 999)
 ```
-
-
-
-
-
-
 
 
 
@@ -2976,7 +2999,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                            by = "terms")
           print(dwarfscrub_univariate_vasc_park)
           
-          
+          #hand calculate corrected F values
           #create permutation object 
           perms19 <- rbind(1:nrow(dwarfscrub_env),
                            shuffleSet(n = nrow(dwarfscrub_env), 
@@ -3019,7 +3042,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                            by = "terms")
           print(dwarfscrub_univariate_vasc_subclass)
           
-          
+          #hand calculate corrected F values
           #create permutation object 
           perms019 <- rbind(1:nrow(dwarfscrub_env),
                            shuffleSet(n = nrow(dwarfscrub_env), 
@@ -3071,6 +3094,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                        by = "terms")
           print(dwarfscrub_multivariate_vasc_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms20 <- rbind(1:nrow(dwarfscrub_composition),
                            shuffleSet(n = nrow(dwarfscrub_composition), 
@@ -3107,6 +3131,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                        by = "terms")
           print(dwarfscrub_multivariate_vasc_subclass)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms020 <- rbind(1:nrow(dwarfscrub_composition),
                            shuffleSet(n = nrow(dwarfscrub_composition), 
@@ -3181,6 +3206,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                                    by = "terms")
           print(dwarfscrub_univariate_lichen_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms21 <- rbind(1:nrow(dwarfscrub_env_lichen),
                            shuffleSet(n = nrow(dwarfscrub_env_lichen), 
@@ -3223,6 +3249,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                                    by = "terms")
           print(dwarfscrub_univariate_lichen_subclass)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms021 <- rbind(1:nrow(dwarfscrub_env_lichen),
                            shuffleSet(n = nrow(dwarfscrub_env_lichen), 
@@ -3273,6 +3300,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                                by = "terms")
           print(dwarfscrub_multivariate_lichen_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms22 <- rbind(1:nrow(dwarfscrub_composition_lichen),
                            shuffleSet(n = nrow(dwarfscrub_composition_lichen), 
@@ -3312,6 +3340,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                                by = "terms")
           print(dwarfscrub_multivariate_lichen_subclass)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms022 <- rbind(1:nrow(dwarfscrub_composition_lichen),
                            shuffleSet(n = nrow(dwarfscrub_composition_lichen), 
@@ -3386,7 +3415,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                                    by = "terms")
           print(dwarfscrub_univariate_nonvasc_park)
           
-          
+          #hand calculate corrected F values
           #create permutation object 
           perms23 <- rbind(1:nrow(dwarfscrub_env_nonvasc),
                            shuffleSet(n = nrow(dwarfscrub_env_nonvasc), 
@@ -3427,7 +3456,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                                    by = "terms")
           print(dwarfscrub_univariate_nonvasc_subclass)
           
-          
+          #hand calculate corrected F values
           #create permutation object 
           perms023 <- rbind(1:nrow(dwarfscrub_env_nonvasc),
                            shuffleSet(n = nrow(dwarfscrub_env_nonvasc), 
@@ -3478,6 +3507,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                                by = "terms")
           print(dwarfscrub_multivariate_nonvasc_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms24 <- rbind(1:nrow(dwarfscrub_composition_nonvasc),
                            shuffleSet(n = nrow(dwarfscrub_composition_nonvasc), 
@@ -3515,6 +3545,7 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
                                                by = "terms")
           print(dwarfscrub_multivariate_nonvasc_subclass)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms024 <- rbind(1:nrow(dwarfscrub_composition_nonvasc),
                            shuffleSet(n = nrow(dwarfscrub_composition_nonvasc), 
@@ -3897,6 +3928,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                        by = "terms")
           print(forest_univariate_vasc_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms25 <- rbind(1:nrow(forest_env),
                            shuffleSet(n = nrow(forest_env), control = perm_design_forest, nset = 999))
@@ -3936,6 +3968,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                        by = "terms")
           print(forest_univariate_vasc_subclass)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms025 <- rbind(1:nrow(forest_env),
                            shuffleSet(n = nrow(forest_env), control = perm_design_forest, nset = 999))
@@ -3985,6 +4018,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                    by = "terms")
           print(forest_multivariate_vasc_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms26 <- rbind(1:nrow(forest_composition),
                            shuffleSet(n = nrow(forest_composition),
@@ -4027,6 +4061,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                    by = "terms")
           print(forest_multivariate_vasc_subclass)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms026 <- rbind(1:nrow(forest_composition),
                            shuffleSet(n = nrow(forest_composition), control = perm_design_forest, nset = 999))
@@ -4117,6 +4152,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                                by = "terms")
           print(forest_univariate_lichen_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms27 <- rbind(1:nrow(forest_env_lichen),
                            shuffleSet(n = nrow(forest_env_lichen), control = perm_design_forest_lichen, nset = 999))
@@ -4155,6 +4191,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                                by = "terms")
           print(forest_univariate_lichen_subclass)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms027 <- rbind(1:nrow(forest_env_lichen),
                            shuffleSet(n = nrow(forest_env_lichen), 
@@ -4204,6 +4241,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                            by = "terms")
           print(forest_multivariate_lichen_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms28 <- rbind(1:nrow(forest_composition_lichen),
                            shuffleSet(n = nrow(forest_composition_lichen), control = perm_design_forest_lichen, nset = 999))
@@ -4240,6 +4278,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                            by = "terms")
           print(forest_multivariate_lichen_subclass)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms028 <- rbind(1:nrow(forest_composition_lichen),
                            shuffleSet(n = nrow(forest_composition_lichen), 
@@ -4328,6 +4367,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                                by = "terms")
           print(forest_univariate_nonvasc_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms29 <- rbind(1:nrow(forest_env_nonvasc),
                            shuffleSet(n = nrow(forest_env_nonvasc), control = perm_design_forest_nonvasc, nset = 999))
@@ -4366,6 +4406,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                                by = "terms")
           print(forest_univariate_nonvasc_subclass)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms029 <- rbind(1:nrow(forest_env_nonvasc),
                            shuffleSet(n = nrow(forest_env_nonvasc), 
@@ -4416,6 +4457,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                            by = "terms")
           print(forest_multivariate_nonvasc_park)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms30 <- rbind(1:nrow(forest_composition_nonvasc),
                            shuffleSet(n = nrow(forest_composition_nonvasc), 
@@ -4452,6 +4494,7 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
                                            by = "terms")
           print(forest_multivariate_nonvasc_subclass)
           
+          #hand calculate corrected F values
           #create permutation structure and results object 
           perms030 <- rbind(1:nrow(forest_composition_nonvasc),
                            shuffleSet(n = nrow(forest_composition_nonvasc), 
@@ -4802,6 +4845,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                      by = "terms")
           print(alpine_univariate_vasc_park)
           
+          #hand calculate corrected F values
         #create permutation framework + results object 
           perms31 <- rbind(1:nrow(alpine_env),
                          shuffleSet(n = nrow(alpine_env), control = perm_design_alpine, nset = 999))
@@ -4838,6 +4882,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                      by = "terms")
           print(alpine_univariate_vasc_subclass)
           
+          #hand calculate corrected F values
       #create permutation framework + results object 
           perms32 <- rbind(1:nrow(alpine_env),
                          shuffleSet(n = nrow(alpine_env), 
@@ -4884,6 +4929,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                        by = "terms")
           print(alpine_multivariate_vasc_park)
           
+          #hand calculate corrected F values
     #create permutation framework + results object 
           perms33 <- rbind(1:nrow(alpine_composition),
                 shuffleSet(n = nrow(alpine_composition), control = perm_design_alpine, nset = 999))
@@ -4921,6 +4967,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                        by = "terms")
           print(alpine_multivariate_vasc_subclass)
           
+          #hand calculate corrected F values
       #create permutation framework + results object 
           perms34 <- rbind(1:nrow(alpine_composition),
                 shuffleSet(n = nrow(alpine_composition), 
@@ -4992,6 +5039,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                            by = "terms")
                 print(alpine_lichen_univariate_park)
                 
+                #hand calculate corrected F values
                 #create permutation object 
                 perms35 <- rbind(1:nrow(alpine_env_lichen),
                                shuffleSet(n = nrow(alpine_env_lichen), control = perm_design_alpine_lichen, nset = 999))
@@ -5032,6 +5080,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                            by = "terms")
                 print(alpine_lichen_univariate_subclass)
                 
+                #hand calculate corrected F values
                 #create permutation object 
                 perms36 <- rbind(1:nrow(alpine_env_lichen),
                                shuffleSet(n = nrow(alpine_env_lichen), 
@@ -5085,6 +5134,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                        by = "terms")
                 print(alpine_lichen_multivariate_park)
                 
+                #hand calculate corrected F values
                 #create permutation object 
                 perms37 <- rbind(1:nrow(alpine_lichen_composition),
                                 shuffleSet(n = nrow(alpine_lichen_composition), 
@@ -5124,6 +5174,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                        by = "terms")
                 print(alpine_lichen_multivariate_subclass)
                 
+                #hand calculate corrected F values
                 #create permutation object 
                 perms38 <- rbind(1:nrow(alpine_lichen_composition),
                                 shuffleSet(n = nrow(alpine_lichen_composition), 
@@ -5197,6 +5248,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                               by = "terms")
           print(alpine_nonvasc_univariate_park)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms39 <- rbind(1:nrow(alpine_env_nonvasc),
                          shuffleSet(n = nrow(alpine_env_nonvasc), control = perm_design_alpine_nonvasc, nset = 999))
@@ -5236,6 +5288,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                               by = "terms")
           print(alpine_nonvasc_univariate_subclass)
           
+          #hand calculate corrected F values
           #create permutation object 
           perms40 <- rbind(1:nrow(alpine_env_nonvasc),
                          shuffleSet(n = nrow(alpine_env_nonvasc), 
@@ -5287,6 +5340,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                             by = "terms")
             print(alpine_nonvasc_multivariate_park)
       
+            #hand calculate corrected F values
       #create permutation object 
             perms41 <- rbind(1:nrow(alpine_nonvasc_composition),
                             shuffleSet(n = nrow(alpine_nonvasc_composition), control = perm_design_alpine_nonvasc, nset = 999))
@@ -5324,6 +5378,7 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                             by = "terms")
             alpine_nonvasc_multivariate_subclass
             
+            #hand calculate corrected F values
         #create permutation object 
             perms42 <- rbind(1:nrow(alpine_nonvasc_composition),
                             shuffleSet(n = nrow(alpine_nonvasc_composition), 
@@ -5382,415 +5437,5 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
                                                               method = "bray"), alpine_env_nonvasc$Viereck.3)
         alpine_nonvasc_dispersion_result3 
         permutest(alpine_nonvasc_dispersion_result3, permutations = 999)
-
-```
-
-
-
-
-
-
-# Paired PERMANOVA For Vegetation Classes 
-
-```{r}
-library(readxl)
-library(vegan)
-library(permute)
-library(lattice)
-library(pairwiseAdonis)
-library(writexl)
-
-vascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/presence_absence_df_full.xlsx")
-lichenspresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/lichenspresence_absence_df_full.xlsx")
-nonvascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/nonvascpresence_absence_df_full.xlsx")
-
-vasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/vasc_df_balanced.xlsx")
-nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/nonvasc_df_balanced.xlsx")
-lichens_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/lichens_df_balanced.xlsx")
-
-lichenspresence_absence_df <- read_xlsx("C:/Users/kmpace/Desktop/LICHENPRESENCEANSENCEBALANCED.xlsx")
-lichens_env <- read_xlsx("C:/Users/kmpace/Desktop/LICHENENVBALANCED.xlsx")
-
-perm_design_lichen = how(
-  plots = Plots(strata = lichens_env$Plot, type = c("free")),
-  within = Within(type = "none"),
-  nperm = 999)
-
-lichen_comp <- lichenspresence_absence_df[,c(13:179)]
-lichen_comp <- as.matrix(lichen_comp)
-
-lichenspresence_absence_df <- lichenspresence_absence_df[order(lichenspresence_absence_df$Plot_Year), ]
-lichens_env <- lichens_env[order(lichens_env$Plot_Year), ]
-
-lichenspresence_absence_df <- lichenspresence_absence_df[-c(19,22,65,68,123,124,125,128,145,158,161,164,167,172,175,186,193,194,197), ]
-lichens_env <- lichens_env[-c(19,22,65,68,123,124,125,128,145,158,161,164,167,172,175,186,193,194,197), ]
-
-table(lichenspresence_absence_df$Park, lichenspresence_absence_df$Plot)
-
-
-
-str(lichens_env)
-lichens_env$Park <- as.factor(lichens_env$Park)
-lichens_env$Viereck.3 <- as.factor(lichens_env$Viereck.3)
-lichens_env$Viereck.2 <- as.factor(lichens_env$Viereck.2)
-lichens_env$Viereck.1 <- as.factor(lichens_env$Viereck.1)
-lichens_env$Vegetation_Class <- as.factor(lichens_env$Vegetation_Class)
-
-
-
-lichen_pairwise <- adonis2(lichen_comp ~ Viereck.3 + Plot,
-                            data = lichens_env, method = "bray",
-                            permutations = perm_design_lichen,
-                            by = "terms")
-lichen_pairwise
-
-#write_xlsx(lichens_env, "/Users/kimberlynpace/Desktop/LICHENENVBALANCED.xlsx")
-#write_xlsx(lichenspresence_absence_df, "/Users/kimberlynpace/Desktop/LICHENPRESENCEANSENCEBALANCED.xlsx")
-
-
-dist_matrix <- vegdist(lichen_comp, method = "bray")
-
-pairwise_results <- pairwise.adonis2(dist_matrix ~ Viereck.3, data = lichens_env, permutations = perm_design_lichen)
-print(pairwise_results)
-
-extract_results <- function(results_list) {
-  df_list <- lapply(names(results_list), function(pair) {
-    result <- results_list[[pair]]
-    data.frame(
-      Comparison = pair,
-      Term = rownames(result),
-      R2 = result$R2,
-      F_stat = result$F,
-      p_value = result$`Pr(>F)`,
-      stringsAsFactors = FALSE)})
-  do.call(rbind, df_list)}
-
-
-dist_matrix <- vegdist(lichen_comp, method = "bray")
-groups <- unique(lichens_env$Viereck.3)
-pairwise_results <- list()
-
-for (i in 1:(length(groups) - 1)) {
-  for (j in (i + 1):length(groups)) {
-    
-    subset_idx <- lichens_env$Viereck.3 %in% c(groups[i], groups[j])
-    env_subset <- lichens_env[subset_idx, , drop = FALSE]
-    comp_subset <- lichen_comp[subset_idx, ]
-    
-    perm_subset <- how(nperm = perm_design_lichen$nperm) 
-    setBlocks(perm_subset) <- perm_design_lichen$blocks[subset_idx]  
-
-    pairwise_results[[paste(groups[i], "vs", groups[j])]] <- adonis2(
-      vegdist(comp_subset, method = "bray") ~ Viereck.3 + Plot, 
-      data = env_subset, 
-      method = "bray", 
-      permutations = perm_subset,  
-      by = "terms"
-    )
-  }
-}
-
-pairwise_results
-viereck3_lichen_paired <- extract_results(pairwise_results)
-
-
-#viereck 2
-dist_matrix <- vegdist(lichen_comp, method = "bray")
-groups <- unique(lichens_env$Viereck.2)
-pairwise_results <- list()
-
-for (i in 1:(length(groups) - 1)) {
-  for (j in (i + 1):length(groups)) {
-    
-    subset_idx <- lichens_env$Viereck.2 %in% c(groups[i], groups[j])
-    env_subset <- lichens_env[subset_idx, , drop = FALSE]
-    comp_subset <- lichen_comp[subset_idx, ]
-    
-    perm_subset <- how(nperm = perm_design_lichen$nperm) 
-    setBlocks(perm_subset) <- perm_design_lichen$blocks[subset_idx]  
-    
-    pairwise_results[[paste(groups[i], "vs", groups[j])]] <- adonis2(
-      vegdist(comp_subset, method = "bray") ~ Viereck.2 + Plot, 
-      data = env_subset, 
-      method = "bray", 
-      permutations = perm_subset,  
-      by = "terms")}}
-
-pairwise_results
-viereck2_lichen_paired <- extract_results(pairwise_results)
-
-#veg sight assigned
-dist_matrix <- vegdist(lichen_comp, method = "bray")
-groups <- unique(lichens_env$Vegetation_Class)
-pairwise_results <- list()
-
-for (i in 1:(length(groups) - 1)) {
-  for (j in (i + 1):length(groups)) {
-    
-    subset_idx <- lichens_env$Vegetation_Class %in% c(groups[i], groups[j])
-    env_subset <- lichens_env[subset_idx, , drop = FALSE]
-    comp_subset <- lichen_comp[subset_idx, ]
-    
-    perm_subset <- how(nperm = perm_design_lichen$nperm) 
-    setBlocks(perm_subset) <- perm_design_lichen$blocks[subset_idx]  
-    
-    pairwise_results[[paste(groups[i], "vs", groups[j])]] <- adonis2(
-      vegdist(comp_subset, method = "bray") ~ Vegetation_Class + Plot, 
-      data = env_subset, 
-      method = "bray", 
-      permutations = perm_subset,  
-      by = "terms")}}
-
-pairwise_results
-veg_lichen_paired <- extract_results(pairwise_results)
-
-
-#bind all results together 
-paired_list <- list(viereck3_lichen_paired, viereck2_lichen_paired, veg_lichen_paired)
-lichen_combined_results <- bind_rows(paired_list)
-write_xlsx(lichen_combined_results, "C:/Users/kmpace/Desktop/LICHEN_PairedTest_Results.xlsx")
-
-
-
-
-
-
-
-
-#vascular species 
-
-vasc_df <- read_xlsx("C:/Users/kmpace/Desktop/vasc_df_balanced.xlsx")
-
-vasc_df <- vasc_df %>%
-  group_by(Plot) %>%
-  filter(!any(is.na(Viereck.3))) %>%
-  ungroup()
-
-vasc_env_balanced <- vasc_df[,c(1:10)]
-
-vasc_composition <- vasc_df[,c(11:284)]
-vasc_composition <- as.matrix(vasc_composition) 
-
-perm_design_vasc = how(
-  plots = Plots(strata = vasc_env_balanced$Plot, type = c("free")),
-  within = Within(type = "none"),
-  nperm = 999)
-
-vasc_pairwise <- adonis2(vasc_composition ~ Vegetation_Class + Plot,
-                           data = vasc_env_balanced, method = "bray",
-                           permutations = perm_design_vasc,
-                           by = "terms")
-vasc_pairwise
-
-
-
-#veg class sight assigned 
-
-dist_matrix <- vegdist(vasc_composition, method = "bray")
-groups <- unique(vasc_env_balanced$Vegetation_Class)
-pairwise_results <- list()
-
-for (i in 1:(length(groups) - 1)) {
-  for (j in (i + 1):length(groups)) {
-    
-    subset_idx <- vasc_env_balanced$Vegetation_Class %in% c(groups[i], groups[j])
-    env_subset <- vasc_env_balanced[subset_idx, , drop = FALSE]
-    comp_subset <- vasc_composition[subset_idx, ]
-    
-    perm_subset <- how(nperm = perm_design_vasc$nperm) 
-    setBlocks(perm_subset) <- perm_design_vasc$blocks[subset_idx]  
-    
-    pairwise_results[[paste(groups[i], "vs", groups[j])]] <- adonis2(
-      vegdist(comp_subset, method = "bray") ~ Vegetation_Class + Plot, 
-      data = env_subset, 
-      method = "bray", 
-      permutations = perm_subset,  
-      by = "terms")}}
-
-pairwise_results
-veg_vasc_paired <- extract_results(pairwise_results)
-
-#viereck 3
-dist_matrix <- vegdist(vasc_composition, method = "bray")
-groups <- unique(vasc_env_balanced$Viereck.3)
-pairwise_results <- list()
-
-for (i in 1:(length(groups) - 1)) {
-  for (j in (i + 1):length(groups)) {
-    
-    subset_idx <- vasc_env_balanced$Viereck.3 %in% c(groups[i], groups[j])
-    env_subset <- vasc_env_balanced[subset_idx, , drop = FALSE]
-    comp_subset <- vasc_composition[subset_idx, ]
-    
-    perm_subset <- how(nperm = perm_design_vasc$nperm) 
-    setBlocks(perm_subset) <- perm_design_vasc$blocks[subset_idx]  
-    
-    pairwise_results[[paste(groups[i], "vs", groups[j])]] <- adonis2(
-      vegdist(comp_subset, method = "bray") ~ Viereck.3 + Plot, 
-      data = env_subset, 
-      method = "bray", 
-      permutations = perm_subset,  
-      by = "terms")}}
-
-pairwise_results
-viereck3_vasc_paired <- extract_results(pairwise_results)
-
-#viereck 2
-dist_matrix <- vegdist(vasc_composition, method = "bray")
-groups <- unique(vasc_env_balanced$Viereck.2)
-pairwise_results <- list()
-
-for (i in 1:(length(groups) - 1)) {
-  for (j in (i + 1):length(groups)) {
-    
-    subset_idx <- vasc_env_balanced$Viereck.2 %in% c(groups[i], groups[j])
-    env_subset <- vasc_env_balanced[subset_idx, , drop = FALSE]
-    comp_subset <- vasc_composition[subset_idx, ]
-    
-    perm_subset <- how(nperm = perm_design_vasc$nperm) 
-    setBlocks(perm_subset) <- perm_design_vasc$blocks[subset_idx]  
-    
-    pairwise_results[[paste(groups[i], "vs", groups[j])]] <- adonis2(
-      vegdist(comp_subset, method = "bray") ~ Viereck.2 + Plot, 
-      data = env_subset, 
-      method = "bray", 
-      permutations = perm_subset,  
-      by = "terms")}}
-
-pairwise_results
-viereck2_vasc_paired <- extract_results(pairwise_results)
-
-
-#bind all results together 
-paired_list <- list(viereck3_vasc_paired, viereck2_vasc_paired, veg_vasc_paired)
-vasc_combined_results <- bind_rows(paired_list)
-write_xlsx(vasc_combined_results, "C:/Users/kmpace/Desktop/VASC_PairedTest_Results.xlsx")
-
-
-
-
-
-
-
-
-
-
-#nonvascular species 
-
-nonvasc_df <- read_xlsx("C:/Users/kmpace/Desktop/nonvasc_df_balanced.xlsx")
-
-nonvasc_df <- nonvasc_df %>%
-  group_by(Plot) %>%
-  filter(!any(is.na(Viereck.3))) %>%
-  ungroup()
-
-nonvasc_env_balanced <- nonvasc_df[,c(1:12)]
-nonvasc_composition <- nonvasc_df[,c(13:219)]
-nonvasc_composition <- as.matrix(nonvasc_composition) 
-
-perm_design_nonvasc = how(
-  plots = Plots(strata = nonvasc_env_balanced$Plot, type = c("free")),
-  within = Within(type = "none"),
-  nperm = 999)
-
-nonvasc_pairwise <- adonis2(nonvasc_composition ~ Vegetation_Class + Plot,
-                         data = nonvasc_env_balanced, method = "bray",
-                         permutations = perm_design_nonvasc,
-                         by = "terms")
-nonvasc_pairwise
-
-
-
-
-
-
-
-#veg class sight assigned 
-
-dist_matrix <- vegdist(nonvasc_composition, method = "bray")
-groups <- unique(nonvasc_env_balanced$Vegetation_Class)
-pairwise_results <- list()
-
-for (i in 1:(length(groups) - 1)) {
-  for (j in (i + 1):length(groups)) {
-    
-    subset_idx <- nonvasc_env_balanced$Vegetation_Class %in% c(groups[i], groups[j])
-    env_subset <- nonvasc_env_balanced[subset_idx, , drop = FALSE]
-    comp_subset <- nonvasc_composition[subset_idx, ]
-    
-    perm_subset <- how(nperm = perm_design_nonvasc$nperm) 
-    setBlocks(perm_subset) <- perm_design_nonvasc$blocks[subset_idx]  
-    
-    pairwise_results[[paste(groups[i], "vs", groups[j])]] <- adonis2(
-      vegdist(comp_subset, method = "bray") ~ Vegetation_Class + Plot, 
-      data = env_subset, 
-      method = "bray", 
-      permutations = perm_subset,  
-      by = "terms")}}
-
-pairwise_results
-veg_nonvasc_paired <- extract_results(pairwise_results)
-
-#viereck 3
-dist_matrix <- vegdist(nonvasc_composition, method = "bray")
-groups <- unique(nonvasc_env_balanced$Viereck.3)
-pairwise_results <- list()
-
-for (i in 1:(length(groups) - 1)) {
-  for (j in (i + 1):length(groups)) {
-    
-    subset_idx <- nonvasc_env_balanced$Viereck.3 %in% c(groups[i], groups[j])
-    env_subset <- nonvasc_env_balanced[subset_idx, , drop = FALSE]
-    comp_subset <- nonvasc_composition[subset_idx, ]
-    
-    perm_subset <- how(nperm = perm_design_nonvasc$nperm) 
-    setBlocks(perm_subset) <- perm_design_nonvasc$blocks[subset_idx]  
-    
-    pairwise_results[[paste(groups[i], "vs", groups[j])]] <- adonis2(
-      vegdist(comp_subset, method = "bray") ~ Viereck.3 + Plot, 
-      data = env_subset, 
-      method = "bray", 
-      permutations = perm_subset,  
-      by = "terms")}}
-
-pairwise_results
-viereck3_nonvasc_paired <- extract_results(pairwise_results)
-
-#viereck 2
-dist_matrix <- vegdist(nonvasc_composition, method = "bray")
-groups <- unique(nonvasc_env_balanced$Viereck.2)
-pairwise_results <- list()
-
-for (i in 1:(length(groups) - 1)) {
-  for (j in (i + 1):length(groups)) {
-    
-    subset_idx <- nonvasc_env_balanced$Viereck.2 %in% c(groups[i], groups[j])
-    env_subset <- nonvasc_env_balanced[subset_idx, , drop = FALSE]
-    comp_subset <- nonvasc_composition[subset_idx, ]
-    
-    perm_subset <- how(nperm = perm_design_nonvasc$nperm) 
-    setBlocks(perm_subset) <- perm_design_nonvasc$blocks[subset_idx]  
-    
-    pairwise_results[[paste(groups[i], "vs", groups[j])]] <- adonis2(
-      vegdist(comp_subset, method = "bray") ~ Viereck.2 + Plot, 
-      data = env_subset, 
-      method = "bray", 
-      permutations = perm_subset,  
-      by = "terms")}}
-
-pairwise_results
-viereck2_nonvasc_paired <- extract_results(pairwise_results)
-
-
-#bind all results together 
-paired_list <- list(viereck3_nonvasc_paired, viereck2_nonvasc_paired, veg_nonvasc_paired)
-nonvasc_combined_results <- bind_rows(paired_list)
-write_xlsx(nonvasc_combined_results, "C:/Users/kmpace/Desktop/NONVASC_PairedTest_Results.xlsx")
-
-
-
-
-
-
 
 ```

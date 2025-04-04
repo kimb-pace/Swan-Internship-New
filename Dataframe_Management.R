@@ -183,6 +183,9 @@ write_xlsx(lichen_sp_richness, "T:/Users/KPace/SWAN-Internship-New/Data/Modified
 write_xlsx(vasc_sp_richness, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/vascular_sp_richness_filtered.xlsx")
 write_xlsx(nonvasc_sp_richness, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/nonvasc_sp_richness_filtered.xlsx")
 
+
+
+
 #pull in old dfs - INCORRECT!!!!!!!!!!!!!!!!
 alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_vasc.xlsx")
 alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/PERMANOVA_DF_QuickLoad/alpine_df_lichen.xlsx")

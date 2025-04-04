@@ -25,9 +25,6 @@ plot_elevation_data <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifi
 taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/taxa_filtered.xlsx")
 ```
 
-
-
-
 # Alpine NMDS Analysis 
 
 ## Manage Dataframes 
