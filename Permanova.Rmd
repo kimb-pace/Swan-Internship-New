@@ -4,6 +4,26 @@ output: html_document
 date: "2025-02-04"
 ---
 
+READ FIRST: 
+
+Adonis2, by default, calculates F statistics as term/residual. This is not necessarily the most exact test for significance (Anderson 2002), and the most exact test can be determined by deriving the expected mean squared variance for your specified model. The correct F calculation can be determined by assigning the variance associated with term of interest to the numerator and finding the term that accounts for all of the variance besides the specific term variance. 
+
+This leads us to need to hand-calculate specific terms in our models by extracting the permutation sums of squares and recalculating the F and P values with the new values. 
+
+For these specific models, we determined that the Park and Viereck.3 terms were more accurately calculated as Term/Plot rather than the Adonis2 default of Term/Residual. For the Viereck.3 F equation, there wasn't an exact test.  
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Setup 
 ```{r}
 library(vegan)
@@ -13,14 +33,15 @@ library(dplyr)
 library(readxl)
 library(readr)
 library(writexl)
+library(here)
 
 #Required: 
     #Canopy Cover 
       #Load this file: 
-      canopy_cover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/canopy_cover.xlsx")
+      canopy_cover <- read_xlsx(here("Data/Modified/canopy_cover.xlsx")) 
       
       #How I calculated the percent cover column: 
-      canopy_cover <- read_csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Canopy_Cover_PtInt.csv")
+      canopy_cover <- read_csv(here("Data/Unmodified/Canopy_Cover_PtInt.csv"))
       canopy_cover <- canopy_cover %>%
         mutate(Plot_Year = paste(Plot, Sample_Year, sep = "_")) %>%
         group_by(Plot_Year) %>%
@@ -28,19 +49,19 @@ library(writexl)
         ungroup()
 
 #Optional (Can avoid if using quickload within subsets)
+
+#If interested in how I balanced the subsets and built the .env files
+summary_table_vasc <- read_xlsx(here("Data/Modified/summary_table_vasc.xlsx"))
+summary_table_nonvasc <- read_xlsx(here("Data/Modified/summary_table_nonvasc.xlsx"))
+summary_table_lichens <- read_xlsx(here("Data/Modified/summary_table_lichens.xlsx")) 
       
-    #If interested in how I balanced the subsets and built the .env files
-summary_table_vasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_vasc.xlsx")
-summary_table_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_nonvasc.xlsx")
-summary_table_lichens <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/summary_table_lichens.xlsx")
+quad_abundance_df_vascular_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/quad_abundance_df_vascular_filtered.xlsx"))
+quad_abundance_df_lichen_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/quad_abundance_df_lichen_filtered.xlsx"))
+quad_abundance_df_nonvasc_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/quad_abundance_df_nonvasc_filtered.xlsx"))
       
-lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
-nonvasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_nonvasc.xlsx")
-vasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_vascular.xlsx")
-      
-lichen_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/Lichen_Species_Richness.xlsx")
-nonvasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/Nonvascular_Species_Richness.xlsx")
-vasc_sp_richness <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/Vascular_Species_Richness.xlsx")
+lichen_sp_richness <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/lichen_sp_richness_filtered.xlsx"))
+nonvasc_sp_richness <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/nonvasc_sp_richness_filtered.xlsx"))
+vasc_sp_richness <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/vascular_sp_richness_filtered.xlsx"))
 ```
 
 # Creation of Summary Tables, Code for Reference (not required to run if using quick load)
@@ -111,12 +132,12 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
       
       #subset main presence absence dataframe based on both conditions 
       #verify that the hand selected plots were correctly pulled 
-      subset_hand_selected <- vascpresence_absence_df %>%
+      subset_hand_selected <- quad_abundance_df_vascular_filtered %>%
         filter(
           Plot %in% names(filter_criteria_beetle) & 
             Sample_Year %in% unlist(filter_criteria_beetle[Plot]))
       
-      beetle_df <- presence_absence_df %>%
+      beetle_df <- quad_abundance_df_vascular_filtered %>%
         filter(
           (Plot %in% beetle_plots) | 
             (Plot %in% names(filter_criteria_beetle) &
@@ -145,13 +166,13 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
           selected_plots
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected <- lichenspresence_absence_df %>%
+          subset_hand_selected <- quad_abundance_df_lichen_filtered %>%
             filter(
               Plot %in% names(filter_criteria_beetle_lichen) & 
                 Sample_Year %in% unlist(filter_criteria_beetle_lichen[Plot]))
           table(subset_hand_selected$Park, subset_hand_selected$Plot) 
           
-          beetle_df_lichen <- lichenspresence_absence_df %>%
+          beetle_df_lichen <- quad_abundance_df_lichen_filtered %>%
             filter(
               (Plot %in% beetle_lichen_plots) | 
                 (Plot %in% names(filter_criteria_beetle_lichen) &
@@ -183,13 +204,13 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
           selected_plots
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected <- nonvascpresence_absence_df %>%
+          subset_hand_selected <- quad_abundance_df_nonvasc_filtered %>%
             filter(
               Plot %in% names(filter_criteria_beetle_nonvasc) & 
                 Sample_Year %in% unlist(filter_criteria_beetle_nonvasc[Plot]))
           table(subset_hand_selected$Park, subset_hand_selected$Plot) 
           
-          beetle_df_nonvasc <- nonvascpresence_absence_df %>%
+          beetle_df_nonvasc <- quad_abundance_df_nonvasc_filtered %>%
             filter(
               (Plot %in% beetle_nonvasc_plots) | 
                 (Plot %in% names(filter_criteria_beetle_nonvasc) &
@@ -262,14 +283,14 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
 ```{r}
 #quick pull from T Drive 
 #dataframes
-beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx")
-beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx")
-beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx")
+beetle_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx"))
+beetle_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx"))
+beetle_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx"))
 
 #built env files
-beetle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_vasc_filtered.xlsx")
-beetle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_lichen_filtered.xlsx")
-beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc_filtered.xlsx")
+beetle_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_vasc_filtered.xlsx"))
+beetle_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_lichen_filtered.xlsx"))
+beetle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc_filtered.xlsx"))
 
 #make sure sample year is numeric 
 beetle_env$Sample_Year <- as.numeric(beetle_env$Sample_Year)
@@ -468,7 +489,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       #calculate P value 
       with(results01, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
       
-#Multivariate 
+#Multivariate (species frequency)
   #differences between parks 
       beetle_multivariate_vasc_park <- adonis2(beetle_composition ~ Park + Plot, 
                                data = beetle_env, method = "bray", 
@@ -567,7 +588,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
         print(beetle_CC_multivariate) 
       
 
-### Beta Diversity 
+### Beta Dispersion  
       #based on visit 
           beetle_dispersion_result1 <- betadisper(vegdist(beetle_composition, 
                                                           method = "bray"), beetle_env$Visit)
@@ -1049,18 +1070,15 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           #combine plots with hand selected plots from filter criteria 
           selected_plots <- union(needle_plots, names(filter_criteria_needle))
           
-          vascpresence_absence_df <- vascpresence_absence_df %>%
-            left_join(viereck %>% select(Plot_Year, Viereck.3), by = c("Plot_Year"))
-          
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected <- vascpresence_absence_df %>%
+          subset_hand_selected <- quad_abundance_df_vascular_filtered %>%
             filter(
               Plot %in% names(filter_criteria_needle) & 
                 Sample_Year %in% unlist(filter_criteria_needle[Plot]))
           table(subset_hand_selected$Park, subset_hand_selected$Plot) 
           
-          needle_df <- vascpresence_absence_df %>%
+          needle_df <- quad_abundance_df_vascular_filtered %>%
             filter(
               (Plot %in% needle_plots) | 
                 (Plot %in% names(filter_criteria_needle) &
@@ -1106,13 +1124,13 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected <- lichenspresence_absence_df %>%
+          subset_hand_selected <- quad_abundance_df_lichen_filtered %>%
             filter(
               Plot %in% names(filter_criteria_needle_lichen) & 
                 Sample_Year %in% unlist(filter_criteria_needle_lichen[Plot]))
           table(subset_hand_selected$Park, subset_hand_selected$Plot) 
           
-          needle_df_lichen <- lichenspresence_absence_df %>%
+          needle_df_lichen <- quad_abundance_df_lichen_filtered %>%
             filter(
               (Plot %in% needle_plots_lichen) | 
                 (Plot %in% names(filter_criteria_needle_lichen) &
@@ -1165,13 +1183,13 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected <- nonvascpresence_absence_df %>%
+          subset_hand_selected <- quad_abundance_df_nonvasc_filtered %>%
             filter(
               Plot %in% names(filter_criteria_needle_nonvasc) & 
                 Sample_Year %in% unlist(filter_criteria_needle_nonvasc[Plot]))
           table(subset_hand_selected$Park, subset_hand_selected$Plot) 
           
-          needle_df_nonvasc <- nonvascpresence_absence_df %>%
+          needle_df_nonvasc <- quad_abundance_df_nonvasc_filtered %>%
             filter(
               (Plot %in% needle_plots_nonvasc) | 
                 (Plot %in% names(filter_criteria_needle_nonvasc) &
@@ -1239,13 +1257,13 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
 ## Load data frames (Required)
 ```{r}
 #Quick load of dataframes from T drive
-needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx")
-needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx")
-needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx")
+needle_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx"))
+needle_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx"))
+needle_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx"))
     
-needle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_vasc_filtered.xlsx")
-needle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_lichen_filtered.xlsx")
-needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_nonvasc_filtered.xlsx")
+needle_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_vasc_filtered.xlsx"))
+needle_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_lichen_filtered.xlsx"))
+needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_nonvasc_filtered.xlsx"))
 
 #ensuring that sample year is numeric 
     needle_env$Sample_Year <- as.numeric(needle_env$Sample_Year)
@@ -1906,23 +1924,19 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
       
       #subset main presence absence dataframe based on both conditions 
       #first verify that the hand selected plots were correctly pulled 
-      subset_hand_selected <- vascpresence_absence_df %>%
+      subset_hand_selected <- quad_abundance_df_vascular_filtered %>%
         filter(
           Plot %in% names(filter_criteria_openlow) & 
             Sample_Year %in% unlist(filter_criteria_openlow[Plot]))
       table(subset_hand_selected$Park, subset_hand_selected$Plot) 
       
-      openlow_df <- vascpresence_absence_df %>%
+      openlow_df <- quad_abundance_df_vascular_filtered %>%
         filter(
           (Plot %in% openlow_plots) | 
             (Plot %in% names(filter_criteria_openlow) &
                Sample_Year %in% unlist(filter_criteria_openlow[Plot])))
       
       table(openlow_df$Park, openlow_df$Plot) 
-      openlow_df <- openlow_df[-38, ]
-      openlow_df <- openlow_df[-37, ]
-      openlow_df <- openlow_df[-36, ]
-      openlow_df <- openlow_df[-35, ]
       
       #convert to frequency from PA
       openlow_vasc_abundance_balanced <- vasc_abundance_df %>%
@@ -1953,24 +1967,19 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
       
       #subset main presence absence dataframe based on both conditions 
       #first verify that the hand selected plots were correctly pulled 
-      subset_hand_selected <- lichenspresence_absence_df %>%
+      subset_hand_selected <- quad_abundance_df_lichen_filtered %>%
         filter(
           Plot %in% names(filter_criteria_openlow_lichen) & 
             Sample_Year %in% unlist(filter_criteria_openlow_lichen[Plot]))
       table(subset_hand_selected$Park, subset_hand_selected$Plot) 
       
-      openlow_df_lichen <- lichenspresence_absence_df %>%
+      openlow_df_lichen <- quad_abundance_df_lichen_filtered %>%
         filter(
           (Plot %in% openlow_plots_lichen) | 
             (Plot %in% names(filter_criteria_openlow_lichen) &
                Sample_Year %in% unlist(filter_criteria_openlow_lichen[Plot])))
       
       table(openlow_df_lichen$Park, openlow_df_lichen$Plot) 
-      
-      openlow_df_lichen <- openlow_df_lichen[-54, ]
-      openlow_df_lichen <- openlow_df_lichen[-33, ]
-      openlow_df_lichen <- openlow_df_lichen[-32, ]
-      openlow_df_lichen <- openlow_df_lichen[-31, ]
       
       #convert to frequency from PA
       openlow_lichen_abundance_balanced <- lichen_abundance_df %>%
@@ -2000,24 +2009,19 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
       
       #subset main presence absence dataframe based on both conditions 
       #first verify that the hand selected plots were correctly pulled 
-      subset_hand_selected <- nonvascpresence_absence_df %>%
+      subset_hand_selected <- quad_abundance_df_nonvasc_filtered %>%
         filter(
           Plot %in% names(filter_criteria_openlow_nonvasc) & 
             Sample_Year %in% unlist(filter_criteria_openlow_nonvasc[Plot]))
       table(subset_hand_selected$Park, subset_hand_selected$Plot) 
       
-      openlow_df_nonvasc <- nonvascpresence_absence_df %>%
+      openlow_df_nonvasc <- quad_abundance_df_nonvasc_filtered %>%
         filter(
           (Plot %in% openlow_plots_nonvasc) | 
             (Plot %in% names(filter_criteria_openlow_nonvasc) &
                Sample_Year %in% unlist(filter_criteria_openlow_nonvasc[Plot])))
       
       table(openlow_df_nonvasc$Park, openlow_df_nonvasc$Plot) 
-      
-      openlow_df_nonvasc <- openlow_df_nonvasc[-54, ]
-      openlow_df_nonvasc <- openlow_df_nonvasc[-33, ]
-      openlow_df_nonvasc <- openlow_df_nonvasc[-32, ]
-      openlow_df_nonvasc <- openlow_df_nonvasc[-31, ]
       
       #convert to frequency from PA
       openlow_nonvasc_abundance_balanced <- nonvasc_abundance_df %>%
@@ -2072,13 +2076,13 @@ needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modifie
 ## Load data frames (Required)
 ```{r}
 #quick pull from T drive 
-openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx")
-openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx")
-openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx")
+openlow_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx"))
+openlow_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx"))
+openlow_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx"))
 
-openlow_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_vasc_filtered.xlsx")
-openlow_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_lichen_filtered.xlsx")
-openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_nonvasc_filtered.xlsx")
+openlow_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_vasc_filtered.xlsx"))
+openlow_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_lichen_filtered.xlsx"))
+openlow_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_nonvasc_filtered.xlsx"))
 
 openlow_env$Sample_Year <- as.numeric(openlow_env$Sample_Year)
 openlow_env_lichen$Sample_Year <- as.numeric(openlow_env_lichen$Sample_Year)
@@ -2732,13 +2736,13 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
           
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected <- vascpresence_absence_df %>%
+          subset_hand_selected <- quad_abundance_df_vascular_filtered %>%
             filter(
               Plot %in% names(filter_criteria_dwarfscrub) & 
                 Sample_Year %in% unlist(filter_criteria_dwarfscrub[Plot]))
           table(subset_hand_selected$Park, subset_hand_selected$Plot) 
           
-          dwarfscrub_df <- vascpresence_absence_df %>%
+          dwarfscrub_df <- quad_abundance_df_vascular_filtered %>%
             filter(
               (Plot %in% dwarfscrub_plots) | 
                 (Plot %in% names(filter_criteria_dwarfscrub) &
@@ -2771,13 +2775,13 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
           
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected <- lichenspresence_absence_df %>%
+          subset_hand_selected <- quad_abundance_df_lichen_filtered %>%
             filter(
               Plot %in% names(filter_criteria_dwarfscrub_lichens) & 
                 Sample_Year %in% unlist(filter_criteria_dwarfscrub_lichens[Plot]))
           table(subset_hand_selected$Park, subset_hand_selected$Plot) 
           
-          dwarfscrub_df_lichens <- lichenspresence_absence_df %>%
+          dwarfscrub_df_lichens <- quad_abundance_df_lichen_filtered %>%
             filter(
               (Plot %in% dwarfscrub_plots_lichens) | 
                 (Plot %in% names(filter_criteria_dwarfscrub_lichens) &
@@ -2810,13 +2814,13 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
           
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected <- nonvascpresence_absence_df %>%
+          subset_hand_selected <- quad_abundance_df_nonvasc_filtered %>%
             filter(
               Plot %in% names(filter_criteria_dwarfscrub_nonvasc) & 
                 Sample_Year %in% unlist(filter_criteria_dwarfscrub_nonvasc[Plot]))
           table(subset_hand_selected$Park, subset_hand_selected$Plot) 
           
-          dwarfscrub_df_nonvasc <- nonvascpresence_absence_df %>%
+          dwarfscrub_df_nonvasc <- quad_abundance_df_nonvasc_filtered %>%
             filter(
               (Plot %in% dwarfscrub_plots_nonvasc) | 
                 (Plot %in% names(filter_criteria_dwarfscrub_nonvasc) &
@@ -2877,13 +2881,13 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
 ## Load Data Frames (Required)
 ```{r}
 #quick Load from T drive 
-dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx")
-dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx")
-dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx")  
+dwarfscrub_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx"))
+dwarfscrub_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx"))
+dwarfscrub_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx"))  
   
-dwarfscrub_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_vasc_filtered.xlsx")
-dwarfscrub_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_lichen_filtered.xlsx")
-dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_nonvasc_filtered.xlsx") 
+dwarfscrub_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_vasc_filtered.xlsx"))
+dwarfscrub_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_lichen_filtered.xlsx"))
+dwarfscrub_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_nonvasc_filtered.xlsx")) 
 
 dwarfscrub_env$Sample_Year <- as.numeric(dwarfscrub_env$Sample_Year)
 dwarfscrub_env_lichen$Sample_Year <- as.numeric(dwarfscrub_env_lichen$Sample_Year)
@@ -3632,13 +3636,13 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected <- vascpresence_absence_df %>%
+          subset_hand_selected <- quad_abundance_df_vascular_filtered %>%
             filter(
               Plot %in% names(filter_criteria_forest) & 
                 Sample_Year %in% unlist(filter_criteria_forest[Plot]))
           table(subset_hand_selected$Park, subset_hand_selected$Plot) 
           
-          forest_df <- vascpresence_absence_df %>%
+          forest_df <- quad_abundance_df_vascular_filtered %>%
             filter(
               (Plot %in% forest_plots) | 
                 (Plot %in% names(filter_criteria_forest) &
@@ -3682,13 +3686,13 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected_lichens <- lichenspresence_absence_df %>%
+          subset_hand_selected_lichens <- quad_abundance_df_lichen_filtered %>%
             filter(
               Plot %in% names(filter_criteria_forest_lichens) & 
                 Sample_Year %in% unlist(filter_criteria_forest_lichens[Plot]))
           table(subset_hand_selected_lichens$Park, subset_hand_selected_lichens$Plot) 
           
-          forest_df_lichens <- lichenspresence_absence_df %>%
+          forest_df_lichens <- quad_abundance_df_lichen_filtered %>%
             filter(
               (Plot %in% forest_plots_lichens) | 
                 (Plot %in% names(filter_criteria_forest_lichens) &
@@ -3730,13 +3734,13 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           
           #subset main presence absence dataframe based on both conditions 
           #first verify that the hand selected plots were correctly pulled 
-          subset_hand_selected_nonvasc <- nonvascpresence_absence_df %>%
+          subset_hand_selected_nonvasc <- quad_abundance_df_nonvasc_filtered %>%
             filter(
               Plot %in% names(filter_criteria_forest_nonvasc) & 
                 Sample_Year %in% unlist(filter_criteria_forest_nonvasc[Plot]))
           table(subset_hand_selected_nonvasc$Park, subset_hand_selected_nonvasc$Plot) 
           
-          forest_df_nonvasc <- nonvascpresence_absence_df %>%
+          forest_df_nonvasc <- quad_abundance_df_nonvasc_filtered %>%
             filter(
               (Plot %in% forest_plots_nonvasc) | 
                 (Plot %in% names(filter_criteria_forest_nonvasc) &
@@ -3814,13 +3818,13 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
 ## Load Data Frames (Required)
 ```{r}
 #quick load from T Drive 
-forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx")
-forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx")
-forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx") 
+forest_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx"))
+forest_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx"))
+forest_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx")) 
     
-forest_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_vasc_filtered.xlsx")
-forest_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_lichen_filtered.xlsx")
-forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_nonvasc_filtered.xlsx") 
+forest_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_vasc_filtered.xlsx"))
+forest_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_lichen_filtered.xlsx"))
+forest_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_nonvasc_filtered.xlsx")) 
 
 forest_env$Sample_Year <- as.numeric(forest_env$Sample_Year)
 forest_env_lichen$Sample_Year <- as.numeric(forest_env_lichen$Sample_Year)
@@ -4599,12 +4603,12 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
             #subset main presence absence dataframe based on both conditions 
             
             #but first verify that the hand selected plots were correctly pulled 
-            subset_hand_selected <- vascpresence_absence_df %>%
+            subset_hand_selected <- quad_abundance_df_vascular_filtered %>%
               filter(
                 Plot %in% names(filter_criteria_alpine) & 
                   Sample_Year %in% unlist(filter_criteria_alpine[Plot]))
             
-            alpine_df <- vascpresence_absence_df %>%
+            alpine_df <- quad_abundance_df_vascular_filtered %>%
               filter(
                 (Plot %in% alpine_plots) | 
                   (Plot %in% names(filter_criteria_alpine) &
@@ -4626,13 +4630,13 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
       selected_plots
       #subset main presence absence dataframe based on both conditions 
       #first verify that the hand selected plots were correctly pulled 
-      subset_hand_selected <- lichenspresence_absence_df %>%
+      subset_hand_selected <- quad_abundance_df_lichen_filtered %>%
         filter(
           Plot %in% names(filter_criteria_alpine_lichen) & 
             Sample_Year %in% unlist(filter_criteria_alpine_lichen[Plot]))
       table(subset_hand_selected$Park, subset_hand_selected$Plot) 
       
-      alpine_lichen_df <- lichenspresence_absence_df %>%
+      alpine_lichen_df <- quad_abundance_df_lichen_filtered %>%
         filter(
           (Plot %in% alpine_lichen_plots) | 
             (Plot %in% names(filter_criteria_alpine_lichen) &
@@ -4658,13 +4662,13 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
       selected_plots
       #subset main presence absence dataframe based on both conditions 
       #first verify that the hand selected plots were correctly pulled 
-      subset_hand_selected <- nonvascpresence_absence_df %>%
+      subset_hand_selected <- quad_abundance_df_nonvasc_filtered %>%
         filter(
           Plot %in% names(filter_criteria_alpine_nonvasc) & 
             Sample_Year %in% unlist(filter_criteria_alpine_nonvasc[Plot]))
       table(subset_hand_selected$Park, subset_hand_selected$Plot) 
       
-      alpine_nonvasc_df <- nonvascpresence_absence_df %>%
+      alpine_nonvasc_df <- quad_abundance_df_nonvasc_filtered %>%
         filter(
           (Plot %in% alpine_nonvasc_plots) | 
             (Plot %in% names(filter_criteria_alpine_nonvasc) &
@@ -4724,13 +4728,13 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
 
 ## Load Data Frames (Required)
 ```{r}
-alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx")
-alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx")
-alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx")
+alpine_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx"))
+alpine_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx"))
+alpine_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx"))
 
-alpine_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_vasc_filtered.xlsx")
-alpine_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_lichen_filtered.xlsx")
-alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_nonvasc_filtered.xlsx")
+alpine_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_vasc_filtered.xlsx"))
+alpine_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_lichen_filtered.xlsx"))
+alpine_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_nonvasc_filtered.xlsx"))
 
 #Ensure that sample year is numeric 
 alpine_env$Sample_Year <- as.numeric(alpine_env$Sample_Year)

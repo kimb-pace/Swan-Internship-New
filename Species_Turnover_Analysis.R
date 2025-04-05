@@ -3,34 +3,39 @@ library(codyn)
 library(dplyr)
 library(writexl)
 library(readxl)
+library(here)
 
-taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/taxa_filtered.xlsx")
+taxa_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/taxa_filtered.xlsx"))
 
 #Official turnover code 
 
-#Vascular ------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Vascular 
         
       #Load data frames from PERMANOVA and NMDS
-        needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx")
-        forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx")
-        beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx")
-        dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx")
-        openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx")
-        alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx")
+        needle_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx"))
+        forest_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx"))
+        beetle_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx"))
+        dwarfscrub_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx"))
+        openlow_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx"))
+        alpine_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx"))
         
         
     #get the first and most recent sample year for each plot (excluding plots visited only once)
-        first_last_years <- openlow_df %>%                                                           #DF CHANGE
+    
+      #assign current working DF
+        current_df <- openlow_df
+        
+        first_last_years <- current_df %>%                                                           
           distinct(Plot, Sample_Year) %>%
           group_by(Plot) %>%
           summarise(
             first_year = min(Sample_Year),
             last_year = max(Sample_Year)) %>%
           filter(first_year != last_year)
-        first_data <- openlow_df %>%                                                                #DF CHANGE
+        first_data <- current_df %>%                                                                
           inner_join(first_last_years %>% select(Plot, first_year), 
                      by = c("Plot" = "Plot", "Sample_Year" = "first_year"))
-        last_data <- openlow_df %>%                                                                 #DF CHANGE
+        last_data <- current_df %>%                                                               
           inner_join(first_last_years %>% select(Plot, last_year), 
                      by = c("Plot" = "Plot", "Sample_Year" = "last_year"))
       #combine them 
@@ -142,33 +147,33 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
           left_join(taxa_filtered %>% select(Genus, Species, Code1), by = "Code1")
         df_changes_summary <-df_changes_summary %>% distinct()
         df_changes_summary <- df_changes_summary %>% select(Genus, Species, everything())
-      #Export                                                                                              #DF CHANGE BELOW
-        write_xlsx(df_changes_summary, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_vascular_specieslist.xlsx")
-        write_xlsx(turnover_joined, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_vascular_turnover.xlsx")
 
 
-#Lichen ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Lichen 
 
     #Load data frames from PERMANOVA and NMDS 
-        needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx")
-        forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx")
-        beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx")
-        dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx")
-        openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx")
-        alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx")        
+        needle_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx"))
+        forest_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx"))
+        beetle_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx"))
+        dwarfscrub_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx"))
+        openlow_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx"))
+        alpine_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx"))        
+        
+        #assign current working dataframe 
+        current_df <- needle_df_lichen
         
       #get the first and most recent sample year for each plot (excluding plots visited only once)
-        first_last_years <- openlow_df_lichen %>%                                                       #DF CHANGE
+        first_last_years <- current_df %>%                                                       #DF CHANGE
           distinct(Plot, Sample_Year) %>%
           group_by(Plot) %>%
           summarise(
             first_year = min(Sample_Year),
             last_year = max(Sample_Year)) %>%
           filter(first_year != last_year)
-        first_data <- openlow_df_lichen %>%                                                            #DF CHANGE
+        first_data <- current_df %>%                                                            #DF CHANGE
           inner_join(first_last_years %>% select(Plot, first_year), 
                      by = c("Plot" = "Plot", "Sample_Year" = "first_year"))
-        last_data <- openlow_df_lichen %>%                                                             #DF CHANGE
+        last_data <- current_df %>%                                                             #DF CHANGE
           inner_join(first_last_years %>% select(Plot, last_year), 
                      by = c("Plot" = "Plot", "Sample_Year" = "last_year"))
         
@@ -281,36 +286,32 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
           left_join(taxa_filtered %>% select(Genus, Species, Code1), by = "Code1")
         df_changes_summary <-df_changes_summary %>% distinct()
         df_changes_summary <- df_changes_summary %>% select(Genus, Species, everything())
-      
-      #Export                                                                                                     #DF CHANGE
-        write_xlsx(df_changes_summary, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_lichen_specieslist.xlsx")
-        write_xlsx(turnover_joined, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_lichen_turnover.xlsx")
 
-
-
-#Nonvascular ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Nonvascular 
 
         #Import data from PERMANOVA and NMDS 
-          needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx")
-          forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx")
-          beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx")
-          dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx")
-          openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx")
-          alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx")
+          needle_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx"))
+          forest_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx"))
+          beetle_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx"))
+          dwarfscrub_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx"))
+          openlow_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx"))
+          alpine_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx"))
           
+          #assign current working DF 
+          current_df <- needle_df_nonvasc 
           
       #get the first and most recent sample year for each plot (excluding plots visited only once)
-          first_last_years <- openlow_df_nonvasc %>%                                                              #DF CHANGE
+          first_last_years <- current_df %>%                                                              #DF CHANGE
             distinct(Plot, Sample_Year) %>%
             group_by(Plot) %>%
             summarise(
               first_year = min(Sample_Year),
               last_year = max(Sample_Year)) %>%
             filter(first_year != last_year)
-          first_data <- openlow_df_nonvasc %>%                                                                    #DF CHANGE
+          first_data <- current_df %>%                                                                    #DF CHANGE
             inner_join(first_last_years %>% select(Plot, first_year), 
                        by = c("Plot" = "Plot", "Sample_Year" = "first_year"))
-          last_data <- openlow_df_nonvasc %>%                                                                     #DF CHANGE
+          last_data <- current_df %>%                                                                     #DF CHANGE
             inner_join(first_last_years %>% select(Plot, last_year), 
                        by = c("Plot" = "Plot", "Sample_Year" = "last_year"))
           
@@ -420,21 +421,28 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
             left_join(taxa_filtered %>% select(Genus, Species, Code1), by = "Code1")
           df_changes_summary <-df_changes_summary %>% distinct()
           df_changes_summary <- df_changes_summary %>% select(Genus, Species, everything())
-          
-      #Export                                                                                                 #DF CHANGE 
-          write_xlsx(df_changes_summary, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_nonvasc_specieslist.xlsx")
-          write_xlsx(turnover_joined, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_nonvasc_turnover.xlsx")
 
----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
 #Calculating average turnover and standard error for each veg class
 
             
 #Alpine 
 
   #Load data 
-    alpine_vascular_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/alpine_vascular_turnover.xlsx")
-    alpine_lichen_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/alpine_lichen_turnover.xlsx")
-    alpine_nonvasc_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/alpine_nonvasc_turnover.xlsx")
+    alpine_vascular_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/alpine_vascular_turnover.xlsx"))
+    alpine_lichen_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/alpine_lichen_turnover.xlsx"))
+    alpine_nonvasc_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/alpine_nonvasc_turnover.xlsx"))
           
           alpine_vascular_turnover %>%
             summarise(
@@ -466,9 +474,9 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
 #Low Shrub        
          
   #Load Data 
-    openlow_vascular_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_vascular_turnover.xlsx")
-    openlow_lichen_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_lichen_turnover.xlsx")
-    openlow_nonvasc_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/openlow_nonvasc_turnover.xlsx")
+    openlow_vascular_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/openlow_vascular_turnover.xlsx"))
+    openlow_lichen_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/openlow_lichen_turnover.xlsx"))
+    openlow_nonvasc_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/openlow_nonvasc_turnover.xlsx"))
 
         openlow_vascular_turnover %>%
           summarise(
@@ -500,9 +508,9 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
 #Spruce Woodland 
         
     #Load Data 
-      needle_vascular_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/needle_vascular_turnover.xlsx")
-      needle_lichen_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/needle_lichen_turnover.xlsx")
-      needle_nonvasc_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/needle_nonvasc_turnover.xlsx")
+      needle_vascular_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/needle_vascular_turnover.xlsx"))
+      needle_lichen_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/needle_lichen_turnover.xlsx"))
+      needle_nonvasc_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/needle_nonvasc_turnover.xlsx"))
 
           needle_vascular_turnover %>%
             summarise(
@@ -535,9 +543,9 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
 #Spruce Beetle Disturbed 
           
     #Load Data 
-      beetle_vascular_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/beetle_vascular_turnover.xlsx")
-      beetle_lichen_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/beetle_lichen_turnover.xlsx")
-      beetle_nonvasc_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/beetle_nonvasc_turnover.xlsx")
+      beetle_vascular_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/beetle_vascular_turnover.xlsx"))
+      beetle_lichen_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/beetle_lichen_turnover.xlsx"))
+      beetle_nonvasc_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/beetle_nonvasc_turnover.xlsx"))
 
             beetle_vascular_turnover %>%
               summarise(
@@ -571,9 +579,9 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
 #Dwarf Shrub 
   
    #Load Data 
-      dwarfscrub_vascular_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/dwarfscrub_vascular_turnover.xlsx")
-      dwarfscrub_lichen_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/dwarfscrub_lichen_turnover.xlsx")
-      dwarfscrub_nonvasc_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/dwarfscrub_nonvasc_turnover.xlsx") 
+      dwarfscrub_vascular_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/dwarfscrub_vascular_turnover.xlsx"))
+      dwarfscrub_lichen_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/dwarfscrub_lichen_turnover.xlsx"))
+      dwarfscrub_nonvasc_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/dwarfscrub_nonvasc_turnover.xlsx")) 
 
           dwarfscrub_vascular_turnover %>%
             summarise(
@@ -606,9 +614,9 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
 #Spruce Forest 
           
    #Load Data 
-      forest_vascular_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/forest_vascular_turnover.xlsx")
-      forest_lichen_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/forest_lichen_turnover.xlsx")
-      forest_nonvasc_turnover <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Turnover_Analysis/forest_nonvasc_turnover.xlsx") 
+      forest_vascular_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/forest_vascular_turnover.xlsx"))
+      forest_lichen_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/forest_lichen_turnover.xlsx"))
+      forest_nonvasc_turnover <- read_xlsx(here("Data/Modified/Turnover_Analysis/forest_nonvasc_turnover.xlsx")) 
 
           forest_vascular_turnover %>%
             summarise(
@@ -637,34 +645,34 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
               app = mean(App_Nonvasc_Prop, na.rm = TRUE),
               se_app = sd(App_Nonvasc_Prop, na.rm = TRUE)/sqrt(n()))
 
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 #Calculating species richness for each vegetation class (Total, and by park)
 
 #Load Data from permanova folder 
-    beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx")
-    beetle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx")
-    beetle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx")
+    beetle_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx"))
+    beetle_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_lichen_filtered.xlsx"))
+    beetle_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_nonvasc_filtered.xlsx"))
     
-    needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx")
-    needle_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx")
-    needle_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx")
+    needle_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_vasc_filtered.xlsx"))
+    needle_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_lichen_filtered.xlsx"))
+    needle_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_df_nonvasc_filtered.xlsx"))
     
-    openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx")
-    openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx")
-    openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx")
+    openlow_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_vasc_filtered.xlsx"))
+    openlow_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_lichen_filtered.xlsx"))
+    openlow_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_df_nonvasc_filtered.xlsx"))
     
-    dwarfscrub_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx")
-    dwarfscrub_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx")
-    dwarfscrub_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx") 
+    dwarfscrub_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_vasc_filtered.xlsx"))
+    dwarfscrub_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_lichen_filtered.xlsx"))
+    dwarfscrub_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_df_nonvasc_filtered.xlsx"))
     
-    forest_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx")
-    forest_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx")
-    forest_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx") 
+    forest_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_vasc_filtered.xlsx"))
+    forest_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_lichen_filtered.xlsx"))
+    forest_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_df_nonvasc_filtered.xlsx"))
     
-    alpine_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx")
-    alpine_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx")
-    alpine_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx")
+    alpine_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_vasc_filtered.xlsx"))
+    alpine_df_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_lichen_filtered.xlsx"))
+    alpine_df_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_df_nonvasc_filtered.xlsx"))
 
 #Filter by park 
       KATM_needle_vasc <- needle_df %>%
@@ -682,7 +690,7 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
       LACL_needle_nonvasc <- needle_df_nonvasc %>%
         filter(Park == "LACL")
 
-#TOTAL -------------------------------------------------------------------------
+#TOTAL 
       summary_vasc <- needle_df %>%
         select(8:261) %>%
         summarise(
@@ -707,7 +715,7 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         )
       print(summary_nonvasc)
 
-#LACL --------------------------------------------------------------------------
+#LACL 
       summary_vasc <- LACL_needle_vasc %>%
         select(8:261) %>%
         summarise(
@@ -732,7 +740,7 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         )
       print(summary_nonvasc)
 
-#KATM --------------------------------------------------------------------------
+#KATM 
       summary_vasc <- KATM_needle_vasc %>%
         select(8:261) %>%
         summarise(
@@ -757,7 +765,14 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         )
       print(summary_nonvasc)
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+      
+      
+      
+      
+      
+      
+      
 #Creation of species richness dataframes 
 
         #make a genus_species column on both taxa and simple_taxa 
@@ -771,7 +786,7 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
                   by = "Genus_Species")
       
       taxa_filtered <- taxa_filtered %>% rename(new_column_name = old_column_name)
-      write_xlsx(taxa_filtered, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/taxa_filtered.xlsx")
+
       
       
       #join code1 to quad_freq using old code 
@@ -838,16 +853,11 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         summarize(Species_Richness = n_distinct(Code1), .groups = "keep") 
         nonvasc_sp_richness <- nonvasc_sp_richness %>% mutate(Plot_Year = paste(Plot, Sample_Year, sep="_"))
       
-      #Export 
-        write_xlsx(lichen_sp_richness, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/lichen_sp_richness_filtered.xlsx")
-        write_xlsx(vasc_sp_richness, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/vascular_sp_richness_filtered.xlsx")
-        write_xlsx(nonvasc_sp_richness, "T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/nonvasc_sp_richness_filtered.xlsx")
-      
+
         
         
         
     #overall species richness spreadsheet
-        # Renaming column 'A' to 'X'
         vasc_sp_richness <- vasc_sp_richness %>% rename(Vasc_Species_Richness = Species_Richness)
         lichen_sp_richness <- lichen_sp_richness %>% rename(Lichen_Species_Richness = Species_Richness)
         nonvasc_sp_richness <- nonvasc_sp_richness %>% rename(Nonvasc_Species_Richness = Species_Richness)
@@ -878,7 +888,12 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         write.csv(species_richness_collapsed_codes, "T:/Users/KPace/Species_Richness_Collapsed_Codes.csv")     
         
 
--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        
+        
+        
+        
+        
         
 #Generalized Linear Mixed Model Analysis - Species Richness 
      
@@ -889,19 +904,21 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
   library(MASS)
   library(ggplot2)
   library(readxl)
-  library(DHARMa)      
+  library(DHARMa)
+  library(here)
         
----------------------------------------------------------------   
+  
 #Open Low Shrub 
-        openlow_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_vasc_filtered.xlsx")
-        
+          
+        openlow_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_vasc_filtered.xlsx"))
+        current_env <- openlow_env
     #Vascular 
         #scale sample year to remove warnings 
         openlow_env$Sample_Year <- as.numeric(openlow_env$Sample_Year)
         openlow_env$Sample_Year_Scaled <- scale(openlow_env$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                  data = openlow_env, family = poisson)
         summary(model_pois_vasc)
         
@@ -912,26 +929,27 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
         
-        confint(model_pois_vasc)
+        ci <- confint(model_pois_vasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
+        
         #negative interval
-        exp(-0.06847906/sd(openlow_env$Sample_Year))
-        (0.9829035-1)*100 #-1.71
+        ((exp(ci_lower/sd(openlow_env$Sample_Year)))-1)*100
         #positive interval 
-        exp(0.0562481/sd(openlow_env$Sample_Year))
-        (1.014265-1)*100 #1.01
+        ((exp(ci_upper/sd(openlow_env$Sample_Year)))-1)*100
         
         original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(openlow_env$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.00158) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
         
     #Lichen 
-        openlow_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_lichen_filtered.xlsx")
+        openlow_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_lichen_filtered.xlsx"))
         #scale sample year to remove warnings 
         openlow_env_lichen$Sample_Year <- as.numeric(openlow_env_lichen$Sample_Year)
         openlow_env_lichen$Sample_Year_Scaled <- scale(openlow_env_lichen$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                    data = openlow_env_lichen, family = poisson)
         summary(model_pois_lichen)
         
@@ -942,26 +960,28 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
         
+        ci <- confint(model_pois_lichen)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
+        
         confint(model_pois_lichen)
         #negative interval
-        exp(-0.12536944/sd(openlow_env_lichen$Sample_Year))
-        (0.9730882-1)*100 #-2.69
+        ((exp(ci_lower/sd(openlow_env_lichen$Sample_Year)))-1)*100
         #positive interval 
-        exp(-0.01917884/sd(openlow_env_lichen$Sample_Year))
-        (0.9958354-1)*100 #-0.42
+        ((exp(ci_upper/sd(openlow_env_lichen$Sample_Year)))-1)*100
         
         original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(openlow_env_lichen$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0158) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
         
     #Nonvascular 
-        openlow_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_nonvasc_filtered.xlsx")
+        openlow_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/openlow_env_nonvasc_filtered.xlsx"))
         #scale sample year to remove warnings 
         openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
         openlow_env_nonvasc$Sample_Year_Scaled <- scale(openlow_env_nonvasc$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                     data = openlow_env_nonvasc, family = poisson)
         summary(model_pois_nonvasc)
         
@@ -972,23 +992,25 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
         
+        ci <- confint(model_pois_nonvasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
+        
         confint(model_pois_nonvasc)
         #negative interval
-        exp(-0.1426947/sd(openlow_env_nonvasc$Sample_Year))
-        (0.9694265-1)*100 #-3.06
+        ((exp(ci_lower/sd(openlow_env_nonvasc$Sample_Year)))-1)*100
         #positive interval 
-        exp(0.005000223/sd(openlow_env_nonvasc$Sample_Year))
-        (1.001089-1)*100 #0.11
+        ((exp(ci_upper/sd(openlow_env_nonvasc$Sample_Year)))-1)*100
         
         original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(openlow_env_nonvasc$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0151) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
         
         
----------------------------------------------------------------        
+ 
         
 #Spruce Woodland 
-        needle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_vasc_filtered.xlsx")
+        needle_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_vasc_filtered.xlsx"))
         
     #Vascular 
         #scale sample year to remove warnings 
@@ -996,7 +1018,7 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         needle_env$Sample_Year_Scaled <- scale(needle_env$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                  data = needle_env, family = poisson)
         summary(model_pois_vasc)
         
@@ -1007,26 +1029,28 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         model_pois_vasc@optinfo$conv #0 = converged, 1 = not converged
         
+        ci <- confint(model_pois_vasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
+        
         confint(model_pois_vasc)
         #negative interval
-        exp(-0.07878733/sd(needle_env$Sample_Year))
-        (0.9771621-1)*100 #-2.28
+        ((exp(ci_lower/sd(needle_env$Sample_Year)))-1)*100
         #positive interval 
-        exp(0.05138275/sd(needle_env$Sample_Year))
-        (1.015181-1)*100 #1.52
+        ((exp(ci_upper/sd(needle_env$Sample_Year)))-1)*100
         
         original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(needle_env$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.00411)-1)*100 #=percent change 
+        (exp(original_slope)-1)*100 #=percent change 
         
     #Lichen 
-        needle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_lichen_filtered.xlsx")
+        needle_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_lichen_filtered.xlsx"))
         #scale sample year to remove warnings 
         needle_env_lichen$Sample_Year <- as.numeric(needle_env_lichen$Sample_Year)
         needle_env_lichen$Sample_Year_Scaled <- scale(needle_env_lichen$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                    data = needle_env_lichen, family = poisson)
         summary(model_pois_lichen)
         
@@ -1037,27 +1061,28 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         model_pois_lichen@optinfo$conv #0 = converged, 1 = not converged
         
+        ci <- confint(model_pois_lichen)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
+        
         confint(model_pois_lichen)
         #negative interval
-        exp(-0.1427322/sd(needle_env_lichen$Sample_Year))
-        (0.96139-1)*100 #-3.86
-        ((exp(-0.1427322/sd(needle_env_lichen$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(needle_env_lichen$Sample_Year)))-1)*100
         #positive interval 
-        exp(-0.0376746/sd(needle_env_lichen$Sample_Year))
-        (0.9896606-1)*100 #-1.03
+        ((exp(ci_upper/sd(needle_env_lichen$Sample_Year)))-1)*100
         
         original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(needle_env_lichen$Sample_Year)
         #calculate percent change per year using corrected coefficient 
         (exp(-0.0249) -1)*100 #=percent change 
         
     #Nonvascular 
-        needle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_nonvasc_filtered.xlsx")
+        needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/needle_env_nonvasc_filtered.xlsx"))
         #scale sample year to remove warnings 
         needle_env_nonvasc$Sample_Year <- as.numeric(needle_env_nonvasc$Sample_Year)
         needle_env_nonvasc$Sample_Year_Scaled <- scale(needle_env_nonvasc$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                     data = needle_env_nonvasc, family = poisson)
         summary(model_pois_nonvasc)
         
@@ -1068,21 +1093,25 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         model_pois_nonvasc@optinfo$conv #0 = converged, 1 = not converged
         
+        ci <- confint(model_pois_nonvasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
+        
         original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(needle_env_nonvasc$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0214) -1)*100 #=percent change  
+        (exp(original_slope) -1)*100 #=percent change  
         
         confint(model_pois_nonvasc)
         #negative interval
-        ((exp(-0.1427495/sd(needle_env_nonvasc$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(needle_env_nonvasc$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(-0.009377086/sd(needle_env_nonvasc$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(needle_env_nonvasc$Sample_Year)))-1)*100
         
         
         
----------------------------------------------------------------   
+
 #Spruce Forest 
-        forest_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_vasc_filtered.xlsx")
+        forest_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_vasc_filtered.xlsx"))
     
     #Vascular 
         #scale sample year to remove warnings 
@@ -1090,7 +1119,7 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         forest_env$Sample_Year_Scaled <- scale(forest_env$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                  data = forest_env, family = poisson)
         summary(model_pois_vasc)
         
@@ -1103,23 +1132,27 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(forest_env$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0154) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_vasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_vasc)
         #negative interval
-        ((exp(-0.1015123/sd(forest_env$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(forest_env$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(0.0176431/sd(forest_env$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(forest_env$Sample_Year)))-1)*100
         
         
     #Lichen 
-        forest_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_lichen_filtered.xlsx")
+        forest_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_lichen_filtered.xlsx"))
         #scale sample year to remove warnings 
         forest_env_lichen$Sample_Year <- as.numeric(forest_env_lichen$Sample_Year)
         forest_env_lichen$Sample_Year_Scaled <- scale(forest_env_lichen$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                    data = forest_env_lichen, family = poisson)
         summary(model_pois_lichen)
         
@@ -1132,23 +1165,27 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(forest_env_lichen$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0367) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_lichen)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_lichen)
         #negative interval
-        ((exp(-0.1806259/sd(forest_env_lichen$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(forest_env_lichen$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(-0.01977007/sd(forest_env_lichen$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(forest_env_lichen$Sample_Year)))-1)*100
         
         
     #Nonvascular 
-        forest_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_nonvasc_filtered.xlsx") 
+        forest_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/forest_env_nonvasc_filtered.xlsx")) 
         #scale sample year to remove warnings 
         forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
         forest_env_nonvasc$Sample_Year_Scaled <- scale(forest_env_nonvasc$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                     data = forest_env_nonvasc, family = poisson)
         summary(model_pois_nonvasc)
         
@@ -1161,17 +1198,21 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(forest_env_nonvasc$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0437) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_nonvasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_nonvasc)
         #negative interval
-        ((exp(-0.20026648/sd(forest_env_nonvasc$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(forest_env_nonvasc$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(-0.03815634/sd(forest_env_nonvasc$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(forest_env_nonvasc$Sample_Year)))-1)*100
         
----------------------------------------------------------------           
+        
 #Beetle 
-        beetle_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_vasc_filtered.xlsx")
+        beetle_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_vasc_filtered.xlsx"))
         
       #Vascular 
         #scale sample year to remove warnings 
@@ -1179,7 +1220,7 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         beetle_env$Sample_Year_Scaled <- scale(beetle_env$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                  data = beetle_env, family = poisson)
         summary(model_pois_vasc)
         
@@ -1192,22 +1233,26 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(beetle_env$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(0.00727) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_vasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_vasc)
         #negative interval
-        ((exp(-0.05080881/sd(beetle_env$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(beetle_env$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(0.09308241/sd(beetle_env$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(beetle_env$Sample_Year)))-1)*100
 
     #Lichen
-        beetle_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_lichen_filtered.xlsx")
+        beetle_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_lichen_filtered.xlsx"))
         #scale sample year to remove warnings 
         beetle_env_lichen$Sample_Year <- as.numeric(beetle_env_lichen$Sample_Year)
         beetle_env_lichen$Sample_Year_Scaled <- scale(beetle_env_lichen$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                    data = beetle_env_lichen, family = poisson)
         summary(model_pois_lichen)
         
@@ -1220,22 +1265,26 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(beetle_env_lichen$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0772) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_lichen)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_lichen)
         #negative interval
-        ((exp(-0.3377355/sd(beetle_env_lichen$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(beetle_env_lichen$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(-0.1239696/sd(beetle_env_lichen$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(beetle_env_lichen$Sample_Year)))-1)*100
 
     #Nonvascular 
-        beetle_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc_filtered.xlsx")
+        beetle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_nonvasc_filtered.xlsx"))
         #scale sample year to remove warnings 
         beetle_env_nonvasc$Sample_Year <- as.numeric(beetle_env_nonvasc$Sample_Year)
         beetle_env_nonvasc$Sample_Year_Scaled <- scale(beetle_env_nonvasc$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                     data = beetle_env_nonvasc, family = poisson)
         summary(model_pois_nonvasc)
         
@@ -1248,19 +1297,23 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(beetle_env_nonvasc$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0215) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_nonvasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_nonvasc)
         #negative interval
-        ((exp(-0.147474/sd(beetle_env_nonvasc$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(beetle_env_nonvasc$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(0.01905762/sd(beetle_env_nonvasc$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(beetle_env_nonvasc$Sample_Year)))-1)*100
 
         
         
----------------------------------------------------------------           
+      
 #dwarfscrub
-        dwarfscrub_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_vasc_filtered.xlsx")
+        dwarfscrub_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_vasc_filtered.xlsx"))
         
       #Vascular 
         #scale sample year to remove warnings 
@@ -1268,7 +1321,7 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         dwarfscrub_env$Sample_Year_Scaled <- scale(dwarfscrub_env$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                  data = dwarfscrub_env, family = poisson)
         summary(model_pois_vasc)
         
@@ -1281,22 +1334,26 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(dwarfscrub_env$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(0.0022) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_vasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_vasc)
         #negative interval
-        ((exp(-0.03527206/sd(dwarfscrub_env$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(dwarfscrub_env$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(0.05808153/sd(dwarfscrub_env$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(dwarfscrub_env$Sample_Year)))-1)*100
 
     #Lichen 
-        dwarfscrub_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_lichen_filtered.xlsx")
+        dwarfscrub_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_lichen_filtered.xlsx"))
         #scale sample year to remove warnings 
         dwarfscrub_env_lichen$Sample_Year <- as.numeric(dwarfscrub_env_lichen$Sample_Year)
         dwarfscrub_env_lichen$Sample_Year_Scaled <- scale(dwarfscrub_env_lichen$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                    data = dwarfscrub_env_lichen, family = poisson)
         summary(model_pois_lichen)
         
@@ -1309,22 +1366,26 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(dwarfscrub_env_lichen$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0156) -1)*100 #=percent change
+        (exp(original_slope) -1)*100 #=percent change
+        
+        ci <- confint(model_pois_lichen)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_lichen)
         #negative interval
-        ((exp(-0.1034390/sd(dwarfscrub_env_lichen$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(dwarfscrub_env_lichen$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(0.01536733/sd(dwarfscrub_env_lichen$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(dwarfscrub_env_lichen$Sample_Year)))-1)*100
         
     #Nonvascular 
-        dwarfscrub_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_nonvasc_filtered.xlsx") 
+        dwarfscrub_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/dwarfscrub_env_nonvasc_filtered.xlsx")) 
         #scale sample year to remove warnings 
         dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Year)
         dwarfscrub_env_nonvasc$Sample_Year_Scaled <- scale(dwarfscrub_env_nonvasc$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                     data = dwarfscrub_env_nonvasc, family = poisson)
         summary(model_pois_nonvasc)
         
@@ -1337,17 +1398,21 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(dwarfscrub_env_nonvasc$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.00211) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_nonvasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_nonvasc)
         #negative interval
-        ((exp(-0.08833292/sd(dwarfscrub_env_nonvasc$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(dwarfscrub_env_nonvasc$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(0.07659689/sd(dwarfscrub_env_nonvasc$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(dwarfscrub_env_nonvasc$Sample_Year)))-1)*100
         
----------------------------------------------------------------   
+ 
 #alpine 
-        alpine_env <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_vasc_filtered.xlsx")
+        alpine_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_vasc_filtered.xlsx"))
         
       #Vascular 
         #scale sample year to remove warnings 
@@ -1355,7 +1420,7 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         alpine_env$Sample_Year_Scaled <- scale(alpine_env$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_vasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                  data = alpine_env, family = poisson)
         summary(model_pois_vasc)
         
@@ -1368,22 +1433,26 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_vasc)["Sample_Year_Scaled"]/sd(alpine_env$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(0.00818) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_vasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_vasc)
         #negative interval
-        ((exp(-0.01222514/sd(alpine_env$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(alpine_env$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(0.09459859/sd(alpine_env$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(alpine_env$Sample_Year)))-1)*100
 
     #Lichen 
-        alpine_env_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_lichen_filtered.xlsx")
+        alpine_env_lichen <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_lichen_filtered.xlsx"))
         #scale sample year to remove warnings 
         alpine_env_lichen$Sample_Year <- as.numeric(alpine_env_lichen$Sample_Year)
         alpine_env_lichen$Sample_Year_Scaled <- scale(alpine_env_lichen$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_lichen <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                    data = alpine_env_lichen, family = poisson)
         summary(model_pois_lichen)
         
@@ -1396,22 +1465,26 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_lichen)["Sample_Year_Scaled"]/sd(alpine_env_lichen$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.00951) -1)*100 #=percent change 
+        (exp(original_slope) -1)*100 #=percent change 
+        
+        ci <- confint(model_pois_lichen)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_lichen)
         #negative interval
-        ((exp(-0.08255785/sd(alpine_env_lichen$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(alpine_env_lichen$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(0.03348602/sd(alpine_env_lichen$Sample_Year)))-1)*100
+        ((exp(ci_upper/sd(alpine_env_lichen$Sample_Year)))-1)*100
 
     #Nonvascular 
-        alpine_env_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_nonvasc_filtered.xlsx")
+        alpine_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/alpine_env_nonvasc_filtered.xlsx"))
         #scale sample year to remove warnings 
         alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
         alpine_env_nonvasc$Sample_Year_Scaled <- scale(alpine_env_nonvasc$Sample_Year)
         
         #Poisson, assumes mean = variance 
-        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (1 | Plot),
+        model_pois_nonvasc <- glmer(Species_Richness ~ Sample_Year_Scaled + (Sample_Year_Scaled + (1 | Plot)),
                                     data = alpine_env_nonvasc, family = poisson)
         summary(model_pois_nonvasc)
         
@@ -1424,17 +1497,22 @@ taxa_filtered <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Col
         
         original_slope <- fixef(model_pois_nonvasc)["Sample_Year_Scaled"]/sd(alpine_env_nonvasc$Sample_Year)
         #calculate percent change per year using corrected coefficient 
-        (exp(-0.0106) -1)*100 #=percent change
+        (exp(original_slope) -1)*100 #=percent change
+        
+        ci <- confint(model_pois_nonvasc)
+        ci_lower <- ci["Sample_Year_Scaled","2.5 %"]
+        ci_upper <- ci["Sample_Year_Scaled","97.5 %"]
         
         confint(model_pois_nonvasc)
         #negative interval
-        ((exp(-0.112528/sd(alpine_env_nonvasc$Sample_Year)))-1)*100
+        ((exp(ci_lower/sd(alpine_env_nonvasc$Sample_Year)))-1)*100
         #positive interval 
-        ((exp(0.05784369/sd(alpine_env_nonvasc$Sample_Year)))-1)*100
-
+        ((exp(ci_upper/sd(alpine_env_nonvasc$Sample_Year)))-1)*100
 
         
-------------------------------------------------------------------------------------
+ 
+
+
 #MODEL COMPARISON 
        
   #checking the overdispersion statistics 
