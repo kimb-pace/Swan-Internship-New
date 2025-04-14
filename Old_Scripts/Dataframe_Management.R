@@ -1,3 +1,15 @@
+library(vegan)
+library(permute)
+library(lattice)
+library(dplyr)
+library(readxl)
+library(readr)
+library(writexl)
+
+install.packages('here')
+library(here)
+citation("vegan")
+
 taxa <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/taxa.csv")
 quad_freq <- read.csv("T:/Users/KPace/SWAN-Internship-New/Data/Unmodified/Quadrat_Frequency.csv")
 

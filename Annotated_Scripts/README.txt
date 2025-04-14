@@ -6,6 +6,9 @@ These are the annotated scripts that I have polished for reproducibility.
 
 3. "Species_Turnover_Analysis.R" contains the script for all of the species richness analysis I did. This script contains the turnover proportion analysis using Codyn, the number of plots appeared/disappeared for each species, average turnover across plots script, calculating species richness across plots script, the creation of the overall species richness dataframes that I used in PERMANOVA and GLM analysis, and the GLM analysis. At the end there is also the code that I used for model comparison to decide which distribution to use (poisson vs. negative binomial) in the GLM analysis. 
 
+4. "Building_Dataframes_Consolidated.Rmd" contains relevant scripts for building various dataframes I used, including the quadrat frequency dataframes, env dataframes, summary tables for balancing plot visits, collapsing the species codes, and the creation of the species richness data tables. 
+
+5. "Functions.R" is the script where the functions I am making will live. Right now it's just the adjusted permanova function that can calculate an adjusted F and P value for one term but I will edit it as I make more/improve on them. 
 
 
 
