@@ -107,12 +107,15 @@ veg_colors <- c("orange", "blue3", "cyan", "orchid3")
 
 #Species loading values 
   #axis1 scores 
+    #extract scores 
       axis1_scores <- scores(mds_alpine, display = "sites")[, 1]
+    #get correlation values and sort them 
       species_cor <- apply(alpine_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated 
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation 
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
@@ -121,21 +124,25 @@ veg_colors <- c("orange", "blue3", "cyan", "orchid3")
       str(species_cor_sorted)
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
+    #join species codes and names for readability 
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe 
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores 
       axis2_scores <- scores(mds_alpine, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(alpine_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation  
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
@@ -144,10 +151,11 @@ veg_colors <- c("orange", "blue3", "cyan", "orchid3")
       str(species_cor_sorted)
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
+    #join species codes and names for readability
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -213,12 +221,15 @@ veg_colors <- c("cyan", "orchid3", "orange", "blue3", "gray")
 
 #Species loading values 
   #axis1 scores 
+    #extract scores 
       axis1_scores <- scores(mds_alpine_lichen, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(alpine_lichen_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation 
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
@@ -227,21 +238,25 @@ veg_colors <- c("cyan", "orchid3", "orange", "blue3", "gray")
       str(species_cor_sorted)
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
+    #join species codes and names for readability
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe 
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_alpine_lichen, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(alpine_lichen_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
@@ -250,10 +265,11 @@ veg_colors <- c("cyan", "orchid3", "orange", "blue3", "gray")
       str(species_cor_sorted)
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
+    #join species codes and names for readability
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -277,8 +293,8 @@ veg_colors <- c("orange", "blue3", "cyan", "orchid3", "gray")
       names(veg_colors) <- unique(alpine_df_nonvasc$Viereck.3)
       dev.off()
 #define axis 
-      xlim <- c(-1, 1.5)
-      ylim <- c(-1, 1)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #plot with base overlay options 
       ordiplot(mds_alpine_nonvasc, type = "n", xlim = xlim, ylim = ylim, 
@@ -322,47 +338,55 @@ beetle_nonvasc_plot_viereck <- recordPlot()
 
 #Species loading values 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_alpine_nonvasc, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(alpine_nonvasc_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_alpine_nonvasc, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(alpine_nonvasc_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -489,47 +513,55 @@ beetlevasc_plot_viereck <- recordPlot()
 
 #Species loading values 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_beetle, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(beetle_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_beetle, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(beetle_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -623,47 +655,55 @@ beetle_lichen_plot_viereck <- recordPlot()
 
 #Species loading values 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_beetle_lichen, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(beetle_lichen_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_beetle_lichen, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(beetle_lichen_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -685,8 +725,8 @@ beetle_lichen_plot_viereck <- recordPlot()
       names(veg_colors) <- unique(beetle_df_nonvasc$Viereck.3)
       dev.off()
 #define axis 
-      xlim <- c(-1, 1.5)
-      ylim <- c(-1, 1)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #plot with base overlay options 
       ordiplot(mds_beetle_nonvasc, type = "n", xlim = xlim, ylim = ylim, 
@@ -755,47 +795,55 @@ beetle_nonvasc_plot_viereck <- recordPlot()
 
 #Species loading values 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_beetle_nonvasc, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(beetle_nonvasc_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_beetle_nonvasc, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(beetle_nonvasc_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -943,47 +991,55 @@ forestvasc_plot_viereck <- recordPlot()
 
 #Species Loading values 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_forest, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(forest_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_forest, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(forest_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -1103,47 +1159,55 @@ forestlichen_plot_viereck <- recordPlot()
 
 #Species Loading Values 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_forest_lichen, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(forest_composition_lichen, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_forest_lichen, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(forest_composition_lichen, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -1263,47 +1327,55 @@ forestnonvasc_plot_viereck <- recordPlot()
 
 #Species loading values 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_forest_nonvasc, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(forest_composition_nonvasc, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_forest_nonvasc, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(forest_composition_nonvasc, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -1372,8 +1444,8 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
       names(veg_colors) <- unique(needle_df$Viereck.3)
       dev.off()
 #define axis 
-      xlim <- c(0, 2)
-      ylim <- c(-1, 1.5)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #Plot with base overlay 
       ordiplot(mds_needle, type = "n", xlim = xlim, ylim = ylim, 
@@ -1469,47 +1541,55 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
 #Species loading values 
       
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_needle, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(needle_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores 
       axis2_scores <- scores(mds_needle, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(needle_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -1631,47 +1711,55 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
 
 #Species loading values 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_needle_lichen, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(needle_composition_lichen, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_needle_lichen, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(needle_composition_lichen, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -1692,8 +1780,8 @@ needle_df_nonvasc <- needle_df_nonvasc %>%
       names(veg_colors) <- unique(needle_df_nonvasc$Viereck.3)
       dev.off()
 #define axis 
-      xlim <- c(-0.5, 0.75)
-      ylim <- c(-0.5, 1)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #plot with base overlay options 
       ordiplot(mds_needle_nonvasc, type = "n", xlim = xlim, ylim = ylim, 
@@ -1782,47 +1870,55 @@ plot <- recordPlot()
 
 #Species loading values 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_needle_nonvasc, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(needle_composition_nonvasc, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores 
       axis2_scores <- scores(mds_needle_nonvasc, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(needle_composition_nonvasc, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -1874,8 +1970,8 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
     names(veg_colors) <- unique(openlow_df$Viereck.3)
     dev.off()
 #define axis
-    xlim <- c(-1, 1.5)
-    ylim <- c(-1, 1.5)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #Plot with base overlay
     ordiplot(mds_openlow, type = "n", xlim = xlim, ylim = ylim, 
@@ -1941,46 +2037,55 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
 
 #Species loading values 
     #axis1 scores 
+      #extract scores
         axis1_scores <- scores(mds_openlow, display = "sites")[, 1]
+      #get correlation values and sort them
         species_cor <- apply(openlow_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
         species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+      #look at highest correlated
         head(species_cor_sorted, 10)
         tail(species_cor_sorted, 10)
-        
+      #turn results into a dataframe and do some manipulation
         species_cor_sorted <- as.data.frame(species_cor_sorted)
         species_cor_sorted <- species_cor_sorted %>%
           rownames_to_column(var = "Code1")
         species_cor_sorted <- species_cor_sorted %>%
           rename(Loadings = species_cor_sorted)
         str(species_cor_sorted)
+      #join species codes and names for readability
         species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
         taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
         species_cor_sorted <- species_cor_sorted %>%
           left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1") 
         species_cor_sorted <-species_cor_sorted %>% distinct()
+      #finalize summary dataframe
         summary_df <- species_cor_sorted %>%
           arrange(Loadings) %>%
           slice(c(1:10, (n()-9):n()))
 
     #axis2 scores
+      #extract scores
         axis2_scores <- scores(mds_openlow, display = "sites")[, 2]
+      #get correlation values and sort them
         species_cor <- apply(openlow_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
         species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+      #look at highest correlated
         head(species_cor_sorted, 10)
         tail(species_cor_sorted, 10)
-        
+      #turn results into a dataframe and do some manipulation
         species_cor_sorted <- as.data.frame(species_cor_sorted)
         species_cor_sorted <- species_cor_sorted %>%
           rownames_to_column(var = "Code1")
         species_cor_sorted <- species_cor_sorted %>%
           rename(Loadings = species_cor_sorted)
         str(species_cor_sorted)
+      #join species codes and names for readability
         species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
         taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
         species_cor_sorted <- species_cor_sorted %>%
           left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
         species_cor_sorted <-species_cor_sorted %>% distinct()
-        
+      #finalize summary dataframe
         summary_df <- species_cor_sorted %>%
           arrange(Loadings) %>%
           slice(c(1:10, (n()-9):n()))
@@ -2001,8 +2106,8 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
       names(veg_colors) <- unique(openlow_df_lichen$Viereck.3)
       dev.off()
 #define axis 
-      xlim <- c(-1, 1.5)
-      ylim <- c(-1, 1.5)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #plot with base overlay 
       ordiplot(mds_openlow_lichen, type = "n", xlim = xlim, ylim = ylim, 
@@ -2085,47 +2190,55 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
 
 #Species Loading Values 
     #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_openlow_lichen, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(openlow_composition_lichen, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
     #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_openlow_lichen, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(openlow_composition_lichen, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -2146,8 +2259,8 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
     names(veg_colors) <- unique(openlow_df_nonvasc$Viereck.3)
     dev.off()
 #define axis 
-    xlim <- c(-1, 1.5)
-    ylim <- c(-1, 1.5)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #plot with base overlay 
       ordiplot(mds_openlow_nonvasc, type = "n", xlim = xlim, ylim = ylim, 
@@ -2217,47 +2330,55 @@ openlow_df_nonvasc <- openlow_df_nonvasc %>%
 #Species Loading values 
 
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_openlow_nonvasc, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(openlow_composition_nonvasc, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores 
       axis2_scores <- scores(mds_openlow_nonvasc, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(openlow_composition_nonvasc, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -2307,8 +2428,8 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
     names(veg_colors) <- unique(dwarfscrub_df$Viereck.3)
     dev.off()
 #define axis 
-    xlim <- c(-1.5, 1)
-    ylim <- c(-1.5, 1)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #Plot with base overlay 
     ordiplot(mds_dwarfscrub, type = "n", xlim = xlim, ylim = ylim, cex.axis = 1.5, cex.lab = 1.4, main = "Dwarf Shrub (Vascular Species)", cex.main = 2,
@@ -2369,47 +2490,57 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
 #Species Loading Values 
     
   #axis1 scores 
+  #extract scores
       axis1_scores <- scores(mds_dwarfscrub, display = "sites")[, 1]
-      species_cor <- apply(dwarfscrub_composition, 2, function(species) cor (species, axis1_scores, method = "spearman"))
+    #get correlation values and sort them
+      species_cor <- apply(dwarfscrub_composition, 2, 
+                           function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_dwarfscrub, display = "sites")[, 2]
-      species_cor <- apply(dwarfscrub_composition, 2, function(species) cor (species, axis2_scores, method = "spearman"))
+    #get correlation values and sort them
+      species_cor <- apply(dwarfscrub_composition, 2, 
+                           function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -2431,8 +2562,8 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
     names(veg_colors) <- unique(dwarfscrub_df_lichen$Viereck.3)
     dev.off()
 #define axis
-    xlim <- c(-1.5, 1)
-    ylim <- c(-1.5, 1)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #plot with base overlay 
     ordiplot(mds_dwarfscrub_lichen, type = "n", xlim = xlim, ylim = ylim, 
@@ -2505,47 +2636,55 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
 #Species Loading Values 
       
   #axis1 scores 
+    #extract scores
       axis1_scores <- scores(mds_dwarfscrub_lichen, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(dwarfscrub_composition_lichen, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_dwarfscrub_lichen, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(dwarfscrub_composition_lichen, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
@@ -2567,8 +2706,8 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
     names(veg_colors) <- unique(dwarfscrub_df_nonvasc$Viereck.3)
     dev.off()
 #define axis 
-    xlim <- c(-1.5, 1)
-    ylim <- c(-1.5, 1)
+    xlim <- c(-1.5, 1.5)
+    ylim <- c(-1.5, 1.5)
 
 #plot with base overlay 
     ordiplot(mds_dwarfscrub_nonvasc, type = "n", xlim = xlim, ylim = ylim, 
@@ -2641,47 +2780,55 @@ dwarfscrub_df_nonvasc <- dwarfscrub_df_nonvasc %>%
 
 #Species loading values 
   #axis1 scores 
+  #extract scores
       axis1_scores <- scores(mds_dwarfscrub_nonvasc, display = "sites")[, 1]
+    #get correlation values and sort them
       species_cor <- apply(dwarfscrub_composition_nonvasc, 2, function(species) cor (species, axis1_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
 
   #axis2 scores
+    #extract scores
       axis2_scores <- scores(mds_dwarfscrub_nonvasc, display = "sites")[, 2]
+    #get correlation values and sort them
       species_cor <- apply(dwarfscrub_composition_nonvasc, 2, function(species) cor (species, axis2_scores, method = "spearman"))
       species_cor_sorted <- sort(species_cor, decreasing = TRUE)
+    #look at highest correlated
       head(species_cor_sorted, 10)
       tail(species_cor_sorted, 10)
-      
+    #turn results into a dataframe and do some manipulation
       species_cor_sorted <- as.data.frame(species_cor_sorted)
       species_cor_sorted <- species_cor_sorted %>%
         rownames_to_column(var = "Code1")
       species_cor_sorted <- species_cor_sorted %>%
         rename(Loadings = species_cor_sorted)
       str(species_cor_sorted)
+    #join species codes and names for readability
       species_cor_sorted$Code1 <- factor(species_cor_sorted$Code1)
       taxa_filtered$Code1 <- factor(taxa_filtered$Code1)
       species_cor_sorted <- species_cor_sorted %>%
         left_join(taxa_filtered %>% select(Genus_Species, Code1), by = "Code1")
       species_cor_sorted <-species_cor_sorted %>% distinct()
-      
+    #finalize summary dataframe
       summary_df <- species_cor_sorted %>%
         arrange(Loadings) %>%
         slice(c(1:10, (n()-9):n()))
