@@ -26,6 +26,7 @@ For these specific models, we determined that the Park and Viereck.3 terms were 
 
 # Setup 
 ```{r}
+#test push
 library(vegan)
 library(permute)
 library(lattice)
