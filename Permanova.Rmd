@@ -111,12 +111,12 @@ summary_table_nonvasc <- summary_table_nonvasc %>% distinct()
 ```
 
 
-# Beetle Disturbed Spruce 
+# Beetle Disturbed Spruce  
 
 ## Building the dataframes to be balanced - code for reference (not required to run if using quick load)
 ```{r}
 #Vascular 
-    #hand select the years for plots with more than the decided number of visits 
+    #hand select the years for plots with more than the decided number of visits, which is 3 in this case  
       filter_criteria_beetle <- list(
         KATM_2009_01_S996 = c(2012, 2014, 2019),
         KATM_2009_01_S999 = c(2013, 2014, 2019),
