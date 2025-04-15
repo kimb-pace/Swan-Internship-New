@@ -253,7 +253,7 @@ taxa_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/taxa_f
               app = mean(App_Nonvasc_Prop, na.rm = TRUE),
               se_app = sd(App_Nonvasc_Prop, na.rm = TRUE)/sqrt(n()))
 
-          
+           
 
 #Calculating species richness for each vegetation class (Total, and by park)
 

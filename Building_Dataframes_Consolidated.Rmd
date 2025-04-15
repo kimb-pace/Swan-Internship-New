@@ -178,7 +178,7 @@ balanced_df <- quad_abundance_dataframe_of_choice %>%
          Sample_Year %in% unlist(filter_criteria[Plot])))
 ```
 
-
+ 
 
 
 

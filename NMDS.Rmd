@@ -510,7 +510,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
          col = "black", cex = 0.7, pos = 4)
 
 beetlevasc_plot_viereck <- recordPlot()
-
+ 
 #Species loading values 
   #axis1 scores 
     #extract scores

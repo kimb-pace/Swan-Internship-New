@@ -5,7 +5,7 @@ library(lattice)
 library(dplyr)
 library(vegan)
 library(here)
-
+ 
 adjusted_permanova <- function(data, 
                                matrix, 
                                base_permutations, 

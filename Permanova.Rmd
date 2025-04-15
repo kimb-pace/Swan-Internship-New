@@ -346,13 +346,13 @@ beetle_env_nonvasc$Sample_Year <- as.numeric(beetle_env_nonvasc$Sample_Year)
 beetle_composition <- beetle_df[,c(8:261)]
 beetle_composition <- as.matrix(beetle_composition) 
 
-      #design permutation structure 
-      #time 
+    #restrict permutations 
+      #shuffling time 
       perm_design_beetle_time = how(
         plots = Plots(strata = beetle_env$Plot, type = c("free")),
         within = Within(type = "series", mirror = FALSE),
         nperm = 999)
-      #for the park model 
+      #not shuffling time 
       perm_design_beetle = how(
         plots = Plots(strata = beetle_env$Plot, type = c("free")),
         within = Within(type = "none"),
@@ -363,13 +363,13 @@ beetle_composition <- as.matrix(beetle_composition)
 beetle_lichen_composition <- beetle_df_lichen[,c(10:167)]
 beetle_lichen_composition <- as.matrix(beetle_lichen_composition) 
 
-      #design permutation structure 
-      #time 
+    #restrict permutations 
+      #shuffling time 
       perm_design_beetle_lichen_time = how(
         plots = Plots(strata = beetle_env_lichen$Plot, type = c("free")),
         within = Within(type = "series", mirror = FALSE),
         nperm = 999)
-      #for the park model 
+      #not shuffling time 
       perm_design_beetle_lichen = how(
         plots = Plots(strata = beetle_env_lichen$Plot, type = c("free")),
         within = Within(type = "none"),
@@ -380,13 +380,13 @@ beetle_lichen_composition <- as.matrix(beetle_lichen_composition)
 beetle_nonvasc_composition <- beetle_df_nonvasc[,c(10:210)]
 beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition) 
 
-      #restrict permutations 
-      #Time 
+    #restrict permutations 
+      #shuffling time 
       perm_design_beetle_nonvasc_time = how(
         plots = Plots(strata = beetle_env_nonvasc$Plot, type = c("free")),
         within = Within(type = "series", mirror = FALSE),
         nperm = 999)
-      #for the park model 
+      #not shuffling time 
       perm_design_beetle_nonvasc = how(
         plots = Plots(strata = beetle_env_nonvasc$Plot, type = c("free")),
         within = Within(type = "none"),
@@ -399,7 +399,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
 #Vascular 
 
 #Differences between parks 
-    #univariate (Species richness)
+    #Uivariate (Species richness)
       #Base model 
       beetle_univariate_vasc_park <- adonis2(beetle_env$Species_Richness ~ Park + Plot,
                                    data = beetle_env, 
@@ -411,7 +411,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       
   #hand calculate corrected F values 
       
-      #create permutation object 
+      #create permutation object that determines how your data will be shuffled each time 
       perms1 <- rbind(1:nrow(beetle_env),
                       shuffleSet(n = nrow(beetle_env), control = perm_design_beetle, nset = 999))
       
@@ -453,7 +453,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       print(beetle_univariate_vasc_subclass)
       
       #hand calculate corrected F values 
-      #create permutation object 
+      #create permutation object that determines how your data will be shuffled each time 
       perms01 <- rbind(1:nrow(beetle_env),
                       shuffleSet(n = nrow(beetle_env), control = perm_design_beetle, nset = 999))
       
@@ -502,9 +502,10 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       
       print(beetle_multivariate_vasc_park)
     #hand calculate corrected F values
-      #create permutation object and results object for sums of squares to be stored 
+      #create permutation object that determines how your data will be shuffled each time 
       perms2 <- rbind(1:nrow(beetle_composition),
                       shuffleSet(n = nrow(beetle_composition), control = perm_design_beetle, nset = 999))
+      #create results object to store the sums of squares for each permutation 
       results2 <- matrix(nrow = nrow(perms2), ncol = 4)
       colnames(results2) <- c("Park", "Plot", "Residual", "Total")
       
@@ -537,7 +538,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
       
       print(beetle_multivariate_vasc_subclass)
       #hand calculate corrected F values
-      #create permutation object  
+      #create permutation object that determines how your data will be shuffled each time  
       perms02 <- rbind(1:nrow(beetle_composition),
                       shuffleSet(n = nrow(beetle_composition), control = perm_design_beetle, nset = 999))
       #create object for SS from each permutation to be stored
@@ -625,7 +626,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_univariate_lichen_park)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms3 <- rbind(1:nrow(beetle_env_lichen),
                           shuffleSet(n = nrow(beetle_env_lichen), control = perm_design_beetle_lichen, nset = 999))
           
@@ -665,7 +666,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_univariate_lichen_subclass)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time  
           perms03 <- rbind(1:nrow(beetle_env_lichen),
                           shuffleSet(n = nrow(beetle_env_lichen), 
                                      control = perm_design_beetle_lichen, nset = 999))
@@ -717,7 +718,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_multivariate_lichen_park)
           
           #hand calculate corrected F values
-          #create permutation object  
+          #create permutation object that determines how your data will be shuffled each time   
           perms4 <- rbind(1:nrow(beetle_lichen_composition),
                           shuffleSet(n = nrow(beetle_lichen_composition), 
                                      control = perm_design_beetle_lichen, nset = 999))
@@ -755,7 +756,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_multivariate_lichen_subclass)
           
           #hand calculate corrected F values:
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time  
           perms04 <- rbind(1:nrow(beetle_lichen_composition),
                           shuffleSet(n = nrow(beetle_lichen_composition), 
                                      control = perm_design_beetle_lichen, nset = 999))
@@ -839,7 +840,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_univariate_nonvasc_park)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time  
           perms5 <- rbind(1:nrow(beetle_env_nonvasc),
                           shuffleSet(n = nrow(beetle_env_nonvasc), 
                                      control = perm_design_beetle_nonvasc, nset = 999))
@@ -880,7 +881,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_univariate_nonvasc_subclass)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time  
           perms05 <- rbind(1:nrow(beetle_env_nonvasc),
                           shuffleSet(n = nrow(beetle_env_nonvasc), 
                                      control = perm_design_beetle_nonvasc, nset = 999))
@@ -931,7 +932,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_multivariate_nonvasc_park)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms6 <- rbind(1:nrow(beetle_nonvasc_composition),
                           shuffleSet(n = nrow(beetle_nonvasc_composition), 
                                      control = perm_design_beetle_nonvasc, nset = 999))
@@ -969,7 +970,7 @@ beetle_nonvasc_composition <- as.matrix(beetle_nonvasc_composition)
           print(beetle_multivariate_nonvasc_subclass)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time  
           perms06 <- rbind(1:nrow(beetle_nonvasc_composition),
                           shuffleSet(n = nrow(beetle_nonvasc_composition), 
                                      control = perm_design_beetle_nonvasc, nset = 999))
@@ -1329,11 +1330,13 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           needle_composition <- needle_df[,c(8:261)]
           needle_composition <- as.matrix(needle_composition) 
           
-          #design permutation structure 
+        #restrict permutations
+          #not shuffling time 
           perm_design_needle = how(
             plots = Plots(strata = needle_env$Plot, type = c("free")),
             within = Within(type = "none"),
             nperm = 999)
+          #shuffling time
           perm_design_needle_time = how(
             plots = Plots(strata = needle_env$Plot, type = c("free")),
             within = Within(type = "series", mirror = FALSE),
@@ -1343,11 +1346,13 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           needle_composition_lichen <- needle_df_lichen[,c(10:167)]
           needle_composition_lichen <- as.matrix(needle_composition_lichen) 
           
-          #design permutation structure 
+        #restrict permutations 
+          #not shuffling time
           perm_design_needle_lichen = how(
             plots = Plots(strata = needle_env_lichen$Plot, type = c("free")),
             within = Within(type = "none"),
             nperm = 999)
+          #shuffling time
           perm_design_needle_time_lichen = how(
             plots = Plots(strata = needle_env_lichen$Plot, type = c("free")),
             within = Within(type = "series", mirror = FALSE),
@@ -1358,11 +1363,13 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           needle_composition_nonvasc <- needle_df_nonvasc[,c(10:210)]
           needle_composition_nonvasc <- as.matrix(needle_composition_nonvasc) 
           
-          #design permutation structure 
+        #restrict permutations
+          #not shuffling time
           perm_design_needle_nonvasc = how(
             plots = Plots(strata = needle_env_nonvasc$Plot, type = c("free")),
             within = Within(type = "none"),
             nperm = 999)
+          #shuffling time
           perm_design_needle_time_nonvasc = how(
             plots = Plots(strata = needle_env_nonvasc$Plot, type = c("free")),
             within = Within(type = "series", mirror = FALSE),
@@ -1385,11 +1392,11 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_univariate_vascular_park)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms7 <- rbind(1:nrow(needle_env),
                            shuffleSet(n = nrow(needle_env), control = perm_design_needle, nset = 999))
           
-          #create object for SS to be stored 
+          #create object for SS to be stored from each permutation 
           results7 <- matrix(nrow = nrow(perms7), ncol = 4)
           colnames(results7) <- c("Park", "Plot", "Residual", "Total")
           
@@ -1423,12 +1430,12 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
                                        by = "terms")
           print(needle_univariate_vascular_time)
           
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms07 <- rbind(1:nrow(needle_env),
                            shuffleSet(n = nrow(needle_env), control = perm_design_needle, nset = 999))
           
       #hand calculate corrected F values
-          #create object for SS to be stored 
+          #create object for SS to be stored from each permutation 
           results07 <- matrix(nrow = nrow(perms07), ncol = 6)
           colnames(results07) <- c("Park", "Plot", "Sample_Year", "Park*Sample_Year", "Residual", "Total")
           
@@ -1462,10 +1469,11 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_multivariate_vascular_park)
           
           #hand calculate corrected F values
-          #create permutation structure and results object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms8 <- rbind(1:nrow(needle_composition),
                            shuffleSet(n = nrow(needle_composition), 
                                       control = perm_design_needle, nset = 999))
+          #create results object that stores sums of squares for each permutation 
           results8 <- matrix(nrow = nrow(perms8), ncol = 4)
           colnames(results8) <- c("Park", "Plot", "Residual", "Total")
           
@@ -1499,10 +1507,11 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_multivariate_vascular_time)
           
           #hand calculate corrected F values
-          #create permutation structure and results object 
+          #create permutation object that determines how your data will be shuffled each time  
           perms08 <- rbind(1:nrow(needle_composition),
                            shuffleSet(n = nrow(needle_composition), 
                                       control = perm_design_needle, nset = 999))
+          #create results object that will store the sums of squares for each permutation 
           results08 <- matrix(nrow = nrow(perms08), ncol = 6)
           colnames(results08) <- c("Park", "Plot", "Sample_Year", 
                                    "Park*Sample_Year", "Residual", "Total")
@@ -1554,12 +1563,12 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_univariate_lichen_park)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms9 <- rbind(1:nrow(needle_env_lichen),
                            shuffleSet(n = nrow(needle_env_lichen), 
                                       control = perm_design_needle_lichen, nset = 999))
           
-          #create object for Ss to be stored 
+          #create results object that will store the sums of squares for each permutation 
           results9 <- matrix(nrow = nrow(perms9), ncol = 4)
           colnames(results9) <- c("Park", "Plot", "Residual", "Total")
           
@@ -1595,12 +1604,12 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_univariate_lichen_time)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time  
           perms09 <- rbind(1:nrow(needle_env_lichen),
                            shuffleSet(n = nrow(needle_env_lichen), 
                                       control = perm_design_needle_lichen, nset = 999))
           
-          #create object for Ss to be stored 
+          #create results object that will store the sums of squares for each permutation 
           results09 <- matrix(nrow = nrow(perms09), ncol = 6)
           colnames(results09) <- c("Park", "Plot", "Sample_Year",
                                    "Park*Sample_Year", "Residual", "Total")
@@ -1638,10 +1647,11 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_multivariate_lichen_park)
           
           #hand calculate corrected F values
-          #create permutation structure and results object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms10 <- rbind(1:nrow(needle_composition_lichen),
                            shuffleSet(n = nrow(needle_composition_lichen), 
                                       control = perm_design_needle_lichen, nset = 999))
+          #create results object that will store the sums of squares for each permutation 
           results10 <- matrix(nrow = nrow(perms10), ncol = 4)
           colnames(results10) <- c("Park", "Plot", "Residual", "Total")
           
@@ -1675,10 +1685,11 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_multivariate_lichen_time)
           
           #hand calculate corrected F values
-          #create permutation structure and results object 
+          #create permutation object that determines how your data will be shuffled each time  
           perms010 <- rbind(1:nrow(needle_composition_lichen),
                            shuffleSet(n = nrow(needle_composition_lichen), 
                                       control = perm_design_needle_lichen, nset = 999))
+          #create results object that will store the sums of squares for each permutation 
           results010 <- matrix(nrow = nrow(perms010), ncol = 6)
           colnames(results010) <- c("Park", "Plot", "Sample_Year", 
                                     "Park*Sample_Year", "Residual", "Total")
@@ -1731,12 +1742,12 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_univariate_nonvasc_park)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms11 <- rbind(1:nrow(needle_env_nonvasc),
                            shuffleSet(n = nrow(needle_env_nonvasc), 
                                       control = perm_design_needle_nonvasc, nset = 999))
           
-          #create object for Ss to be stored 
+          #create results object that will store the sums of squares for each permutation 
           results11 <- matrix(nrow = nrow(perms11), ncol = 4)
           colnames(results11) <- c("Park", "Plot", "Residual", "Total")
           
@@ -1771,12 +1782,12 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_univariate_nonvasc_time)
           
           #hand calculate corrected F values
-          #create permutation object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms011 <- rbind(1:nrow(needle_env_nonvasc),
                            shuffleSet(n = nrow(needle_env_nonvasc), 
                                       control = perm_design_needle_nonvasc, nset = 999))
           
-          #create object for Ss to be stored 
+          #create object for SS from each permutation to be stored 
           results011 <- matrix(nrow = nrow(perms011), ncol = 6)
           colnames(results011) <- c("Park", "Plot", "Sample_Year", 
                                     "Park*Sample_Year", "Residual", "Total")
@@ -1813,10 +1824,11 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
           print(needle_multivariate_nonvasc_park)
           
           #hand calculate corrected F values
-          #create permutation structure and results object 
+          #create permutation object that determines how your data will be shuffled each time 
           perms12 <- rbind(1:nrow(needle_composition_nonvasc),
                            shuffleSet(n = nrow(needle_composition_nonvasc), 
                                       control = perm_design_needle_nonvasc, nset = 999))
+          #create results object that will store the sums of squares from each permutation 
           results12 <- matrix(nrow = nrow(perms12), ncol = 4)
           colnames(results12) <- c("Park", "Plot", "Residual", "Total")
           
@@ -1850,7 +1862,7 @@ needle_env_nonvasc <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/P
                                            by = "terms")
           print(needle_multivariate_nonvasc_time)
           
-          #create permutation structure and results object 
+          #create permutation object that determines how your data will be shuffled each time  
           perms012 <- rbind(1:nrow(needle_composition_nonvasc),
                            shuffleSet(n = nrow(needle_composition_nonvasc), 
                                       control = perm_design_needle_nonvasc, nset = 999))
@@ -2147,10 +2159,12 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
       openlow_composition <- as.matrix(openlow_composition) 
 
       #design permutation structure 
+      #shuffling time
       perm_design_openlow_time = how(
         plots = Plots(strata = openlow_env$Plot, type = c("free")),
         within = Within(type = "series", mirror = FALSE),
         nperm = 999)
+      #not shuffling time 
       perm_design_openlow = how(
         plots = Plots(strata = openlow_env$Plot, type = c("free")),
         within = Within(type = "none"),
@@ -2161,10 +2175,12 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
       openlow_composition_lichen <- as.matrix(openlow_composition_lichen) 
       
       #design permutation structure 
+      #shuffling time
       perm_design_openlow_time_lichen = how(
         plots = Plots(strata = openlow_env_lichen$Plot, type = c("free")),
         within = Within(type = "series", mirror = FALSE),
         nperm = 999)
+      #not shuffling time
       perm_design_openlow_lichen = how(
         plots = Plots(strata = openlow_env_lichen$Plot, type = c("free")),
         within = Within(type = "none"),
@@ -2175,10 +2191,12 @@ openlow_env_nonvasc$Sample_Year <- as.numeric(openlow_env_nonvasc$Sample_Year)
       openlow_composition_nonvasc <- as.matrix(openlow_composition_nonvasc) 
       
       #design permutation structure 
+      #shuffling time
       perm_design_openlow_time_nonvasc = how(
         plots = Plots(strata = openlow_env_nonvasc$Plot, type = c("free")),
         within = Within(type = "series", mirror = FALSE),
         nperm = 999)
+      #not shuffling time
       perm_design_openlow_nonvasc = how(
         plots = Plots(strata = openlow_env_nonvasc$Plot, type = c("free")),
         within = Within(type = "none"),
@@ -2951,13 +2969,13 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           dwarfscrub_composition <- dwarfscrub_df[,c(8:261)]
           dwarfscrub_composition <- as.matrix(dwarfscrub_composition) 
           
-          #design permutation structure 
-          #For time based models 
+        #restrict permutations 
+          #shuffling time
           perm_design_dwarfscrub_time = how(
             plots = Plots(strata = dwarfscrub_env$Plot, type = c("free")),
             within = Within(type = "series", mirror = FALSE),
             nperm = 999)
-          #for the park model 
+          #not shuffling time 
           perm_design_dwarfscrub = how(
             plots = Plots(strata = dwarfscrub_env$Plot, type = c("free")),
             within = Within(type = "none"),
@@ -2967,13 +2985,13 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           dwarfscrub_composition_lichen <- dwarfscrub_df_lichen[,c(10:167)]
           dwarfscrub_composition_lichen <- as.matrix(dwarfscrub_composition_lichen) 
 
-          #design permutation structure 
-          #for time based models 
+        #restrict permutations 
+          #shuffling time 
           perm_design_dwarfscrub_time_lichen = how(
             plots = Plots(strata = dwarfscrub_env_lichen$Plot, type = c("free")),
             within = Within(type = "series", mirror = FALSE),
             nperm = 999)
-          #for the park model 
+          #not shuffling time
           perm_design_dwarfscrub_lichen = how(
             plots = Plots(strata = dwarfscrub_env_lichen$Plot, type = c("free")),
             within = Within(type = "none"),
@@ -2984,13 +3002,13 @@ dwarfscrub_env_nonvasc$Sample_Year <- as.numeric(dwarfscrub_env_nonvasc$Sample_Y
           dwarfscrub_composition_nonvasc <- dwarfscrub_df_nonvasc[,c(10:210)]
           dwarfscrub_composition_nonvasc <- as.matrix(dwarfscrub_composition_nonvasc) 
           
-          #design permutation structure 
-          #for time based models 
+        #restrict permutations 
+          #shuffling time 
           perm_design_dwarfscrub_time_nonvasc = how(
             plots = Plots(strata = dwarfscrub_env_nonvasc$Plot, type = c("free")),
             within = Within(type = "series", mirror = FALSE),
             nperm = 999)
-          #for park model 
+          #not shuffling time
           perm_design_dwarfscrub_nonvasc = how(
             plots = Plots(strata = dwarfscrub_env_nonvasc$Plot, type = c("free")),
             within = Within(type = "none"),
@@ -3888,11 +3906,13 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
           forest_composition <- forest_df[,c(8:261)]
           forest_composition <- as.matrix(forest_composition) 
           
-          #design permutation structure 
+        #restrict permutations
+          #shuffling time
           perm_design_forest_time = how(
             plots = Plots(strata = forest_env$Plot, type = c("free")),
             within = Within(type = "series", mirror = FALSE),
             nperm = 999)
+          #not shuffling time
           perm_design_forest = how(
             plots = Plots(strata = forest_env$Plot, type = c("free")),
             within = Within(type = "none"),
@@ -3902,11 +3922,13 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
           forest_composition_lichen <- forest_df_lichen[,c(10:167)]
           forest_composition_lichen <- as.matrix(forest_composition_lichen)
 
-          #design permutation structure 
+        #restrict permutations 
+          #shuffling time
           perm_design_forest_time_lichen = how(
             plots = Plots(strata = forest_env_lichen$Plot, type = c("free")),
             within = Within(type = "series", mirror = FALSE),
             nperm = 999)
+          #not shuffling time
           perm_design_forest_lichen = how(
             plots = Plots(strata = forest_env_lichen$Plot, type = c("free")),
             within = Within(type = "none"),
@@ -3916,11 +3938,13 @@ forest_env_nonvasc$Sample_Year <- as.numeric(forest_env_nonvasc$Sample_Year)
           forest_composition_nonvasc <- forest_df_nonvasc[,c(10:210)]
           forest_composition_nonvasc <- as.matrix(forest_composition_nonvasc) 
           
-          #design permutation structure 
+        #restrict permutations 
+          #shuffling time
           perm_design_forest_time_nonvasc = how(
             plots = Plots(strata = forest_env_nonvasc$Plot, type = c("free")),
             within = Within(type = "series", mirror = FALSE),
             nperm = 999)
+          #not shuffling time
           perm_design_forest_nonvasc = how(
             plots = Plots(strata = forest_env_nonvasc$Plot, type = c("free")),
             within = Within(type = "none"),
@@ -4806,39 +4830,39 @@ alpine_env_nonvasc$Sample_Year <- as.numeric(alpine_env_nonvasc$Sample_Year)
 
 #Restrict Permutations 
 
-#Vascular 
-      #for differences between parks  
+  #Vascular 
+      #not shuffling time
             perm_design_alpine = how(
               plots = Plots(strata = alpine_env$Plot, type = c("free")),
               within = Within(type = "none"),
               nperm = 999)
-      #for differences over time 
+      #shuffling time
             perm_design_alpine_time = how(
               plots = Plots(strata = alpine_env$Plot, type = c("free")),
               within = Within(type = "series", mirror = FALSE),
               nperm = 999)
             
             
-#Lichen 
-      #for differences between parks
+  #Lichen 
+      #not shuffling time
             perm_design_alpine_lichen = how(
               plots = Plots(strata = alpine_env_lichen$Plot, type = c("free")),
               within = Within(type = "none"),
               nperm = 999)
-      #for differences over time   
+      #shuffling time  
             perm_design_alpine_lichen_time = how(
               plots = Plots(strata = alpine_env_lichen$Plot, type = c("free")),
               within = Within(type = "series", mirror = FALSE),
               nperm = 999)
             
 
-#Nonvascular 
-      #for differences between parks
+  #Nonvascular 
+      #not shuffling time
             perm_design_alpine_nonvasc = how(
               plots = Plots(strata = alpine_env_nonvasc$Plot, type = c("free")),
               within = Within(type = "none"),
               nperm = 999)
-      #for differences over time 
+      #shuffling time
             perm_design_alpine_nonvasc_time = how(
               plots = Plots(strata = alpine_env_nonvasc$Plot, type = c("free")),
               within = Within(type = "series", mirror = FALSE),
