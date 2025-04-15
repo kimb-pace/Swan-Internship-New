@@ -10,7 +10,7 @@ library(tibble)
 
 str(forest_env)
 
-
+ 
 
 
 

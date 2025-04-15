@@ -7,7 +7,7 @@ library(permute)
 library(lattice)
 library(pairwiseAdonis)
 library(writexl)
-
+ 
 vascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/presence_absence_df_full.xlsx")
 lichenspresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/lichenspresence_absence_df_full.xlsx")
 nonvascpresence_absence_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/nonvascpresence_absence_df_full.xlsx")

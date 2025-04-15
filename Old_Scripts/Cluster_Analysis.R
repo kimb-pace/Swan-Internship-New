@@ -5,7 +5,7 @@ library(dendextend)
 library(factoextra)
 library(NbClust)
 library(ggpubr)
-
+ 
 vasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/vasc_df_balanced.xlsx")
 nonvasc_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/nonvasc_df_balanced.xlsx")
 lichens_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/lichens_df_balanced.xlsx")

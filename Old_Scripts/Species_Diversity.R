@@ -5,7 +5,7 @@ library(tidyverse)
 library(tidyr)
 library(ggplot2)
 library(ggpubr) 
-
+ 
 #Dataframe Creation:
 sp_richness <- fulldata %>%
   group_by(Park, Elevation_Band, Plot, Sample_Year) %>% 

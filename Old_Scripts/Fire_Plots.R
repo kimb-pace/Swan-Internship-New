@@ -7,7 +7,7 @@ library(writexl)
 library(readr)
 library(dplyr)
 library(tibble)
-
+ 
 load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_fire.rdata")
 plot_fire <- as.data.frame(plot_fire)
 viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_env.xlsx")
