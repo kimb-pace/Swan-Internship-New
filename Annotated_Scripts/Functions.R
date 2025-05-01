@@ -6,6 +6,61 @@ library(dplyr)
 library(vegan)
 library(here)
  
+#' #' Adjusted PERMANOVA with Custom F-Ratio Permutation Tests
+#'
+#' Performs a PERMANOVA using the \code{adonis2} function from the \code{vegan} package,
+#' with the option to compute custom F-ratios using user-specified permutation structures.
+#'
+#' This function gives you the option to test hypotheses involving adjusted F-ratios,
+#' which is done by applying different permutation control structures to the numerator and denominator terms
+#' of the F-test and by specifying the desired numerator and denominator associated with your specified hypotheses.
+#'
+#' @param data A data frame containing the grouping variables (factors) associated with each unit (such as plot or visit).
+#' @param matrix A raw data matrix (which will be converted to a distance matrix internally using the distance parameter you specify) that 
+#' contains each species as a column and each row as a unit, with data as either presence-absence or counts.
+#' @param base_permutations A \code{how()} object from the \code{permute} package used for the base PERMANOVA that determines how your non-adjusted terms will be permuted.
+#' @param corrected_F_equations A named list of expressions indicating F-ratio comparisons, where names
+#' are in the form \code{"Term1/Term4"} and values are the corresponding permutation structures
+#' (e.g., from \code{how()}).
+#' @param terms A character string specifying all of the individual terms of the model formula (e.g., \code{"A + B + C"}). Include all terms you would like to partition 
+#' variance among, excluding residual and total which will be added internally. 
+#' @param by A string that is passed to \code{adonis2}, indicating how to partition sums of squares; typically
+#' \code{"terms"} or \code{"margin"}.
+#' @param method A string specifying the distance method to use. Defaults to \code{"bray"} but \code{"jaccard"}, 
+#' \code{"euclidian"}, \code{"manhattan"} or other distance measures can be used as long as they are compatable with 
+#' adonis2 from the \code{vegan} package.
+#'
+#' @return A list with the following components:
+#' \describe{
+#'   \item{\code{base_model}}{The base model PERMANOVA table with corrected F and p-values inserted where applicable.}
+#'   \item{\code{corrected_F_values}}{A named list of custom-calculated F-ratios. They are also present in the base model table}
+#'   \item{\code{corrected_P_values}}{A named list of p-values for each custom F-ratio test. They are also present in the base model table}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' # Define permutation structures with permute::how()
+#' ps1 <- how(plots = Plots(strata = variable_data$FactorB, type = c("free")), within = Within(type = "free"), nperm = 999)
+#' ps2 <- how(Plots(strata = variable_data$FactorB, type = c("free")), within = Within(type = "series", mirror = FALSE), nperm = 999)
+#'
+#' adjusted_permanova(
+#'   data = variable_data,
+#'   matrix = species_matrix,
+#'   base_permutations = ps1,
+#'   corrected_F_equations = list("A/B" = ps1, "C/A" = ps2),
+#'   terms = "A + B + C"
+#'   by = "terms", 
+#'   method = "bray"
+#' )
+#' }
+#'
+#' @import vegan
+#' @importFrom permute shuffleSet how Within
+#' @export
+
+
+
+
 adjusted_permanova <- function(data, 
                                matrix, 
                                base_permutations, 
@@ -110,8 +165,8 @@ adjusted_permanova <- function(data,
 #Test Calls: 
 
 #Load data 
-beetle_df <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_df_vasc_filtered.xlsx"))
-beetle_env <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/PERMANOVA_DF_QuickLoad/beetle_env_vasc_filtered.xlsx"))
+beetle_df <- read_xlsx(here("beetle_df_vasc_filtered.xlsx"))
+beetle_env <- read_xlsx(here("beetle_env_vasc_filtered.xlsx"))
 
 #format matrix 
 beetle_composition <- beetle_df[,c(8:261)]
@@ -163,51 +218,10 @@ perm_design_beetle = how(
           print.data.frame(head002)
           #calculate P value 
           with(results02, sum(F.Viereck >= F.Viereck[1]) / length(F.Viereck))
-
-#test calls for the function: 
-          
-  #recalculate viereck term ONLY 
-    adjusted_beetle_result_viereck <- adjusted_permanova(
-      data = beetle_env,
-      matrix = beetle_composition,
-      base_permutations = perm_design_beetle_time,
-      adjusted_permutations = perm_design_beetle,
-      corrected_F_equations = c("Viereck.3/Plot"),
-      terms = "Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year",
-      by = "terms",
-      method = "bray"
-    )
     
-  #recalculate park term ONLY 
-    adjusted_beetle_result_park <- adjusted_permanova(
-      data = beetle_env,
-      matrix = beetle_composition,
-      base_permutations = perm_design_beetle_time,
-      adjusted_permutations = perm_design_beetle,
-      corrected_F_equations = c("Park/Plot"),
-      terms = "Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year",
-      by = "terms",
-      method = "bray"
-    )
-
-
-  #testing the call using multiple corrected F equations that use the same permutation restrictions 
-    multiple_term_result <- adjusted_permanova(
-      data = beetle_env, 
-      matrix = beetle_composition, 
-      base_permutations = perm_design_beetle_time,
-      adjusted_permutations = perm_design_beetle,
-      corrected_F_equations = c("Viereck.3/Plot", "Park/Plot"),
-      terms = "Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year",
-      by = "terms",
-      method = "bray"
-    )
-    
-    
-#new call with specifying permutation structure for each adjusted term 
-    
-    #testing the call using multiple corrected F equations that use the same permutation restrictions 
-    multiple_term_result <- adjusted_permanova(
+#testing the call using multiple corrected F equations that use the same permutation restrictions 
+  
+  multiple_term_result <- adjusted_permanova(
       data = beetle_env, 
       matrix = beetle_composition, 
       base_permutations = perm_design_beetle_time,
@@ -216,10 +230,28 @@ perm_design_beetle = how(
         "Park/Plot" = perm_design_beetle),
       terms = "Viereck.3 + Park + Plot + Sample_Year + Viereck.3*Sample_Year",
       by = "terms",
-      method = "bray"
-    ) 
+      method = "bray") 
     
     
 
+ 
     
+    
+    
+    
+    
+    
+    
+    
+    
+#EMS function 
+    
+  #draft input 
+    terms <- list(
+      list(name = "Vs", label = "Viereck.3", subscripts = c("s"), type = "fixed", levels = "a"),
+      list(name = "Pi", label = "Park", subscripts = c("i"), type = "fixed", levels = "b"),
+      list(name = "X(si)j", label = "Plot", subscripts = c("j", "(s,i)"), type = "random", levels = "(ab)c"),
+      list(name = "Tk", label = "Time", subscripts = c("k"), type = "random", levels = "d"),
+      list(name = "(VT)sk", label = "Interaction", subscripts = c("s", "k"), type = "random", levels = "ad"),
+      list(name = "Esijk", label = "Residual", subscripts = c("s", "i", "j", "k"), type = "random", levels = "abcd"))
 
