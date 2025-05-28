@@ -17,10 +17,24 @@ taxa_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/taxa_f
 taxa <- read.csv(here("Data/Unmodified/taxa.csv"))
 quad_freq <- read.csv(here("Data/Unmodified/Quadrat_Frequency.csv"))
 quad_freq_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/quad_freq_filtered.xlsx"))
+
+#Build Simple Taxa
+simple_taxa <- taxa %>%
+  group_by(Genus, Species) %>%
+  summarise(Code1 = first(Species_Code),
+            Genus = first(Genus),
+            Species = first(Species)) %>%
+  ungroup()
+
+#Make a genus_species column on both taxa and simple_taxa 
+taxa <- taxa %>% mutate(Genus_Species = paste(Genus, Species, sep="_"))
+taxa_filtered <- taxa_filtered %>% mutate(Genus_Species = paste(Genus, Species, sep="_"))
+simple_taxa <- simple_taxa %>% mutate(Genus_Species = paste(Genus, Species, sep="_"))
 ```
 
 # Creation of Collapsed Codes (combining subspecies and varieties, so that individuals are grouped by genus+species)
 ```{r}
+
   #make a genus_species column on both taxa and simple_taxa 
       taxa <- taxa %>% mutate(Genus_Species = paste(Genus, Species, sep="_"))
       taxa_filtered <- taxa_filtered %>% mutate(Genus_Species = paste(Genus, Species, sep="_"))
@@ -40,6 +54,25 @@ quad_freq_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/q
       quad_freq <- quad_freq %>% mutate(Plot_Year = paste(Plot, Sample_Year, sep="_")) %>%
         group_by(Plot) %>%
         mutate(Quad_Total = n_distinct(Quad_Num))
+      
+      
+      
+#Checking to see which species are only keyed out to genus level 
+genus_only <- taxa_filtered %>%
+  filter(Genus != "" & !is.na(Genus) & Species == "" | is.na(Species)) %>%
+  select(Species_Code, Vascular_Code, Genus, Species)
+genus_only
+
+#Checking for duplicates in vascular codes 
+    duplicates <- taxa_filtered %>%
+      filter(Vascular_Code != "" & !is.na(Vascular_Code)) %>%
+      group_by(Genus, Species) %>%
+      filter(n() > 1) %>%
+      ungroup()
+    duplicates
+    
+    duplicates_true <- duplicates %>% filter(Is_Name_Current %in% c("TRUE"))
+    duplicates_false <- duplicates %>% filter(Is_Name_Current %in% c("FALSE"))
 ```      
 
 # Checking for duplicate sample visits within the same year and removing them 
@@ -52,10 +85,21 @@ quad_freq_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/q
         select(Vascular_Code, Plot, Sample_Year, Sample_Date)
       multiple_visits <- multiple_visits %>% distinct()
       
+#Other duplicates - multiple quadrat repeats (ie two transects ran for quality assurance calibration)
+katm_2009_02_032 <- vascular_only %>% filter(Plot %in% c("KATM_2009_02_032"))
+duplicate_quads2 <- katm_2009_02_032 %>%
+  group_by(Quad_Num, Code1) %>%
+  filter(n() > 1) 
+lacl_2007_02_002 <- vascular_only %>% filter(Plot %in% c("LACL_2007_02_002"))
+duplicate_quads2 <- lacl_2007_02_002 %>%
+  group_by(Quad_Num, Code1) %>%
+  filter(n() > 1) 
+      
   #remove duplicate sampling events 
       quad_freq_filtered <- quad_freq %>%
         filter(!(Plot == "LACL_2007_02_002" & Sample_Date == "2022-07-17") &
                  !(Plot == "LACL_2007_02_006" & Sample_Date == "2007-08-13"))
+    
 ```
       
       
@@ -93,6 +137,13 @@ quad_freq_filtered <- read_xlsx(here("Data/Modified/Collapsed_Species_Code_DFs/q
         ungroup() 
       quad_abundance_df_nonvasc <- nonvasc_df %>%
         pivot_wider(names_from = Code1, values_from = Species_Quad_Count, values_fill = 0)
+      
+      
+  #transform the quadrat frequency dataframes into presence-absence example code: 
+  presence_absence_df <- quad_abundance_df %>%
+      mutate(across(-Plot_Year, ~ifelse(. > 1, 1, .)))
+  presence_absence_df <- presence_absence_df %>%
+  separate(Plot_Year, into = c("Park", "EstYear", "Elevation_Band", "PlotID", "Sample_Year"), sep = "_", remove = FALSE)
 ```
 
 # Creation of Summary Tables - Used to Help Balance Plot Visits 
@@ -178,22 +229,6 @@ balanced_df <- quad_abundance_dataframe_of_choice %>%
          Sample_Year %in% unlist(filter_criteria[Plot])))
 ```
 
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # Creation of Species Richness Dataframes 
 ```{r}
@@ -264,8 +299,12 @@ balanced_df <- quad_abundance_dataframe_of_choice %>%
 ```
 
 
+Random Code for Quick Reference from Dataframe_Management script
+```{r}
 
 
+
+```
 
 
 
