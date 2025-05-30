@@ -59,7 +59,7 @@ library(here)
 #' @export
 
 
-
+ 
 
 adjusted_permanova <- function(data, 
                                matrix, 
