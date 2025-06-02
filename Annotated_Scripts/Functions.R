@@ -232,17 +232,256 @@ perm_design_beetle = how(
       by = "terms",
       method = "bray") 
     
-    
 
+    TO DO: 
+    1. make the matrix script into a function 
+  2. figure out how to accomodate nesting and complex stuff 
+  3. make the output prettier (more better?)
+  4. finish documenting with roxygen 
+  5. finish loading example data for test calls 
+  6. beef up roxygen documentation for all of these. especially with dependency packages, figure out which one uses what 
+  7. ?????? 
+    8. package 
+  9. adjust the balancing dataframes function to accomodate other things. ie park or elevation band or number of plots 
+  per vegetation class? add it to the call and you specify which variable you want it to balance  
+  10. adjust years param in balance function to accomodate multiple visits in the same year ie visit_tag or something instead of explicitly year? 
+
+#balancing function 
+  
+  #Original script - not a function 
+  #hand select the years for plots with more than the decided number of visits 
+  filter_criteria <- list(
+    Plot1 = c(Selected_Year, Selected_Year, Selected_Year),
+    Plot2 = c(Selected_Year, Selected_Year, Selected_Year),
+    Plot3 = c(Selected_Year, Selected_Year, Selected_Year),
+    Plot4	= c(Selected_Year, Selected_Year, Selected_Year))
+  
+  #next identify plots with three plot visits from your vegetation class (or whatever the number you've decided is)
+  selected_plots <- summary_table_of_choice %>%
+    filter(Vegetation_Class == "Desired Vegetation Class", Number_Visits == 3) %>%
+    pull(Plot)
+  
+  #combine plots with hand selected plots from filter criteria 
+  selected_plots <- union(selected_plots, names(filter_criteria))
+  
+  #subset main presence absence dataframe based on both conditions 
+  #verify that the hand selected plots were correctly pulled 
+  subset_hand_selected <- quad_abundance_dataframe_of_choice %>%
+    filter(
+      Plot %in% names(filter_criteria) & 
+        Sample_Year %in% unlist(filter_criteria[Plot]))
+  
+  balanced_df <- quad_abundance_dataframe_of_choice %>%
+    filter(
+      (Plot %in% selected_plots) | 
+        (Plot %in% names(filter_criteria) &
+           Sample_Year %in% unlist(filter_criteria[Plot])))
+  
+
+#roxygen documentation 
+
+#' Balance Plot Visits for PERMANOVA Analysis 
+#'
+#' Subsets a data frame to ensure a specified number of visits per plot for PERMANOVA analyses using \code(Adonis2) in the \code(Vegan) Package or the Adjusted_Permanova Package.
+#' If some plots have more visits than the desired number, this function selects a subset of years 
+#' that are most similar to those in plots already balanced at the target number of visits.
+#'
+#' Optionally has a manual override built in to specify which years to retain for particular plots of interest.
+#'
+#' @param df A data frame containing plot and year information.
+#' @param plot_col The name of the column in `df` that identifies plots.
+#' @param year_col The name of the column in `df` that identifies years.
+#' @param n_visits A number specifying the number of visits (years) to retain per plot.
+#' @param manual_selection Optional named list specifying plots as names and vectors of years to retain. 
+#'   This overrides automatic selection for those plots.
+#'
+#' @return A data frame (`filtered_df`) that retains only the selected visits for plots with exactly `n_visits`.
+#'
+#' @examples
+#' #Assume you have a data frame called 'veg_df' with columns "Plot" and "Year" and you want to retain two visits of your choice
+#' balanced <- balance_visits(
+#'   df = veg_df,
+#'   plot_col = "Plot",
+#'   year_col = "Year",
+#'   n_visits = 2)
+#'
+#' # With manual override
+#' manual_years <- list(
+#'   "Plot4" = c(2012, 2015),
+#'   "Plot5" = c(2013, 2016))
+#'
+#' balanced_manual <- balance_visits(
+#'   df = veg_df,
+#'   plot_col = "Plot",
+#'   year_col = "Year",
+#'   n_visits = 2,
+#'   manual_selection = manual_years)
+#'
+#'@import dyplyr tidyr (i think, double check on this though)
+#'
+#' @export    
+  
+  
+  
+#balancing function 
+balance_visits <- function(df, 
+                           plot_col = "Plot", 
+                           year_col = "Sample_Year", 
+                           n_visits = 2,
+                           manual_selection = NULL) { #use null if you aren't manually selecting plots, use manual_plots in selection if you are choosing specific ones
+  #this makes a df that has one row per plot and a list of all years that plot was visited. 
+  #basically the summary table from the building dataframes section, which is what I used to hand select and balance things. 
+  #this way you can look at the years and specify if you want a manual override or to let it handle it auto-style 
  
-    
-    
-    
-    
-    
-    
-    
-    
+  plot_years <- df %>%
+    dplyr::select(.data[[plot_col]], .data[[year_col]]) %>% #selects just the two columns of interest from the dataframe, one for plotIDs and one for sample years.
+    #used .data[[name]] instead of actual column name so that you can have variation in what you call the column to have flexibility in future use 
+    distinct() %>%
+    group_by(.data[[plot_col]]) %>%
+    summarize(Years = list(sort(unique(.data[[year_col]]))), .groups = "drop")
+  
+  #manual override handling of selection 
+  manual_df <- NULL #creates items for manual selection if used. this is the longform version of selected years if added 
+  manual_summary <- NULL #this is the labeled version of the years for if you want to visualize/print it, for readability 
+  manual_plots <- character() #names of plots hand selected, skips auto-selection for them as it sifts through. makes an empty vector to store names of plots taht were manually selected. 
+  #use this to exclude plots from automatic processing later on 
+  if (!is.null(manual_selection)) { #if null the rest will be skipped! 
+    manual_df <- tibble::tibble( #turns named list of years into a tibble for ease of use 
+      !!plot_col := names(manual_selection),
+      Selected_Years = manual_selection
+    ) %>%
+      tidyr::unnest(cols = Selected_Years) %>% #expands each row into multiple rows (longform table) ie plot1 c(2018, 2020) into plot1 2018
+                                                                                                              # plot1 2020 
+      dplyr::rename(Selected_Year = Selected_Years) #since now its long form instead of c(year1, year2) rename column to reflect that 
+    manual_summary <- manual_df %>%
+      mutate(Selection_Type = "Manual") #adds manual as the selection type for designation 
+    manual_plots <- unique(manual_df[[plot_col]]) #grabs list of plot names in this section for later use 
+  }
+  
+  #remove manually selected plots from being part of the auto-selection process if there are some specified in call, so they 
+  #don't get processed twice (manual and auto)
+  plot_years <- plot_years %>%
+    filter(!(!!rlang::sym(plot_col) %in% manual_plots)) #keep rows where the plot column is NOT in the list of manual plots; tidy eval
+  #categorize plots based on how many visits they have 
+  #plots woth the desired number of visits: 
+  exact_plots <- plot_years %>%
+    filter(lengths(Years) == n_visits)
+  #plots with more than the desired number of visits (need to be decreased)
+  over_plots <- plot_years %>%
+    filter(lengths(Years) > n_visits)
+  #plots with less than teh number of visits (will be excluded)
+  under_plots <- plot_years %>%
+    filter(lengths(Years) < n_visits)
+  #figure out what the common year combos are among plots with the correct number of visits, to have it match in its auto-selection 
+  #this will guide the auto-selection's decisions on the over_plots 
+  common_combos <- exact_plots$Years %>%
+    purrr::map_chr(~ paste(sort(.x), collapse = "_")) %>% #takes the vector of years and sorts them in ascending order, and then joins them as a list with underscores. 
+    #ie c(2012, 2014) would become 2012_2014. used purr from tidyverse to return a character vector so it's easier to tally up with table. used laaply() originally but had to unlist and it got messy down the line and this is just easier. 
+    #i also tried sapply() but this just worked better because map_chr() guarantees it returns as a character vector instead of sapply() assuming it's a character but sometimes listing it as something else and giving me an error 
+    table() %>% #creates a frequewncy table for the year combinations to see what the common ones are 
+    sort(decreasing = TRUE) #sort from msot common to least common 
+  top_combo <- strsplit(names(common_combos)[1], "_")[[1]] %>% as.numeric() #decide what the most common one is, split it back from the string into the OG format 
+  
+  #originally was 
+    #common_combos <- table(
+      #sapply(exact_plots$Years, function(x) paste(sort(x), collapse = "_"))
+      # ) %>%
+      #sort(decreasing = TRUE)
+  
+  
+  #auto select closest matching years from the over_plots list of plots 
+  #basically it generates all combinations of n_visits and then picks the closest to the most similar combination using absolute year differences 
+  over_plots <- over_plots %>%
+    mutate(
+      Selected_Years = purrr::map(Years, function(yrs) { #for each element of years, applies function to select n_visits subset and purrr:map returns a list 
+        combs <- combn(yrs, n_visits, simplify = FALSE) #combn to generate all combos of n_visits years from the full list of years, simplify = false to get a list of vectors 
+        combs[which.min(sapply(combs, function(x) sum(abs(sort(x) - top_combo))))][[1]]})) #sort(x) to put years and top combo in order, abs(sortx-topcombo) 
+          #calculates the difference between the combos of years ie (2012, 2014) and (2012, 2015) would return something like (0,1) and then these are aded together
+          #so the lower the overall sum the closer the combo of years is to top combo if that makes sense (used which.min to find the lowest)
+  
+  #combine the exact_plots and the auto-selected plots 
+  selected_auto <- bind_rows(
+    exact_plots %>% mutate(Selected_Years = Years),
+    over_plots
+  ) %>%
+    select(!!plot_col, Selected_Years) %>%
+    tidyr::unnest(cols = Selected_Years) %>% #so each year becomes its own row again 
+    dplyr::rename(Selected_Year = Selected_Years) %>% #changes the year column name to reflect that 
+    mutate(Selection_Type = "Auto") #adds a selection type column for tracking if you want to knwo which plots were auto selected and which were manual 
+  
+  #add in manual selections if specified, optional if nothing is specified in the call 
+  if (!is.null(manual_summary)) {
+    all_selected <- bind_rows(selected_auto, manual_summary)
+  } else {
+    all_selected <- selected_auto}
+  
+  #filter dataframe with plot criteria outlined above now that the specification has been made 
+  filtered_dataframe <- df %>%
+    dplyr::inner_join(all_selected,
+                      by = setNames(c(plot_col, year_col), c(plot_col, "Selected_Year")))
+  
+  #generate summary table with selected plots 
+  summary_table <- all_selected %>%
+    arrange(.data[[plot_col]], Selected_Year) #use .data for flexibility 
+  
+  #print results with clarity in whats what
+  cat("balance Summary\n")
+  cat("Plots with exact/trimmed years (auto):", length(unique(selected_auto[[plot_col]])), "\n")
+  if (!is.null(manual_summary)) {
+    cat("Plots with manual override:", length(manual_plots), "\n")
+  }
+  if (nrow(under_plots) > 0) {
+    cat("Dropped", nrow(under_plots), "plot(s) with fewer than", n_visits, "visits:\n")
+    print(under_plots[[plot_col]])
+  }
+  return(list(
+    filtered_dataframe = filtered_dataframe,
+    summary_table = summary_table
+  ))
+}
+}
+
+
+
+#Example call
+#first specify manual override 
+manual_override <- list(
+  KATM_2009_01_S996 = c(2012, 2014, 2019),
+  LACL_2010_01_S995 = c(2012, 2014, 2019))
+#then call for filtered DF using criteria 
+filtered_df <- balance_visits(
+  quad_abundance_df_vascular_filtered,
+  plot_col = "Plot",
+  year_col = "Sample_Year",
+  n_visits = 2,
+  manual_selection = manual_override)
+
+
+#updated call with manual override built in instead of separate item 
+result <- balance_visits(
+  df = quad_abundance_df_vascular_filtered,
+  plot_col = "Plot",
+  year_col = "Sample_Year",
+  n_visits = 2,
+  manual_selection = list(
+    "KATM_2009_01_S996" = c(2012, 2014),
+    "LACL_2010_01_S995" = c(2014, 2019)))
+
+#otehr call option, if manual override is not utilized 
+result <- balance_visits(
+  df = quad_abundance_df_vascular_filtered,
+  plot_col = "Plot",
+  year_col = "Sample_Year",
+  n_visits = 2,
+  manual_selection = NULL)
+
+  
+  
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
+  
+
+  
+#EMS function - MATRIX GENERATION 
     
 #EMS function 
     
