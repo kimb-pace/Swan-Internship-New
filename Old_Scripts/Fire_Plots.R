@@ -8,64 +8,65 @@ library(readr)
 library(dplyr)
 library(tibble)
  
-load("T:\\Users\\KPace\\Quadrat_Freq_Analyses\\Data\\plot_fire.rdata")
-plot_fire <- as.data.frame(plot_fire)
-viereck <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/Viereck_env.xlsx")
-lichen_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_lichen.xlsx")
-nonvasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_nonvasc.xlsx")
-vasc_abundance_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/quad_abundance_df_vascular.xlsx")
+#load necessary data 
+plot_fire <- (here("Data/Unmodified/plot_fire.rdata"))
+viereck <- read_xlsx(here("Data/Modified/Viereck_env.xlsx"))
+lichen_abundance_df <- read_xlsx(here("Data/Modified/quad_abundance_df_lichen.xlsx"))
+nonvasc_abundance_df <- read_xlsx(here("Data/Modified/quad_abundance_df_nonvasc.xlsx"))
+vasc_abundance_df <- read_xlsx(here("Data/Modified/quad_abundance_df_vascular.xlsx"))
 
-
+#add in viereck classes for grouping 
 plot_fire <- plot_fire %>%
   left_join(viereck %>% select(Plot, Vegetation_Class, Viereck.2, Viereck.3), by = c("Plot"))
+#remove duplicates because the join is being weird 
 plot_fire <- plot_fire %>% distinct()
 
-
+#see which plots have evidence of fire and make a separate dataframe of them 
 plot_fire_true <- plot_fire %>% filter(fire_evid == TRUE)
 
+#check to see if plots in these datafranes are included in the fire plots list - loaded them and check 
+openlow_df <- read_xlsx(here("Data/Modified/openlow_df.xlsx"))
+needle_df <- read_xlsx(here("Data/Modified/needle_df.xlsx"))
+beetle_df <- read_xlsx(here("Data/Modified/dwarfscrub_df.xlsx"))
 
+    #see what plots are burned in these subsets 
+        common_plots_ls <- intersect(openlow_df$Plot, plot_fire_true$Plot)
+        length(common_plots_ls)
 
+        common_plots_sw <- intersect(needle_df$Plot, plot_fire_true$Plot)
+        length(common_plots_sw)
 
-#check to see if these plots are included 
-openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/openlow_df.xlsx")
-needle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/needle_df.xlsx")
-beetle_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/dwarfscrub_df.xlsx")
-
-#see what plots are burned in these subsets 
-common_plots_ls <- intersect(openlow_df$Plot, plot_fire_true$Plot)
-length(common_plots_ls)
-
-common_plots_sw <- intersect(needle_df$Plot, plot_fire_true$Plot)
-length(common_plots_sw)
-
-
+        
 #Permanova analysis to see if burned plots are different than non-burned plots 
+        
+#add fire evidence column to main dataframe 
 needle_df <- needle_df %>%
   left_join(plot_fire %>% select(Plot, fire_evid), by = "Plot")
+#why are duplicates being so weird?? 
 needle_df <- needle_df %>% distinct()
 
+#select only balanced sample years that were used in the official permanova analysis 
 needle_vasc_abundance_balanced <- vasc_abundance_df %>%
   filter(Plot_Year %in% needle_df$Plot_Year)
 needle_df <- needle_vasc_abundance_balanced 
 
+#prepare dataframes for adonis2
 needle_composition <- needle_df[,c(8:281)]
 needle_composition <- as.matrix(needle_composition) 
-
 needle_env <- needle_df[,c(1:7, 282)]
-
+#create visit column 
 needle_env <- needle_env %>%
   arrange(Plot, Sample_Year) %>%
   group_by(Plot) %>%
   mutate(Visit = paste0("visit_", row_number())) %>%
   ungroup()
-
-
+#create permutation restruction design 
 perm_design_needle_time = how(
   plots = Plots(strata = needle_env$Plot, type = c("free")),
   within = Within(type = "series", mirror = FALSE),
   nperm = 999)
 
-#viereck classes within - open and closed canopy 
+#run adonis2 
 needle_vascular_perm <- adonis2(needle_composition ~ fire_evid + Park + Plot + Visit + fire_evid*Visit, 
                                 data = needle_env, method = "bray", 
                                 permutations = perm_design_needle_time, 
@@ -73,15 +74,9 @@ needle_vascular_perm <- adonis2(needle_composition ~ fire_evid + Park + Plot + V
 print(needle_vascular_perm)
 
 
+#open low shrub grouping 
 
-
-#re-do needleleaf forest and low shrub permanova analysis to not include burn plots 
-
-
-
-
-
-#open low shrub 
+#remove fire plots that made it into the low shrub grouping: create a list of them to remove from the loaded data frames 
 openlow_plots_to_remove <- c("LACL_2010_01_105",
                               "LACL_2015_01_013",
                               "LACL_2015_01_104",
@@ -89,6 +84,7 @@ openlow_plots_to_remove <- c("LACL_2010_01_105",
                               "LACL_2017_01_161",
                               "LACL_2017_01_169")
 
+#load data 
 openlow_df <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/openlow_df.xlsx")
 openlow_df_lichen <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/openlow_df_lichen.xlsx")
 openlow_df_nonvasc <- read_xlsx("T:/Users/KPace/SWAN-Internship-New/Data/Modified/openlow_df_nonvasc.xlsx")
