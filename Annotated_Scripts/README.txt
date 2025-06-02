@@ -10,6 +10,8 @@ These are the annotated scripts that I have polished for reproducibility.
 
 5. "Functions.R" is the script where the functions I am making will live. Right now it's just the adjusted permanova function that can calculate an adjusted F and P value for one term but I will edit it as I make more/improve on them. 
 
+6. "Cluster_Analysis.R" is the script that contains some of the exploratory cluster analysis I did using data from alpine plots. 
+
 
 
 
