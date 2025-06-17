@@ -377,12 +377,20 @@ balance_visits <- function(df,
                            visit_col = NULL,
                            n_visits = 2,
                            multiple_visits_per_year = FALSE,
+                           require_all_years = FALSE,
                            manual_selection = NULL) { #use null if you aren't manually selecting plots, use manual_plots in selection if you are choosing specific ones
   #this makes a df that has one row per plot and a list of all years that plot was visited. 
   #basically the summary table from the building dataframes section, which is what I used to hand select and balance things. 
   #this way you can look at the years and specify if you want a manual override or to let it handle it auto-style 
   
   visit_id_col <- if (!is.null(visit_col) && multple_visits_per_year) visit_col else year_col 
+  
+  #if only want to have a visit_col and not a year col, for ease of use to accomodate multiple types of dataframes:
+  #this assumes your visit_col is in the format YYYY_MM ie 2020_06 
+  get_year <- function(v) {
+    if (is.numeric(v)) return (v)
+    as.numeric(substr(v,1,4))
+  }
   
   plot_visits <- df %>%
     dplyr::select(.data[[plot_col]], .data[[visit_id_col]]) %>% #selects just the two columns of interest from the dataframe, one for plotIDs and one for sample years.
@@ -447,7 +455,17 @@ balance_visits <- function(df,
   over_plots <- over_plots %>%
     mutate(
       Selected_Visits = purrr::map(Visits, function(vs) { #vs = visit, #for each element of years, applies function to select n_visits subset and purrr:map returns a list 
-        combs <- combn(vs, n_visits, simplify = FALSE) #combn to generate all combos of n_visits years from the full list of years, simplify = false to get a list of vectors 
+        combs <- combn(vs, n_visits, simplify = FALSE) 
+        
+        #if specified to use all years 
+        if(require_all_years) {
+          all_years <- unique(get_year(vs))
+          required_n_years <- length(all_years)
+          combs <- Filter(function(x) length(unique(get_year(x))) == required_n_years, combs)
+          if (length(combs) == 0 {
+            warning("No combos found that span all years")
+            combs <- combn(vs, n_visits, simplify = FALSE)}}
+        #combn to generate all combos of n_visits years from the full list of years, simplify = false to get a list of vectors 
         combs[which.min(sapply(combs, function(x) sum(abs(sort(x) - top_combo))))][[1]]})) #sort(x) to put years and top combo in order, abs(sortx-topcombo) 
   #calculates the difference between the combos of years ie (2012, 2014) and (2012, 2015) would return something like (0,1) and then these are aded together
   #so the lower the overall sum the closer the combo of years is to top combo if that makes sense (used which.min to find the lowest)
@@ -455,8 +473,7 @@ balance_visits <- function(df,
   #combine the exact_plots and the auto-selected plots 
   selected_auto <- bind_rows(
     exact_plots %>% mutate(Selected_Visits = Visits),
-    over_plots
-  ) %>%
+    over_plots) %>%
     select(!!plot_col, Selected_Visits) %>%
     tidyr::unnest(cols = Selected_Visits) %>% #so each year becomes its own row again 
     dplyr::rename(Selected_Year = Selected_Visits) %>% #changes the year column name to reflect that 
@@ -534,7 +551,8 @@ balance_visits(df = quad_abundance_df_vascular_filtered,
                year_col = "Sample_Year",
                visit_col = "Month_Year", #ie 2020_06
                n_visits = 3,
-               multiple_visits_per_year = TRUE)
+               multiple_visits_per_year = TRUE,
+               require_all_years = TRUE)
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
   
