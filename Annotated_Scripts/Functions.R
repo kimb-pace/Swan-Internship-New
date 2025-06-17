@@ -232,23 +232,18 @@ multiple_term_result <- adjusted_permanova(
   
   
   TO DO: 
-  1. make the matrix script into a function 
 2. figure out how to accomodate nesting and complex stuff 
 3. make the output prettier (more better?)
 4. finish documenting with roxygen 
 5. finish loading example data for test calls 
-6. beef up roxygen documentation for all of these. especially with dependency packages, figure out which one uses what 
-7. ?????? 
-  8. package 
+6. FIX BALANCE DATAFRAMES FUNCTION - BROKEN WHEN ADDED OTHER BALANCING PARAM 
+7. 
+8. package 
 9. write vignette about deriving EMS and adjusting F equations 
 10. add citations to anderson papers about adjusted permanova models to roxygen documentation 
 11. upload ems PDF to github so you can reference it 
 
 
-9. adjust the balancing dataframes function to accomodate other things. ie park or elevation band or number of plots 
-per vegetation class? add it to the call and you specify which variable you want it to balance  
-10. adjust years param in balance function to accomodate multiple visits in the same year ie visit_tag or something instead of explicitly year? 
-  
   #mike do you have any ideas to add to this if so let me know 
   
   
@@ -316,9 +311,17 @@ balanced_df <- quad_abundance_dataframe_of_choice %>%
 #' This function can be used to balance visits either across years or within years (such as monthly samples). Optionally, 
 #' specific visits can be manually selected for individual plots using a manual override specification. 
 #' 
+#' Subsets a dataframe to include a specified number of plots per sampling unit (ie years, months, parks, vegetation classes, etc) for balanced PERMANOVA analysis 
+#' using \code{adonis2} from the \code{vegan} package. 
+#' 
+#' This function selects visits so that the specified grouping parameters has an equal number of plots or return visits \code{n_visits}.
+#' Plots with fewer than the number of plots specified will be excluded, and plots with a greater number of visits are filtered to match the most 
+#' common combination of return visits (units?) found among plots with the specified number of visits. An optional manual override allows the user to 
+#' decide to retain specific visits regardless of the similarity to other plots. 
 #'
 #' @param df A data frame containing plot and year information.
 #' @param plot_col The name of the column in `df` that identifies plots.
+#' @param balance_col A string giving the name of the column in `df` to balance (ie Year, Park, Vegetation Class)
 #' @param year_col The name of the column in `df` that identifies years.
 #' @param visit_col An optional column. The name of the column in the dataframe that identifies unique visits (ie year_month). Required if "multiple_visits_per_year = TRUE" in call.
 #' @param n_visits A number specifying the number of visits (years) to retain per plot.
@@ -337,8 +340,16 @@ balanced_df <- quad_abundance_dataframe_of_choice %>%
 #' balanced <- balance_visits(
 #'   df = veg_df,
 #'   plot_col = "Plot",
+#'   balance_col = "Year",
 #'   year_col = "Year",
 #'   n_visits = 2)
+#'   
+#'   
+#' balanced_months <- balance_visits(
+#' df = veg_df,
+#' plot_col = "Plot",
+#' balance_col = "Month",
+#' n_visits = 7)  
 #'
 #' # With manual override for specific plots 
 #' manual_years <- list(
@@ -349,6 +360,7 @@ balanced_df <- quad_abundance_dataframe_of_choice %>%
 #'   df = veg_df,
 #'   plot_col = "Plot",
 #'   year_col = "Year",
+#'   balance_col = "Year"
 #'   n_visits = 2,
 #'   manual_selection = manual_years)
 #'   
@@ -375,6 +387,7 @@ balance_visits <- function(df,
                            plot_col = "Plot", 
                            year_col = "Sample_Year", 
                            visit_col = NULL,
+                           balance_col = "Sample_Year",
                            n_visits = 2,
                            multiple_visits_per_year = FALSE,
                            require_all_years = FALSE,
@@ -385,6 +398,15 @@ balance_visits <- function(df,
   
   visit_id_col <- if (!is.null(visit_col) && multple_visits_per_year) visit_col else year_col 
   
+  #create a summary of whatever specified units you want to balance by 
+  plot_units <- df %>%
+    dplyr::select(.data[[plot_col]], .data[[balance_col]]) %>%
+    distinct() %>%
+    group_by(.data[[plot_col]]) %>%
+    summarize(Balance_Units = list(sort(unique(.data[[balance_col]]))), .groups = "drop")
+  
+  #i guess I need to change all visits to units now? 
+  
   #if only want to have a visit_col and not a year col, for ease of use to accomodate multiple types of dataframes:
   #this assumes your visit_col is in the format YYYY_MM ie 2020_06 
   get_year <- function(v) {
@@ -392,7 +414,7 @@ balance_visits <- function(df,
     as.numeric(substr(v,1,4))
   }
   
-  plot_visits <- df %>%
+  plot_units <- df %>%
     dplyr::select(.data[[plot_col]], .data[[visit_id_col]]) %>% #selects just the two columns of interest from the dataframe, one for plotIDs and one for sample years.
     #used .data[[name]] instead of actual column name so that you can have variation in what you call the column to have flexibility in future use 
     distinct() %>%
@@ -582,6 +604,11 @@ balance_visits(df = quad_abundance_df_vascular_filtered,
 #'
 #' This function assists with constructing the matrix used to derive the Expected Mean Squares (EMS) for custom (? come up with better word choice here) models. 
 #' The resulting output matrix includes the fixed or random status of the variable, its number of levels, and the subscript associated with it. 
+#' 
+#' Constructs an input matrix used to derive Expected Mean Squares (EMS) for custom mixed-effects models. The matrix contains 
+#' information about each model term's fixed/random status, number of levels, and subscript structure and how that determines the expected variance to be partitioned.
+#' 
+#' The matrix serves as a foundational input for subsequent EMS calculations using the \code{derive_ems} function from this package.
 #'
 #' @param terms This is a list of term objects. Each object is a named list with the following elements: 
 #'      \describe{
@@ -593,17 +620,32 @@ balance_visits(df = quad_abundance_df_vascular_filtered,
 #'      
 #' @return A character matrix where rows have metadata regarding the terms from the input data (fixed or random, levels, subscripts) 
 #' followed by rows for each term with associated 0 and 1 entries based on parameters. 
+#' \itemize{
+#' \item{"Fixed or Random":} Indicates whether each term is fixed (F) or random (R) effect. 
+#' \item{Number of Levels":} Number of levels for each subscript, represented by a letter.
+#' \item{"Subscript":} The subscript names.
+#' \item{"Rows per Term":} Entries are "0" if the term includes the subscript and is fixed, "1" if random, and the number of levels otherwise.}
 #' 
-#' @@details 
-#' Additional details...
+#' @details 
 #' This function is the first part of a two step process to derive the expected mean variance of a custom model. It builds an input matrix that is then 
-#' used by the derive_ems function from this package to complete the process. 
+#' used by the derive_ems function from this package to complete the process. The generated matrix encodes the model structure for interpretation of the derive_ems function. 
+#' 
+#' @examples
+#' terms <- list(
+#'    list(name = "Vs", label = "Viereck.3", subscripts = c("s"), type = "fixed", levels = "a"),
+#'    list(name = "Pi", label = "Park", subscripts = c("i"), type = "fixed", levels = "b"),
+#'    list(name = "Tk", label = "Time", subscripts = c("k"), type = "random", levels = "c"),
+#'    list(name = "Esik", label = "Residual", subscripts = c("s", "i", "k"), type = "random", levels = "abc")))
+#' 
+#' derive_matrix(terms)
 #'
+#' @export 
 #'
-#'
-#'
-#'
-#'
+#' @details 
+#' This function builds an input matrix to help derive Expected Mean Squares (EMS) following the derivation method described 
+#' in Topic 10 Supplement from the University of New Hampshire course ANFS933. For detailed instructions on how to do this by hand or 
+#' to further understand the mechanics behind this function, see: 
+#' \url{insert RAW github url here once you upload the PDF}
 
 
 
@@ -737,21 +779,54 @@ derive_matrix <- function(terms) {
   subscripts <- unique(unlist(lapply(terms[!is_error], function(x) x$subscripts)))
   #assign fixed or random based on input 
   
+  #determine if each subscript is fixed or random 
+  fixed_or_random <- character(length(subscripts))
+  names(fixed_or_random) <- subscripts
+  for (s in subscripts) {
+    for (term in terms) {
+      if (term$label != "Error" && s %in% term$subscripts) {
+        fixed_or_random[s] <- if (term$type == "fixed") "F" else "R"
+        break}}}
   
   #get levels 
-  levels_row <- sapply(subscripts, function(s) {
+  levels_row <- character(length(subscripts))
+  names(levels_row) <- subscripts
+  for (s in subscripts) {
     for(term in terms) {
       if(term$label != error && s %in% term$subscripts) {
-        return(term$levels)}}})
+        levels_row[s] <- term$levels 
+        break}}}
   
+  #get the subscript names row 
+  subscripts_row <- subscripts 
   
-  #make the matrix 
+  #get the term names 
+  term_names <- vapply(terms, function(x) x$name, character(1))
+  
+  #make the matrix
+  output_matrix <- matrix("",
+                          nrow = 3 + length(terms),
+                          ncol = length(subscripts),
+                          dimnames = list(
+                            c("Fixed or Random", "Number of Levels", "Subscript", term_names)))
+  #fill header rows 
   output_matrix["Fixed or Random", ] <- fixed_or_random 
   output_matrix["Number of Levels", ] <- levels_row 
   output_matrix["subscript"] <- subscripts 
   
+  #fill in the cells of the matrix 
   subscript_type <- ifelse(fixed_or_random == "F", 0, 1)
-}
+  for (term in terms) {
+    for (s in subscripts) {
+      if s %in% term$subscriupts) {
+      output_matrix[term$name, s] <- as.character(subscript_type[s])
+    } else {
+      output_matrix{term$name, s] <- levels_row[s]}}}
+ 
+    return(output_matrix)
+    }
+    
+    
 
 #call 
 terms <- list(
@@ -774,6 +849,10 @@ Vs                  0    a   a
 Pi                  a    0    a 
 Tk                 a    a     1 
 Esik                a   b    c 
+
+
+
+
 
 
 
