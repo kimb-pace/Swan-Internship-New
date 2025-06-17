@@ -894,6 +894,8 @@ Esik                a   b    c
   #'   - "Fixed or random": indicates whether each model term is fixed ("F") or random ("R")
   #'   - "Number of levels": the number of levels associated with each subscript, represented as a letter variable different from the subscript letter
   #'   - "Subscript": the subscript associated with each term, representing the number of groups associated with the associated term 
+  #'
+  #'
   #' @param terms A list where each element is a list containing:
   #'   - \code{name}: the name of the term as it appears in the output matrix
   #'   - \code{type}: either "fixed" or "random"
@@ -942,7 +944,8 @@ Esik                a   b    c
     
     for (term_name in term_names) {
       #get the current term's subscripts in the loop, does this loop for each model term in the input matrix 
-      current_subscripts <- subscripts[output_matrix[term_name, ] %in% c("0", "1")]
+      current_codes <- output_matrix[term_name,]
+      current_subscripts <- subscripts[current_codes %in% c("0", "1")] 
       #extracts which subscripts are relevant (ie marked as 0 or 1 in the matrix) to the current loop through 
       
       #identify which columns will be used for that step (ie this column is not used for this row so it will be excluded, these will be kept, etc)
@@ -953,11 +956,11 @@ Esik                a   b    c
       contributing_terms <- c()
       #does it contribute to the current EMS if so then proceed 
       for (other_term in term_names) {
-        other_subscripts <- subscripts[output_matrix[other_term, ] %in% c("0", "1")]
+        other_subscripts <- subscripts[other_codes %in% c("0", "1")]
         if (all(current_subscripts %in% other_subscripts)) {
           #build product of values from columns not in current_subscripts (ie those not "hidden" with a pencil like on the paper)
           visible_cols <- output_matrix[other_term, columns_to_keep]
-          product_factors <- visible_cols[visible_cols != ""]
+          product_factors <- visible_cols[visible_cols != "" & visible_cols != "0"]
           product_expr <- paste(product_factors, collapse = " * ")
           #basically for the visible subscripts (columns outside the current term) it collects their number of levels and multiplies them together
           
@@ -1035,6 +1038,68 @@ Esik                a   b    c
       expression(frac(1, a - 1) * sum(alpha[i]^2, i == 1, a)),
       cex = 2
     )  
+    
+#maybe turn plot_ems_pretty into a function to help with looking at results? 
+    
+#' Plot Expected Mean Squares (EMS) Expressions 
+#' 
+#' This function takes the output from the calculate_ems function and plots it nicely in the R plot window or saves it to files in your directory.
+#' 
+#' @param ems_results A named list of EMS expressions from calculate_ems function output 
+#' @param title The title of the plot, ie the model if more than one output is desired to be plotted 
+#' @param cex font size 
+#' @param save_to_file logical statement, if TRUE saves as a PNG file to your directory 
+#' @param file_name Output file name (if = TRUE for save_to_file)
+#' 
+#' @export
+#' 
+#' 
+#'    
+    
+    
+    
+plot_ems <- function(ems_results, title = "Expected Mean Squared Variance",
+                     cex = 1.5, save_to_file = FALSE,
+                     filename = "EMS_output.png") {
+  if (save_to_file) {
+    png(filename, width = 1000, height = 600)
+  } else {
+    plot.new()}
+  
+  par(mar = c(4, 4, 2, 2))
+  n_terms <- length(ems_results)
+  
+  #add in here the specifications from above: 
+    
+    
+    
+    
+    
+    
+    call: 
+      ems_results <- calculate_ems(output_matrix, terms)
+    plot_ems(ems_results) #shows in viewer 
+    plot(ems_results, save_to_file = TRUE, filename = "name.png")
+    
+    
+    
+    ideas to add: 
+      
+      1. add a highlighted line or two. highlight_term = NULL or otherwise ie if you want to bold a line to use as an adjusted F equation 
+      2. need to fix the fixed effect summation formula from phi to the actual one. once you figure out how to code it here 
+      3. save as pdf? instaed of png 
+      4. add in there the F equation if specifying separately. so maybe in the bottom or right you can pull the variance from the line and 
+            just visually show it as x/x for fun 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
