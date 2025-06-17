@@ -610,13 +610,14 @@ balance_visits(df = quad_abundance_df_vascular_filtered,
 #' 
 #' The matrix serves as a foundational input for subsequent EMS calculations using the \code{derive_ems} function from this package.
 #'
-#' @param terms This is a list of term objects. Each object is a named list with the following elements: 
+#' @param terms This is a list of model term objects. Each object is a named list with the following elements: 
 #'      \describe{
 #'      \item{label}{Character. The label for the term ie Park = P. "Error" is the name for the error term.}
 #'      \item{name}{Character. A common name for the term, ie Park}
 #'      \item{type}{Character. Designate each term as "Fixed" or "Random"}
 #'      \item{levels}{Character or numeric. The number of levels associated with each term, can be a number or letter}
-#'      \item{subscripts}{Character. Subscripts that define the term structure}}
+#'      \item{main_subscripts}{Character. Subscripts directly associated with the term}
+#'      \item{determinant_subscripts}{Character. Subscripts that are associated with nesting for a term}}
 #'      
 #' @return A character matrix where rows have metadata regarding the terms from the input data (fixed or random, levels, subscripts) 
 #' followed by rows for each term with associated 0 and 1 entries based on parameters. 
@@ -626,11 +627,14 @@ balance_visits(df = quad_abundance_df_vascular_filtered,
 #' \item{"Subscript":} The subscript names.
 #' \item{"Rows per Term":} Entries are "0" if the term includes the subscript and is fixed, "1" if random, and the number of levels otherwise.}
 #' 
+#' 
 #' @details 
 #' This function is the first part of a two step process to derive the expected mean variance of a custom model. It builds an input matrix that is then 
 #' used by the derive_ems function from this package to complete the process. The generated matrix encodes the model structure for interpretation of the derive_ems function. 
 #' 
 #' @examples
+#' 
+#' #no nesting 
 #' terms <- list(
 #'    list(name = "Vs", label = "Viereck.3", subscripts = c("s"), type = "fixed", levels = "a"),
 #'    list(name = "Pi", label = "Park", subscripts = c("i"), type = "fixed", levels = "b"),
@@ -638,6 +642,16 @@ balance_visits(df = quad_abundance_df_vascular_filtered,
 #'    list(name = "Esik", label = "Residual", subscripts = c("s", "i", "k"), type = "random", levels = "abc")))
 #' 
 #' derive_matrix(terms)
+#'
+#'#nesting 
+#'terms <- list(
+#'list(name = "Vs", label = "Viereck", main_subscripts = c("s"), determinant_subscripts = character(0), type = "fixed", levels = "a"),
+#'list(name = "Pi", label = "Park", main_subscripts = c("i"), determinant_subscripts = character(0), type = "fixed", levels = "b"),
+#'list(name = "Tk", label = "Time", main_subscripts = c("k"), determinant_subscripts = character(0), type = "random", levels = "c"),
+#'list(name = "Rj(si)", label = "Plot", main_subscripts = c("j"), determinant_subscripts = c("s", "i"), type = "random", levels = "d"),
+#'list(name = "Esik", label = "Error", main_subscripts = c("s", "i", "k"), determinant_subscripts = character(0), type = "random", levels = "abc"))
+#'
+#'derive_matrix(terms)
 #'
 #' @export 
 #'
@@ -776,24 +790,28 @@ print(output_matrix, quote = FALSE)
 #function start 
 derive_matrix <- function(terms) {
   is_error <- sapply(terms, function(x) x$label == "Error") #first identify the error term in the input 
-  subscripts <- unique(unlist(lapply(terms[!is_error], function(x) x$subscripts)))
+  
+  #collect all subscripts from main and determinant 
+  all_subscripts <- unique(unlist(lapply(terms[!is_error], function(x) {
+    c(x$main_subscripts, x$determinant_subscripts)})))
+
   #assign fixed or random based on input 
   
   #determine if each subscript is fixed or random 
-  fixed_or_random <- character(length(subscripts))
-  names(fixed_or_random) <- subscripts
-  for (s in subscripts) {
+  fixed_or_random <- character(length(all_subscripts))
+  names(fixed_or_random) <- all_subscripts
+  for (s in all_subscripts) {
     for (term in terms) {
-      if (term$label != "Error" && s %in% term$subscripts) {
+      if (term$label != "Error" && s %in% term$main_subscripts, term$determinant_subscripts)) {
         fixed_or_random[s] <- if (term$type == "fixed") "F" else "R"
         break}}}
   
   #get levels 
-  levels_row <- character(length(subscripts))
-  names(levels_row) <- subscripts
-  for (s in subscripts) {
+  levels_row <- character(length(all_subscripts))
+  names(levels_row) <- all_subscripts
+  for (s in all_subscripts) {
     for(term in terms) {
-      if(term$label != error && s %in% term$subscripts) {
+      if(term$label != error && s %in% c(term$main_subscripts, term$determinant_subscripts)) {
         levels_row[s] <- term$levels 
         break}}}
   
@@ -801,25 +819,27 @@ derive_matrix <- function(terms) {
   subscripts_row <- subscripts 
   
   #get the term names 
-  term_names <- vapply(terms, function(x) x$name, character(1))
+  term_names <- sapply(terms, function(x) x$name)
   
   #make the matrix
   output_matrix <- matrix("",
                           nrow = 3 + length(terms),
-                          ncol = length(subscripts),
+                          ncol = length(all_subscripts),
                           dimnames = list(
                             c("Fixed or Random", "Number of Levels", "Subscript", term_names)))
   #fill header rows 
   output_matrix["Fixed or Random", ] <- fixed_or_random 
   output_matrix["Number of Levels", ] <- levels_row 
-  output_matrix["subscript"] <- subscripts 
+  output_matrix["subscript"] <- all_subscripts 
   
   #fill in the cells of the matrix 
   subscript_type <- ifelse(fixed_or_random == "F", 0, 1)
   for (term in terms) {
-    for (s in subscripts) {
-      if s %in% term$subscriupts) {
-      output_matrix[term$name, s] <- as.character(subscript_type[s])
+    for (s in all_subscripts) {
+      if s %in% term$main_subscripts) {
+        output_matrix[row, s] <- "0"
+      } else if (s %in% term$determinant_subscripts) {
+        output_matrix[row, s] <- "1"}
     } else {
       output_matrix{term$name, s] <- levels_row[s]}}}
  
@@ -830,12 +850,13 @@ derive_matrix <- function(terms) {
 
 #call 
 terms <- list(
-  list(name = "Vs", label = "Viereck", subscripts = c("s"), type = "fixed", levels = "a"),
-  list(name = "Pi", label = "Park", subscripts = c("i"), type = "fixed", levels = "b"),
-  list(name = "Tk", label = "Time", subscripts = c("k"), type = "random", levels = "c"),
-  list(name = "Esik", label = "Error", subscripts = c("s", "i", "k"), type = "random", levels = "abc"))
+  list(name = "Vs", label = "Viereck", main_subscripts = c("s"), determinant_subscripts = character(0), type = "fixed", levels = "a"),
+  list(name = "Pi", label = "Park", main_subscripts = c("i"), determinant_subscripts = character(0), type = "fixed", levels = "b"),
+  list(name = "Tk", label = "Time", main_subscripts = c("k"), determinant_subscripts = character(0), type = "random", levels = "c"),
+  list(name = "Rj(si)", label = "Plot", main_subscripts = c("j"), determinant_subscripts = c("s", "i"), type = "random", levels = "d"),
+  list(name = "Esik", label = "Error", main_subscripts = c("s", "i", "k"), determinant_subscripts = character(0), type = "random", levels = "abc"))
 
-output_matrix <- input_matrix(terms)
+output_matrix <- derive_matrix(terms)
 
 #results 
 
